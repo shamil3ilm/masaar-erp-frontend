@@ -1,6 +1,21 @@
 node_modules/
 dist/
 .turbo/
+coverage/
 *.local
 .env.local
 .env.*.local
+
+# IDE
+.idea/
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lint cache
+.eslintcache
+
+# TypeScript build info
+*.tsbuildinfo
