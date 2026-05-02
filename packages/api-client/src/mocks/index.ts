@@ -1,2 +1,5 @@
-// MSW handlers — filled in Task 6
-export const allMockHandlers: unknown[] = []
+export { zatcaMockHandlers } from './zatca'
+
+import { zatcaMockHandlers } from './zatca'
+
+export const allMockHandlers = [...zatcaMockHandlers]
