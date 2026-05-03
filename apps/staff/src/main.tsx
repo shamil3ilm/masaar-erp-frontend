@@ -1,10 +1,22 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { RouterProvider } from '@tanstack/react-router'
+import { router } from './router'
+import { initApiClient } from '@erp/api-client'
+import { useAuthStore } from './store/auth'
 import './index.css'
-import App from './App.tsx'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+initApiClient(
+  (import.meta.env.VITE_API_URL as string) ?? 'http://localhost:8000/api/v1',
+  () => useAuthStore.getState().token,
+  () => useAuthStore.getState().organization?.id ?? null,
+  () => useAuthStore.getState().logout(),
+)
+
+useAuthStore.getState().hydrateFromStorage()
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>,
 )
