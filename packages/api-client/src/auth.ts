@@ -57,7 +57,8 @@ export function useResetPassword() {
 }
 
 export interface VerifyEmailPayload {
-  token: string
+  email: string
+  code: string
 }
 
 export function useVerifyEmail() {

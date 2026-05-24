@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useAuthStore } from '../store/auth'
 import { getApiClient, useVerify2fa } from '@erp/api-client'
 import { AuthLayout } from '../components/AuthLayout'
@@ -24,6 +24,8 @@ const inputCls = 'auth-input w-full rounded-xl border border-gray-200 px-4 py-3 
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const search = useSearch({ strict: false }) as { verified?: string }
+  const justVerified = search.verified === '1'
   const { setAuth } = useAuthStore()
 
   const [email, setEmail]       = useState('')
@@ -127,6 +129,12 @@ export function LoginPage() {
         </p>
       </div>
 
+      {justVerified && (
+        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-400">
+          Email verified — you can sign in now.
+        </div>
+      )}
+
       {error && (
         <div className="auth-error-alert">
           <span>⚠</span> {error}
@@ -169,12 +177,28 @@ export function LoginPage() {
         </button>
       </form>
 
-      <div className="auth-divider"><span>Trusted by 500+ companies</span></div>
+      <div className="auth-divider"><span>Trusted by 500+ companies across GCC &amp; India</span></div>
 
       <div className="auth-trust-row">
-        <span>🔒 SSL encrypted</span>
-        <span>🛡 SOC 2 compliant</span>
-        <span>🌍 GCC & India</span>
+        <span className="auth-trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          256-bit encrypted
+        </span>
+        <span className="auth-trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          ZATCA certified
+        </span>
+        <span className="auth-trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          GCC &amp; India
+        </span>
       </div>
     </AuthLayout>
   )
