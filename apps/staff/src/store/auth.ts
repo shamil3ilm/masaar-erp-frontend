@@ -6,7 +6,7 @@ interface AuthState {
   user: User | null
   organization: Organization | null
   organizations: Organization[]
-  setAuth: (token: string, user: User, orgs: Organization[], selectedOrg: Organization) => void
+  setAuth: (token: string, user: User, orgs: Organization[], selectedOrg: Organization | null) => void
   switchOrg: (org: Organization) => void
   logout: () => void
   hydrateFromStorage: () => void
@@ -20,7 +20,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setAuth: (token, user, orgs, selectedOrg) => {
     localStorage.setItem('erp_token', token)
-    localStorage.setItem('erp_org_id', selectedOrg.id)
+    // Super-admins have no organization; only persist an org id when one exists.
+    if (selectedOrg) {
+      localStorage.setItem('erp_org_id', selectedOrg.id)
+    } else {
+      localStorage.removeItem('erp_org_id')
+    }
     set({ token, user, organizations: orgs, organization: selectedOrg })
   },
 

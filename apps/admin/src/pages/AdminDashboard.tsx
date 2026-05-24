@@ -23,7 +23,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
       <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Logo size={32} />
-          <span className="text-sm font-semibold text-gray-900 tracking-tight">LoopERP Admin</span>
+          <span className="text-sm font-semibold text-gray-900 tracking-tight">Masaar Admin Console</span>
         </div>
         <button
           type="button"

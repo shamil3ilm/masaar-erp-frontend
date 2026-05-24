@@ -17,11 +17,16 @@ export interface Branch {
 
 export interface User {
   id: string
+  uuid?: string
   name: string
   email: string
-  organization_id: string
-  roles: Role[]
-  permissions: string[]
+  is_super_admin?: boolean
+  // Backend returns the user's organization (null for super-admins with no org)
+  // via UserResource when the relation is loaded — not a plural array.
+  organization?: Organization | null
+  organization_id?: string | null
+  roles?: Role[]
+  permissions?: string[]
 }
 
 export interface Role {
