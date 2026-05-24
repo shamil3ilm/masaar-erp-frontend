@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "vite --port 5174",
     "build": "tsc -b && vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@erp/api-client": "workspace:*",
     "@erp/types": "workspace:*",
     "@erp/ui": "workspace:*",
+    "@tanstack/react-query": "^5.100.8",
+    "axios": "^1.16.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

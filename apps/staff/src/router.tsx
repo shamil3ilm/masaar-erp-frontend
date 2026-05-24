@@ -8,6 +8,7 @@ import { OnboardingPage } from './pages/zatca/OnboardingPage'
 import { InvoicesPage } from './pages/zatca/InvoicesPage'
 import { CreateInvoicePage } from './pages/zatca/CreateInvoicePage'
 import { ReportsPage } from './pages/zatca/ReportsPage'
+import { DashboardPage } from './pages/DashboardPage'
 
 const queryClient = createQueryClient()
 
@@ -44,12 +45,7 @@ const appRoute = createRoute({
 const dashboardRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/dashboard',
-  component: () => (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="text-gray-500 mt-2">Welcome to ERP</p>
-    </div>
-  ),
+  component: DashboardPage,
 })
 
 const indexRoute = createRoute({
