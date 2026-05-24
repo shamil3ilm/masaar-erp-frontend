@@ -20,7 +20,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setAuth: (token, user, orgs, selectedOrg) => {
     localStorage.setItem('erp_token', token)
-    // Super-admins have no organization; only persist an org id when one exists.
+    localStorage.setItem('erp_user', JSON.stringify(user))
+    localStorage.setItem('erp_orgs', JSON.stringify(orgs))
     if (selectedOrg) {
       localStorage.setItem('erp_org_id', selectedOrg.id)
     } else {
@@ -36,12 +37,23 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     localStorage.removeItem('erp_token')
+    localStorage.removeItem('erp_user')
+    localStorage.removeItem('erp_orgs')
     localStorage.removeItem('erp_org_id')
     set({ token: null, user: null, organization: null, organizations: [] })
   },
 
   hydrateFromStorage: () => {
     const token = localStorage.getItem('erp_token')
-    if (token) set({ token })
+    if (!token) return
+    try {
+      const user: User | null = JSON.parse(localStorage.getItem('erp_user') ?? 'null')
+      const orgs: Organization[] = JSON.parse(localStorage.getItem('erp_orgs') ?? '[]')
+      const orgId = localStorage.getItem('erp_org_id')
+      const organization = orgs.find((o) => o.id === orgId) ?? null
+      set({ token, user, organizations: orgs, organization })
+    } catch {
+      set({ token })
+    }
   },
 }))

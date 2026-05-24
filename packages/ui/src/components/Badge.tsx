@@ -2,18 +2,18 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+  'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-semibold leading-normal',
   {
     variants: {
       variant: {
-        default:  'bg-surface-2 text-text',
-        brand:    'bg-brand-subtle text-brand-dark border border-brand/20',
-        success:  'bg-success-subtle text-success border border-success/20',
-        danger:   'bg-danger-subtle text-danger border border-danger/20',
-        warning:  'bg-warning-subtle text-warning border border-warning/20',
-        info:     'bg-info-subtle text-info border border-info/20',
-        muted:    'bg-surface-2 text-muted',
-        outline:  'border border-border text-muted',
+        default:  'bg-surface-2 text-text border-border',
+        brand:    'bg-brand-subtle text-brand-dark dark:text-brand border-transparent',
+        success:  'bg-success-subtle text-success border-transparent',
+        danger:   'bg-danger-subtle text-danger border-transparent',
+        warning:  'bg-warning-subtle text-warning border-transparent',
+        info:     'bg-info-subtle text-info border-transparent',
+        muted:    'bg-surface-2 text-muted border-border',
+        outline:  'bg-transparent text-muted border-border',
       },
     },
     defaultVariants: { variant: 'default' },
@@ -67,6 +67,9 @@ const STATUS_MAP: Record<string, StatusColor> = {
   cancelled: 'danger',
   failed:    'danger',
   error:     'danger',
+  blocked:   'danger',
+  review:    'info',
+  in_review: 'info',
   processing: 'info',
   // sales
   paid:      'success',

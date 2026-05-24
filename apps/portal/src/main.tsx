@@ -1,5 +1,6 @@
 import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import type { AxiosError } from 'axios'
 import './index.css'
 import { fetchVendorInvoice } from './api.ts'
 import { InvoiceViewer } from './InvoiceViewer.tsx'
@@ -30,11 +31,12 @@ function App() {
         if (!cancelled) setState({ phase: 'ready', invoice })
       })
       .catch((err: unknown) => {
-        if (!cancelled) {
-          const message =
-            err instanceof Error ? err.message : 'Failed to load invoice'
-          setState({ phase: 'error', message })
-        }
+        if (cancelled) return
+        const status = (err as AxiosError)?.response?.status
+        let message = 'Unable to load invoice. Please try again later.'
+        if (status === 401 || status === 403) message = 'This link has expired or is no longer valid.'
+        else if (status === 404) message = 'Invoice not found.'
+        setState({ phase: 'error', message })
       })
 
     return () => {

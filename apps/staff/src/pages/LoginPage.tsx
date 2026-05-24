@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useAuthStore } from '../store/auth'
 import { getApiClient, useVerify2fa } from '@erp/api-client'
 import { AuthLayout } from '../components/AuthLayout'
-import { PasswordInput } from '@erp/ui'
+import { Input, PasswordInput, Alert } from '@erp/ui'
 import type { ApiResponse, User } from '@erp/types'
 
 interface LoginSuccessData {
@@ -19,8 +19,6 @@ interface LoginChallengeData {
 }
 
 type LoginResponseData = LoginSuccessData | LoginChallengeData
-
-const inputCls = 'auth-input w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:outline-none placeholder:text-gray-400'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -86,9 +84,7 @@ export function LoginPage() {
         </div>
 
         {error && (
-          <div className="auth-error-alert">
-            <span>⚠</span> {error}
-          </div>
+          <Alert variant="danger" className="mb-5">{error}</Alert>
         )}
 
         <form onSubmit={handle2fa} noValidate className="auth-form-body">
@@ -130,28 +126,23 @@ export function LoginPage() {
       </div>
 
       {justVerified && (
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-400">
-          Email verified — you can sign in now.
-        </div>
+        <Alert variant="success" className="mb-5">Email verified — you can sign in now.</Alert>
       )}
 
       {error && (
-        <div className="auth-error-alert">
-          <span>⚠</span> {error}
-        </div>
+        <Alert variant="danger" className="mb-5">{error}</Alert>
       )}
 
       <form onSubmit={handleLogin} noValidate className="auth-form-body">
         <div className="auth-field">
           <label htmlFor="email">Email address</label>
-          <input
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
             placeholder="you@company.com"
-            className={inputCls}
           />
         </div>
 
@@ -166,7 +157,6 @@ export function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             placeholder="Enter your password"
-            className="rounded-xl border-gray-200 py-3"
           />
         </div>
 

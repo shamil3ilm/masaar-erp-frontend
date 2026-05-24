@@ -11,14 +11,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         className={cn(
-          'w-full rounded-lg border bg-bg px-3 py-2 text-sm text-text transition-colors appearance-none',
-          'focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent',
+          'w-full h-9 rounded-[--radius] border bg-surface px-3 text-sm text-text transition-colors appearance-none',
+          'focus:outline-none focus:border-brand focus:ring-[3px] focus:ring-brand/25',
           error
-            ? 'border-danger focus:ring-danger'
-            : 'border-border hover:border-border-strong',
-          'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface',
+            ? 'border-danger focus:ring-danger/25'
+            : 'border-border-strong hover:border-muted',
+          'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface-2',
           // Chevron arrow via background image
-          'bg-[image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'none\' stroke=\'%236b7280\' stroke-width=\'1.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M2 4l4 4 4-4\'/%3E%3C/svg%3E")] bg-no-repeat bg-[right_0.75rem_center]',
+          'bg-[image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'1.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M2 4l4 4 4-4\'/%3E%3C/svg%3E")] bg-no-repeat bg-[right_0.75rem_center] pr-8',
           className,
         )}
         {...props}

@@ -16,7 +16,7 @@ export function Table({ children, className }: { children: ReactNode; className?
 }
 
 export function THead({ children }: { children: ReactNode }) {
-  return <thead className="bg-surface-2 border-b border-border">{children}</thead>
+  return <thead className="bg-surface-2/60 border-b border-border">{children}</thead>
 }
 
 export function TBody({ children }: { children: ReactNode }) {
@@ -28,8 +28,8 @@ export function TR({ children, onClick, className }: { children: ReactNode; onCl
     <tr
       onClick={onClick}
       className={cn(
-        'bg-bg transition-colors',
-        onClick && 'cursor-pointer hover:bg-surface',
+        'transition-colors',
+        onClick && 'cursor-pointer hover:bg-surface-2/50',
         className,
       )}
     >
@@ -42,7 +42,7 @@ export function TH({ children, className, align = 'start' }: { children?: ReactN
   return (
     <th
       className={cn(
-        'px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted whitespace-nowrap',
+        'px-4 py-2.5 text-xs font-medium text-muted whitespace-nowrap',
         align === 'end' ? 'text-end' : align === 'center' ? 'text-center' : 'text-start',
         className,
       )}

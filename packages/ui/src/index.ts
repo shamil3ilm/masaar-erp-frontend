@@ -32,6 +32,8 @@ export { FormField } from './components/FormField'
 // Data display
 export { Badge, StatusBadge, badgeVariants } from './components/Badge'
 export type { BadgeProps } from './components/Badge'
+export { Alert, alertVariants } from './components/Alert'
+export type { AlertProps } from './components/Alert'
 export { Card, CardHeader, CardBody, StatCard } from './components/Card'
 export { DataCard } from './components/DataCard'
 export { Table, THead, TBody, TR, TH, TD, TableEmpty, Pagination } from './components/Table'

@@ -63,7 +63,7 @@ export function PageHeader({ title, breadcrumbs, actions, back, description, cla
 
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-text">{title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-text">{title}</h1>
           {description && <p className="mt-1 text-sm text-muted">{description}</p>}
         </div>
         {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}

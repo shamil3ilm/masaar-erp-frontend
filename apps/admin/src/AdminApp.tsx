@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AdminLogin } from './pages/AdminLogin'
-import { AdminDashboard } from './pages/AdminDashboard'
+import { AdminShell } from './components/AdminShell'
 
 export function AdminApp() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('admin_token'))
@@ -17,7 +17,7 @@ export function AdminApp() {
   }
 
   return (
-    <AdminDashboard
+    <AdminShell
       onLogout={() => {
         localStorage.removeItem('admin_token')
         setToken(null)

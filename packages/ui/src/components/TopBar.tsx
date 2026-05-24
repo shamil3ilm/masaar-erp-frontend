@@ -130,7 +130,7 @@ export function TopBar({
             </button>
 
             {profileOpen && (
-              <div className="absolute end-0 top-full mt-1 w-52 rounded-xl border border-border bg-surface shadow-lg z-50 py-1">
+              <div className="absolute end-0 top-full mt-1 w-52 rounded-[var(--radius)] border border-border bg-surface shadow-pop z-50 py-1">
                 <div className="px-3 py-2 border-b border-border mb-1">
                   <p className="text-xs font-semibold text-text truncate">{resolvedUser.name}</p>
                   {resolvedUser.email && <p className="text-[11px] text-muted truncate">{resolvedUser.email}</p>}

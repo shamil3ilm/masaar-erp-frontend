@@ -1,0 +1,96 @@
+/* ── Masaar shared style preset ────────────────────────────────────────────────
+   The single source of truth for every app's Tailwind setup. Each app's own
+   index.css should import ONLY this file, then add app-specific styles below it.
+
+   Owns:
+     • the Tailwind import
+     • design tokens (via theme.css)
+     • the semantic-token → Tailwind-utility mapping (@theme)
+     • shadows from the Masaar UI template
+     • class-based dark mode variant
+     • the base layer (body, box-sizing)
+
+   This keeps all apps on one identical model — change it here, every app updates.
+──────────────────────────────────────────────────────────────────────────────── */
+
+@import "tailwindcss";
+@import "./theme.css";
+
+/* Scan the shared UI package for class names (path is relative to THIS file, so
+   it resolves to packages/ui/src/** regardless of which app imports the preset).
+   Each app's own source is auto-detected by @tailwindcss/vite. */
+@source "../**/*.{ts,tsx}";
+
+/* ── Class-based dark mode ─────────────────────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Map semantic tokens into Tailwind utilities ───────────────────────────── */
+@theme {
+  /* Surfaces */
+  --color-bg:            var(--bg);
+  --color-surface:       var(--surface);
+  --color-surface-2:     var(--surface-2);
+
+  /* Borders */
+  --color-border:        var(--border);
+  --color-border-strong: var(--border-strong);
+
+  /* Text */
+  --color-text:   var(--text);
+  --color-muted:  var(--text-muted);
+  --color-faint:  var(--text-faint);
+
+  /* Brand */
+  --color-brand:        var(--brand);
+  --color-brand-dark:   var(--brand-dark);
+  --color-brand-fg:     var(--brand-fg);
+  --color-brand-subtle: var(--brand-subtle);
+
+  /* Feedback */
+  --color-danger:         var(--danger);
+  --color-danger-fg:      var(--danger-fg);
+  --color-danger-subtle:  var(--danger-subtle);
+  --color-success:        var(--success);
+  --color-success-fg:     var(--success-fg);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning:        var(--warning);
+  --color-warning-fg:     var(--warning-fg);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-info:           var(--info);
+  --color-info-fg:        var(--info-fg);
+  --color-info-subtle:    var(--info-subtle);
+
+  /* Shadows (Masaar UI template) */
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+  --shadow-pop:  0 8px 24px -4px rgb(15 23 42 / 0.12), 0 4px 8px -2px rgb(15 23 42 / 0.08);
+
+  /* Brand teal scale — remaps blue-* so legacy bg-blue-600 etc. render as teal */
+  --color-blue-50:  #f0fdfa;
+  --color-blue-100: #ccfbf1;
+  --color-blue-200: #99f6e4;
+  --color-blue-300: #5eead4;
+  --color-blue-400: #2dd4bf;
+  --color-blue-500: #14b8a6;
+  --color-blue-600: #0d9488;
+  --color-blue-700: #0f766e;
+  --color-blue-800: #115e59;
+  --color-blue-900: #134e4a;
+  --color-blue-950: #042f2e;
+}
+
+/* ── Base layer ────────────────────────────────────────────────────────────── */
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  #root { display: contents; }
+}

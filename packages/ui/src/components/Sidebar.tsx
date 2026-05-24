@@ -86,11 +86,12 @@ export function Sidebar({
                       href={item.href}
                       title={collapsed ? item.label : undefined}
                       className={cn(
-                        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                        collapsed && 'justify-center px-2',
-                        active
-                          ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-text-active)]'
-                          : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)]',
+                        'flex items-center gap-3 py-2 text-sm font-medium transition-colors',
+                        collapsed
+                          ? 'justify-center px-2 rounded-lg'
+                          : active
+                            ? 'sb-active -mx-2 pl-5 pr-3'
+                            : 'px-3 rounded-lg text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)]',
                       )}
                     >
                       {item.icon && (

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Logo, Input, PasswordInput, Button } from '@erp/ui'
+import { Logo, Input, PasswordInput, Button, FormField, Alert } from '@erp/ui'
 import { getApiClient } from '@erp/api-client'
 import type { AxiosError } from 'axios'
 
@@ -67,16 +67,11 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
           <p className="text-sm text-muted mb-8">Restricted access — authorized staff only.</p>
 
           {error && (
-            <div className="mb-5 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-              {error}
-            </div>
+            <Alert variant="danger" className="mb-5">{error}</Alert>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-text mb-1.5">
-                Email address
-              </label>
+            <FormField label="Email address" htmlFor="email">
               <Input
                 id="email"
                 type="email"
@@ -86,11 +81,8 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@masaar.app"
               />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-text mb-1.5">
-                Password
-              </label>
+            </FormField>
+            <FormField label="Password" htmlFor="password">
               <PasswordInput
                 id="password"
                 autoComplete="current-password"
@@ -99,7 +91,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
               />
-            </div>
+            </FormField>
 
             <Button type="submit" className="w-full" loading={loading}>
               Sign in
