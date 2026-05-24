@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useCreateContact } from '@erp/api-client'
-import { PageHeader } from '@erp/ui'
+import { PageHeader, Card, CardHeader, FormField, Input, Select, Button } from '@erp/ui'
 
 const schema = z.object({
   company_name: z.string().min(1, 'Required'),
@@ -43,9 +43,10 @@ export function CreateContactPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="New Contact"
+        back={{ label: 'Back to Contacts', href: '/app/sales/contacts' }}
         breadcrumbs={[
           { label: 'Sales' },
           { label: 'Contacts', href: '/app/sales/contacts' },
@@ -53,120 +54,68 @@ export function CreateContactPage() {
         ]}
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-          <h2 className="font-semibold text-gray-800">Company Details</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Company Name *</label>
-              <input
-                {...register('company_name')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              {errors.company_name && <p className="text-xs text-red-600 mt-1">{errors.company_name.message}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Contact Type *</label>
-              <select
-                {...register('contact_type')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
+        <Card>
+          <CardHeader title="Company Details" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField label="Company Name" required error={errors.company_name?.message} className="sm:col-span-2">
+              <Input {...register('company_name')} error={!!errors.company_name} />
+            </FormField>
+            <FormField label="Contact Type" required>
+              <Select {...register('contact_type')}>
                 <option value="customer">Customer</option>
                 <option value="supplier">Supplier</option>
                 <option value="both">Both</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Tax Number</label>
-              <input
-                {...register('tax_number')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
+              </Select>
+            </FormField>
+            <FormField label="Tax Number">
+              <Input {...register('tax_number')} />
+            </FormField>
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-          <h2 className="font-semibold text-gray-800">Contact Person</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
-              <input
-                {...register('contact_name')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                {...register('email')}
-                type="email"
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email.message}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Phone</label>
-              <input
-                {...register('phone')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
+        <Card>
+          <CardHeader title="Contact Person" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField label="Name">
+              <Input {...register('contact_name')} />
+            </FormField>
+            <FormField label="Email" error={errors.email?.message}>
+              <Input type="email" {...register('email')} error={!!errors.email} />
+            </FormField>
+            <FormField label="Phone">
+              <Input {...register('phone')} />
+            </FormField>
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-          <h2 className="font-semibold text-gray-800">Financial Settings</h2>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Currency</label>
-              <select
-                {...register('currency_code')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
+        <Card>
+          <CardHeader title="Financial Settings" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <FormField label="Currency">
+              <Select {...register('currency_code')}>
                 <option value="SAR">SAR</option>
                 <option value="AED">AED</option>
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
                 <option value="INR">INR</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Payment Terms (days)</label>
-              <input
-                {...register('payment_terms', { valueAsNumber: true })}
-                type="number"
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              {errors.payment_terms && <p className="text-xs text-red-600 mt-1">{errors.payment_terms.message}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Credit Limit</label>
-              <input
-                {...register('credit_limit', { valueAsNumber: true })}
-                type="number"
-                step="0.01"
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              {errors.credit_limit && <p className="text-xs text-red-600 mt-1">{errors.credit_limit.message}</p>}
-            </div>
+              </Select>
+            </FormField>
+            <FormField label="Payment Terms (days)" error={errors.payment_terms?.message}>
+              <Input type="number" {...register('payment_terms', { valueAsNumber: true })} error={!!errors.payment_terms} />
+            </FormField>
+            <FormField label="Credit Limit" error={errors.credit_limit?.message}>
+              <Input type="number" step="0.01" {...register('credit_limit', { valueAsNumber: true })} error={!!errors.credit_limit} />
+            </FormField>
           </div>
-        </div>
+        </Card>
 
         <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={createContact.isPending}
-            className="bg-blue-600 text-white px-6 py-2 rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-          >
-            {createContact.isPending ? 'Saving...' : 'Create Contact'}
-          </button>
-          <button
-            type="button"
-            onClick={() => void navigate({ to: '/app/sales/contacts' })}
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded text-sm font-medium hover:bg-gray-50"
-          >
+          <Button type="submit" loading={createContact.isPending}>
+            {createContact.isPending ? 'Saving…' : 'Create Contact'}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => void navigate({ to: '/app/sales/contacts' })}>
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     </div>

@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { usePaymentsReceived, usePaymentSummary, useCompletePayment, useVoidPayment } from '@erp/api-client'
-import { PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, DataCard } from '@erp/ui'
+import {
+  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard,
+  Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
+  Plus, CreditCard, CheckCircle2, AlertCircle,
+} from '@erp/ui'
 import { fmtCurrency, fmtDate } from './fmt'
 
 export function PaymentsPage() {
@@ -16,99 +20,90 @@ export function PaymentsPage() {
   })
   const { data: summary } = usePaymentSummary()
 
-  if (isLoading) return <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
-  if (isError) return <div className="p-6 text-red-600">Failed to load payments.</div>
-
   const payments = data?.data ?? []
   const meta = data?.meta
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Payments Received"
         breadcrumbs={[{ label: 'Sales' }, { label: 'Payments' }]}
         actions={
-          <button
-            onClick={() => void navigate({ to: '/app/sales/payments/new' })}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700"
-          >
+          <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/payments/new' })}>
             Record Payment
-          </button>
+          </Button>
         }
       />
 
       {summary && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <DataCard title="Total Received" value={fmtCurrency(summary.total_received)} />
-          <DataCard title="Allocated" value={fmtCurrency(summary.total_allocated)} />
-          <DataCard title="Unallocated" value={fmtCurrency(summary.total_unallocated)} />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <StatCard label="Total Received" value={fmtCurrency(summary.total_received)} icon={CreditCard} />
+          <StatCard label="Allocated" value={fmtCurrency(summary.total_allocated)} icon={CheckCircle2} />
+          <StatCard label="Unallocated" value={fmtCurrency(summary.total_unallocated)} icon={AlertCircle} />
         </div>
       )}
 
       <div className="flex gap-3 mb-4">
-        <select
+        <Select
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1) }}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="max-w-[180px]"
         >
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
           <option value="completed">Completed</option>
           <option value="bounced">Bounced</option>
           <option value="voided">Voided</option>
-        </select>
+        </Select>
       </div>
 
-      {payments.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
+      ) : isError ? (
+        <div className="rounded-xl border border-border bg-surface p-6 text-danger">Failed to load payments.</div>
+      ) : payments.length === 0 ? (
         <EmptyState
+          icon={CreditCard}
           title="No payments found"
           description="Record a customer payment to get started."
           action={
-            <button
-              onClick={() => void navigate({ to: '/app/sales/payments/new' })}
-              className="text-sm text-blue-600 hover:underline"
-            >
+            <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/payments/new' })}>
               Record Payment
-            </button>
+            </Button>
           }
         />
       ) : (
         <>
-          <div className="rounded-lg border border-gray-200 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Payment #</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Customer</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Date</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Method</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Amount</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Unallocated</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+          <div className="rounded-xl border border-border bg-surface overflow-hidden">
+            <Table>
+              <THead>
+                <TR>
+                  <TH>Payment #</TH>
+                  <TH>Customer</TH>
+                  <TH>Date</TH>
+                  <TH>Method</TH>
+                  <TH align="end">Amount</TH>
+                  <TH align="end">Unallocated</TH>
+                  <TH align="center">Status</TH>
+                  <TH align="end">Actions</TH>
+                </TR>
+              </THead>
+              <TBody>
                 {payments.map((p) => (
                   <PaymentRow key={p.id} payment={p} onRefetch={() => void refetch()} />
                 ))}
-              </tbody>
-            </table>
+              </TBody>
+            </Table>
           </div>
           {meta && (
-            <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
-              <span>Page {meta.current_page} of {meta.last_page} &mdash; {meta.total} payments</span>
-              <div className="flex gap-2">
-                <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                  Previous
-                </button>
-                <button disabled={page >= meta.last_page} onClick={() => setPage((p) => p + 1)}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                  Next
-                </button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={meta.current_page}
+              lastPage={meta.last_page}
+              total={meta.total}
+              perPage={meta.per_page}
+              onPageChange={setPage}
+              className="mt-2"
+            />
           )}
         </>
       )}
@@ -137,38 +132,38 @@ function PaymentRow({
   const voidPay = useVoidPayment(payment.id)
 
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-4 py-3 font-mono text-gray-900">{payment.payment_number}</td>
-      <td className="px-4 py-3 text-gray-700">{payment.customer_name}</td>
-      <td className="px-4 py-3 text-gray-600">{fmtDate(payment.payment_date)}</td>
-      <td className="px-4 py-3 text-gray-600 capitalize">{payment.payment_method.replace('_', ' ')}</td>
-      <td className="px-4 py-3 text-right font-mono">{fmtCurrency(payment.amount, payment.currency_code)}</td>
-      <td className="px-4 py-3 text-right font-mono">{fmtCurrency(payment.unallocated_amount, payment.currency_code)}</td>
-      <td className="px-4 py-3 text-center">
-        <SalesStatusBadge status={payment.status} />
-      </td>
-      <td className="px-4 py-3 text-right">
-        <div className="flex justify-end gap-2">
+    <TR>
+      <TD className="font-mono font-medium">{payment.payment_number}</TD>
+      <TD>{payment.customer_name}</TD>
+      <TD muted>{fmtDate(payment.payment_date)}</TD>
+      <TD muted className="capitalize">{payment.payment_method.replace('_', ' ')}</TD>
+      <TD align="end" className="font-mono">{fmtCurrency(payment.amount, payment.currency_code)}</TD>
+      <TD align="end" className="font-mono">{fmtCurrency(payment.unallocated_amount, payment.currency_code)}</TD>
+      <TD align="center"><SalesStatusBadge status={payment.status} /></TD>
+      <TD align="end">
+        <div className="flex justify-end gap-1">
           {payment.status === 'pending' && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={complete.isPending}
               onClick={() => complete.mutate(undefined, { onSuccess: onRefetch })}
-              disabled={complete.isPending}
-              className="text-xs text-green-600 hover:underline disabled:opacity-50"
             >
               Complete
-            </button>
+            </Button>
           )}
           {(payment.status === 'pending' || payment.status === 'completed') && (
-            <button
+            <Button
+              variant="danger-outline"
+              size="sm"
+              loading={voidPay.isPending}
               onClick={() => voidPay.mutate(undefined, { onSuccess: onRefetch })}
-              disabled={voidPay.isPending}
-              className="text-xs text-red-500 hover:underline disabled:opacity-50"
             >
               Void
-            </button>
+            </Button>
           )}
         </div>
-      </td>
-    </tr>
+      </TD>
+    </TR>
   )
 }

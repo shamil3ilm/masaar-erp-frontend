@@ -45,20 +45,25 @@ async function run() {
       // Public route → no login needed.
       const isPublic = routePath.startsWith('/login') || routePath === '/' || routePath.startsWith('/register')
       if (!isPublic) {
-        await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
+        await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
         // Best-effort login; fields are matched loosely so it survives markup changes.
         const email = page.locator('input[type="email"], input[name="email"]').first()
         if (await email.count()) {
           await email.fill(EMAIL)
           await page.locator('input[type="password"]').first().fill(PASSWORD)
           await page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Log in")').first().click()
-          await page.waitForLoadState('networkidle').catch(() => {})
-          await page.waitForTimeout(800)
+          // Wait until the token is persisted so the next hard nav passes the auth guard.
+          await page.waitForFunction(() => !!localStorage.getItem('erp_token'), { timeout: 10000 }).catch(() => {})
+          await page.waitForTimeout(500)
         }
       }
 
-      await page.goto(`${BASE}${routePath}`, { waitUntil: 'networkidle' }).catch(() => {})
-      await page.waitForTimeout(600)
+      // domcontentloaded (not networkidle — Vite's HMR socket keeps the network busy).
+      await page.goto(`${BASE}${routePath}`, { waitUntil: 'domcontentloaded' })
+      if (!isPublic) await page.waitForURL(`**${routePath}`, { timeout: 10000 }).catch(() => {})
+      // Let data/render settle.
+      await page.waitForLoadState('load').catch(() => {})
+      await page.waitForTimeout(1500)
 
       const suffix = `${width}${dark ? '-dark' : ''}${rtl ? '-rtl' : ''}`
       const file = resolve(outDir, `${label}-${suffix}.png`)

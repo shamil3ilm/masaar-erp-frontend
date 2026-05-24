@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useInvoices, useInvoiceSummary, useSendInvoice, useVoidInvoice } from '@erp/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard,
-  Button, Select, Table, THead, TBody, TR, TH, TD, TableEmpty, Pagination,
+  Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Receipt, CreditCard, AlertCircle, CheckCircle2,
 } from '@erp/ui'
 import { fmtCurrency, fmtDate } from './fmt'

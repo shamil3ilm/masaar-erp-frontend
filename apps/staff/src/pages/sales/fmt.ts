@@ -1,7 +1,10 @@
-export function fmtCurrency(amount: number, currency = 'SAR'): string {
-  return new Intl.NumberFormat('en-SA', { style: 'currency', currency }).format(amount)
+export function fmtCurrency(amount: number | null | undefined, currency = 'SAR'): string {
+  const n = Number(amount)
+  return new Intl.NumberFormat('en-SA', { style: 'currency', currency }).format(Number.isFinite(n) ? n : 0)
 }
 
-export function fmtDate(iso: string): string {
-  return new Intl.DateTimeFormat('en-SA', { dateStyle: 'medium' }).format(new Date(iso))
+export function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '—' : new Intl.DateTimeFormat('en-SA', { dateStyle: 'medium' }).format(d)
 }

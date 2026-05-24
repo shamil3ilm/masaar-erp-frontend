@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useCreatePayment, useContacts } from '@erp/api-client'
-import { PageHeader } from '@erp/ui'
+import { PageHeader, Card, FormField, Input, Select, Button } from '@erp/ui'
 
 const schema = z.object({
   customer_id: z.string().min(1, 'Customer is required'),
@@ -43,9 +43,10 @@ export function CreatePaymentPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-6">
+    <div className="max-w-xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Record Payment"
+        back={{ label: 'Back to Payments', href: '/app/sales/payments' }}
         breadcrumbs={[
           { label: 'Sales' },
           { label: 'Payments', href: '/app/sales/payments' },
@@ -53,93 +54,55 @@ export function CreatePaymentPage() {
         ]}
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Customer *</label>
-            <select
-              {...register('customer_id')}
-              className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Select customer...</option>
+        <Card>
+          <FormField label="Customer" required error={errors.customer_id?.message}>
+            <Select {...register('customer_id')} error={!!errors.customer_id}>
+              <option value="">Select customer…</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>{c.company_name}</option>
               ))}
-            </select>
-            {errors.customer_id && <p className="text-xs text-red-600 mt-1">{errors.customer_id.message}</p>}
-          </div>
+            </Select>
+          </FormField>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Payment Date *</label>
-              <input
-                {...register('payment_date')}
-                type="date"
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Currency</label>
-              <select
-                {...register('currency_code')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField label="Payment Date" required>
+              <Input type="date" {...register('payment_date')} />
+            </FormField>
+            <FormField label="Currency">
+              <Select {...register('currency_code')}>
                 <option value="SAR">SAR</option>
                 <option value="AED">AED</option>
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Amount *</label>
-              <input
-                {...register('amount', { valueAsNumber: true })}
-                type="number"
-                step="0.01"
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              {errors.amount && <p className="text-xs text-red-600 mt-1">{errors.amount.message}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Payment Method *</label>
-              <select
-                {...register('payment_method')}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
+              </Select>
+            </FormField>
+            <FormField label="Amount" required error={errors.amount?.message}>
+              <Input type="number" step="0.01" {...register('amount', { valueAsNumber: true })} error={!!errors.amount} />
+            </FormField>
+            <FormField label="Payment Method" required>
+              <Select {...register('payment_method')}>
                 <option value="bank_transfer">Bank Transfer</option>
                 <option value="cheque">Cheque</option>
                 <option value="cash">Cash</option>
                 <option value="credit_card">Credit Card</option>
                 <option value="online">Online</option>
                 <option value="other">Other</option>
-              </select>
-            </div>
+              </Select>
+            </FormField>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Reference / Cheque #</label>
-            <input
-              {...register('reference')}
-              placeholder="e.g., cheque number, transfer ID"
-              className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-        </div>
+          <FormField label="Reference / Cheque #">
+            <Input placeholder="e.g., cheque number, transfer ID" {...register('reference')} />
+          </FormField>
+        </Card>
 
         <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={createPayment.isPending}
-            className="bg-blue-600 text-white px-6 py-2 rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-          >
-            {createPayment.isPending ? 'Saving...' : 'Record Payment'}
-          </button>
-          <button
-            type="button"
-            onClick={() => void navigate({ to: '/app/sales/payments' })}
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded text-sm font-medium hover:bg-gray-50"
-          >
+          <Button type="submit" loading={createPayment.isPending}>
+            {createPayment.isPending ? 'Saving…' : 'Record Payment'}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => void navigate({ to: '/app/sales/payments' })}>
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     </div>

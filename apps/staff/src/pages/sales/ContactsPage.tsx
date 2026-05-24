@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useContacts } from '@erp/api-client'
-import { PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge } from '@erp/ui'
+import {
+  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Badge,
+  Button, Input, Select, Table, THead, TBody, TR, TH, TD, Pagination,
+  Plus, Users,
+} from '@erp/ui'
 import { fmtCurrency } from './fmt'
 
 export function ContactsPage() {
@@ -17,124 +21,97 @@ export function ContactsPage() {
     contact_type: contactType || undefined,
   })
 
-  if (isLoading) return <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
-  if (isError) return <div className="p-6 text-red-600">Failed to load contacts.</div>
-
   const contacts = data?.data ?? []
   const meta = data?.meta
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Contacts"
         breadcrumbs={[{ label: 'Sales' }, { label: 'Contacts' }]}
         actions={
-          <button
-            onClick={() => void navigate({ to: '/app/sales/contacts/new' })}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700"
-          >
+          <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/contacts/new' })}>
             New Contact
-          </button>
+          </Button>
         }
       />
 
-      <div className="flex gap-3 mb-4">
-        <input
+      <div className="flex flex-wrap gap-3 mb-4">
+        <Input
           type="text"
-          placeholder="Search company or name..."
+          placeholder="Search company or name…"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-64"
         />
-        <select
+        <Select
           value={contactType}
           onChange={(e) => { setContactType(e.target.value); setPage(1) }}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="max-w-[160px]"
         >
           <option value="">All Types</option>
           <option value="customer">Customer</option>
           <option value="supplier">Supplier</option>
           <option value="both">Both</option>
-        </select>
+        </Select>
       </div>
 
-      {contacts.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
+      ) : isError ? (
+        <div className="rounded-xl border border-border bg-surface p-6 text-danger">Failed to load contacts.</div>
+      ) : contacts.length === 0 ? (
         <EmptyState
+          icon={Users}
           title="No contacts found"
           description="Create your first contact to start building your customer list."
           action={
-            <button
-              onClick={() => void navigate({ to: '/app/sales/contacts/new' })}
-              className="text-sm text-blue-600 hover:underline"
-            >
+            <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/contacts/new' })}>
               New Contact
-            </button>
+            </Button>
           }
         />
       ) : (
         <>
-          <div className="rounded-lg border border-gray-200 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Company</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Contact Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Outstanding</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+          <div className="rounded-xl border border-border bg-surface overflow-hidden">
+            <Table>
+              <THead>
+                <TR>
+                  <TH>Company</TH>
+                  <TH>Type</TH>
+                  <TH>Contact Name</TH>
+                  <TH>Email</TH>
+                  <TH align="end">Outstanding</TH>
+                  <TH align="center">Status</TH>
+                </TR>
+              </THead>
+              <TBody>
                 {contacts.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">{c.company_name}</td>
-                    <td className="px-4 py-3">
-                      <SalesStatusBadge status={c.contact_type} />
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{c.contact_name ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-600">{c.email ?? '—'}</td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-900">
-                      {fmtCurrency(c.outstanding_balance, c.currency_code)}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {c.payment_block ? (
-                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
-                          Blocked
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                          Active
-                        </span>
-                      )}
-                    </td>
-                  </tr>
+                  <TR key={c.id}>
+                    <TD className="font-medium">{c.company_name}</TD>
+                    <TD><SalesStatusBadge status={c.contact_type} /></TD>
+                    <TD muted>{c.contact_name ?? '—'}</TD>
+                    <TD muted>{c.email ?? '—'}</TD>
+                    <TD align="end" className="font-mono">{fmtCurrency(c.outstanding_balance, c.currency_code)}</TD>
+                    <TD align="center">
+                      {c.payment_block
+                        ? <Badge variant="danger" dot>Blocked</Badge>
+                        : <Badge variant="success" dot>Active</Badge>}
+                    </TD>
+                  </TR>
                 ))}
-              </tbody>
-            </table>
+              </TBody>
+            </Table>
           </div>
           {meta && (
-            <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
-              <span>
-                Page {meta.current_page} of {meta.last_page} &mdash; {meta.total} contacts
-              </span>
-              <div className="flex gap-2">
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                <button
-                  disabled={page >= meta.last_page}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={meta.current_page}
+              lastPage={meta.last_page}
+              total={meta.total}
+              perPage={meta.per_page}
+              onPageChange={setPage}
+              className="mt-2"
+            />
           )}
         </>
       )}
