@@ -5,43 +5,84 @@ interface AuthLayoutProps {
   children: ReactNode
 }
 
+const ACTIVITY = [
+  { icon: '🧾', title: 'ZATCA invoice generated', sub: 'INV-2024-0891 · SAR 24,500', tag: 'Compliant' },
+  { icon: '✅', title: 'VAT return filed', sub: 'Q4 2024 · AED 8,200', tag: 'Filed' },
+  { icon: '💰', title: 'Payment reconciled', sub: 'SABB Bank · SAR 145,000', tag: 'Matched' },
+  { icon: '📊', title: 'Journal entry posted', sub: 'FY2024 · 14 lines', tag: 'Posted' },
+]
+
+const STATS = [
+  { value: '500+', label: 'Companies' },
+  { value: '6', label: 'Countries' },
+  { value: '99.9%', label: 'Uptime' },
+]
+
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex">
-      {/* ── Brand panel (hidden on mobile) ───────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[400px] xl:w-[460px] flex-col bg-[#1a1f36] px-12 py-14 relative overflow-hidden shrink-0">
-        {/* Decorative rings — bottom-left corner */}
-        <div className="pointer-events-none absolute -bottom-40 -left-40 w-[480px] h-[480px] rounded-full border border-[#14b8a6]/10" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 w-[320px] h-[320px] rounded-full border border-[#14b8a6]/15" />
-        <div className="pointer-events-none absolute -bottom-8  -left-8  w-[180px] h-[180px] rounded-full border border-[#14b8a6]/20" />
-        {/* Filled glow */}
-        <div className="pointer-events-none absolute bottom-0 left-0 w-[200px] h-[200px] rounded-full bg-[#14b8a6]/5 blur-3xl" />
+    <div className="auth-root">
 
-        {/* Logo */}
-        <Logo size={44} showName nameClassName="font-semibold text-white tracking-tight" />
+      {/* ── LEFT: brand panel ──────────────────────────────────────────── */}
+      <div className="auth-left">
 
-        {/* Tagline — anchored to bottom */}
-        <div className="mt-auto space-y-3 relative z-10">
-          <p className="text-2xl font-semibold text-white leading-snug">
-            Enterprise ERP for<br />GCC &amp; India
-          </p>
-          <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
-            Sales, compliance, accounting, and HR — built for ZATCA e-invoicing, VAT, and regional regulations.
-          </p>
+        {/* Background orbs */}
+        <div className="auth-orb auth-orb-1" />
+        <div className="auth-orb auth-orb-2" />
+        <div className="auth-orb auth-orb-3" />
+        <div className="auth-dot-grid" />
+
+        {/* Content */}
+        <div className="auth-left-inner">
+
+          {/* Logo */}
+          <div className="auth-left-logo">
+            <Logo size={40} showName nameClassName="font-semibold text-white tracking-tight" />
+          </div>
+
+          {/* Headline */}
+          <div className="auth-headline">
+            <h1>The ERP built<br />for GCC &amp; India</h1>
+            <p>ZATCA e-invoicing, VAT, multi-currency accounting, and payroll — in one platform your whole team will use.</p>
+          </div>
+
+          {/* Live activity feed */}
+          <div className="auth-feed">
+            {ACTIVITY.map((item, i) => (
+              <div
+                key={item.title}
+                className="auth-feed-item"
+                style={{ animationDelay: `${0.4 + i * 0.12}s` }}
+              >
+                <span className="auth-feed-icon">{item.icon}</span>
+                <div className="auth-feed-body">
+                  <span className="auth-feed-title">{item.title}</span>
+                  <span className="auth-feed-sub">{item.sub}</span>
+                </div>
+                <span className="auth-feed-tag">{item.tag}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats */}
+          <div className="auth-stats">
+            {STATS.map((s) => (
+              <div key={s.label} className="auth-stat">
+                <span className="auth-stat-value">{s.value}</span>
+                <span className="auth-stat-label">{s.label}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
       </div>
 
-      {/* ── Form panel ───────────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-white">
-        {/* Mobile-only logo */}
-        <div className="lg:hidden mb-10">
-          <Logo size={40} showName />
-        </div>
-
-        <div className="w-full max-w-[360px]">
+      {/* ── RIGHT: form panel ──────────────────────────────────────────── */}
+      <div className="auth-right">
+        <div className="auth-form-wrap">
           {children}
         </div>
       </div>
+
     </div>
   )
 }

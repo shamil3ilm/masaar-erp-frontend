@@ -10,7 +10,6 @@ interface LoginSuccessData {
   token: string
   token_type: string
   expires_in: number
-  // The user's organization (nullable for super-admins) is carried on user.organization.
   user: User
 }
 
@@ -21,21 +20,22 @@ interface LoginChallengeData {
 
 type LoginResponseData = LoginSuccessData | LoginChallengeData
 
+const inputCls = 'auth-input w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:outline-none placeholder:text-gray-400'
+
 export function LoginPage() {
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
 
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
 
   const [challengeToken, setChallengeToken] = useState<string | null>(null)
   const [otpCode, setOtpCode] = useState('')
   const verify2fa = useVerify2fa()
 
   function handleAuthSuccess(data: LoginSuccessData) {
-    // Backend models one organization per user (null for super-admins).
     const org = data.user.organization ?? null
     setAuth(data.token, data.user, org ? [org] : [], org)
     void navigate({ to: '/app/dashboard' })
@@ -43,13 +43,11 @@ export function LoginPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
+    if (!email || !password) { setError('Please enter your email and password.'); return }
     setLoading(true)
     setError('')
     try {
-      const { data } = await getApiClient().post<ApiResponse<LoginResponseData>>('/auth/login', {
-        email,
-        password,
-      })
+      const { data } = await getApiClient().post<ApiResponse<LoginResponseData>>('/auth/login', { email, password })
       const result = data.data
       if ('requires_2fa' in result && result.requires_2fa) {
         setChallengeToken(result.challenge_token)
@@ -57,7 +55,7 @@ export function LoginPage() {
         handleAuthSuccess(result as LoginSuccessData)
       }
     } catch {
-      setError('Invalid email or password.')
+      setError('Invalid email or password. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -75,18 +73,23 @@ export function LoginPage() {
     }
   }
 
-  // ── 2FA challenge ─────────────────────────────────────────────────────────
+  // ── 2FA ───────────────────────────────────────────────────────────────────
   if (challengeToken) {
     return (
       <AuthLayout>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Two-factor auth</h1>
-        <p className="text-sm text-gray-500 mb-8">
-          Enter the 6-digit code from your authenticator app.
-        </p>
+        <div className="auth-form-header">
+          <div className="auth-2fa-icon">🔐</div>
+          <h1>Two-step verification</h1>
+          <p>Enter the 6-digit code from your authenticator app.</p>
+        </div>
 
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && (
+          <div className="auth-error-alert">
+            <span>⚠</span> {error}
+          </div>
+        )}
 
-        <form onSubmit={handle2fa} className="space-y-4">
+        <form onSubmit={handle2fa} noValidate className="auth-form-body">
           <input
             type="text"
             inputMode="numeric"
@@ -95,21 +98,18 @@ export function LoginPage() {
             placeholder="000 000"
             value={otpCode}
             onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-            className="w-full rounded-lg border border-gray-200 px-4 py-3 text-center text-xl tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="auth-otp-input"
           />
           <button
             type="submit"
             disabled={verify2fa.isPending || otpCode.length !== 6}
-            className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="auth-btn"
           >
-            {verify2fa.isPending ? 'Verifying…' : 'Verify'}
+            {verify2fa.isPending ? 'Verifying…' : 'Verify code'}
           </button>
         </form>
 
-        <button
-          onClick={() => setChallengeToken(null)}
-          className="mt-6 w-full text-center text-sm text-gray-400 hover:text-gray-600"
-        >
+        <button onClick={() => setChallengeToken(null)} className="auth-back-link">
           ← Use a different account
         </button>
       </AuthLayout>
@@ -119,60 +119,63 @@ export function LoginPage() {
   // ── Sign in ───────────────────────────────────────────────────────────────
   return (
     <AuthLayout>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Welcome back</h1>
-      <p className="text-sm text-gray-500 mb-8">
-        No account?{' '}
-        <Link to="/register" className="text-blue-600 hover:underline font-medium">
-          Create one free
-        </Link>
-      </p>
+      <div className="auth-form-header">
+        <h1>Welcome back</h1>
+        <p>
+          No account?{' '}
+          <Link to="/register" className="auth-link">Create one free</Link>
+        </p>
+      </div>
 
-      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+      {error && (
+        <div className="auth-error-alert">
+          <span>⚠</span> {error}
+        </div>
+      )}
 
-      <form onSubmit={handleLogin} className="space-y-5">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Email
-          </label>
+      <form onSubmit={handleLogin} noValidate className="auth-form-body">
+        <div className="auth-field">
+          <label htmlFor="email">Email address</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
             autoComplete="email"
             placeholder="you@company.com"
-            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+            className={inputCls}
           />
         </div>
 
-        <div>
-          <div className="flex justify-between items-center mb-1.5">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline">
-              Forgot password?
-            </Link>
+        <div className="auth-field">
+          <div className="auth-field-row">
+            <label htmlFor="password">Password</label>
+            <Link to="/forgot-password" className="auth-link auth-link-sm">Forgot password?</Link>
           </div>
           <PasswordInput
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
             autoComplete="current-password"
-            placeholder="••••••••"
+            placeholder="Enter your password"
+            className="rounded-xl border-gray-200 py-3"
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
-          {loading ? 'Signing in…' : 'Sign in'}
+        <button type="submit" disabled={loading} className="auth-btn">
+          {loading
+            ? <><span className="auth-spinner" /> Signing in…</>
+            : 'Sign in'}
         </button>
       </form>
+
+      <div className="auth-divider"><span>Trusted by 500+ companies</span></div>
+
+      <div className="auth-trust-row">
+        <span>🔒 SSL encrypted</span>
+        <span>🛡 SOC 2 compliant</span>
+        <span>🌍 GCC & India</span>
+      </div>
     </AuthLayout>
   )
 }

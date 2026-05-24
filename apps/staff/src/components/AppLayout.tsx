@@ -1,80 +1,34 @@
 import { Outlet, Link, useLocation, useNavigate } from '@tanstack/react-router'
-import { AppShell, TopBar, Logo } from '@erp/ui'
+import {
+  AppShell, Sidebar, TopBar, Logo, ThemeToggle, DirectionToggle,
+  type NavSection,
+  Users, FileText, ShoppingCart, Receipt, CreditCard, RotateCcw,
+  Shield,
+} from '@erp/ui'
 import { useAuthStore } from '../store/auth'
-
-interface NavSection {
-  label: string
-  items: { label: string; href: string; icon: string }[]
-}
 
 const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Sales',
     items: [
-      { label: 'Contacts', href: '/app/sales/contacts', icon: '👥' },
-      { label: 'Quotations', href: '/app/sales/quotations', icon: '📋' },
-      { label: 'Sales Orders', href: '/app/sales/sales-orders', icon: '🛒' },
-      { label: 'Invoices', href: '/app/sales/invoices', icon: '🧾' },
-      { label: 'Payments', href: '/app/sales/payments', icon: '💰' },
-      { label: 'Credit Notes', href: '/app/sales/credit-notes', icon: '↩️' },
+      { label: 'Contacts',     href: '/app/sales/contacts',     icon: <Users size={15} /> },
+      { label: 'Quotations',   href: '/app/sales/quotations',   icon: <FileText size={15} /> },
+      { label: 'Sales Orders', href: '/app/sales/sales-orders', icon: <ShoppingCart size={15} /> },
+      { label: 'Invoices',     href: '/app/sales/invoices',     icon: <Receipt size={15} /> },
+      { label: 'Payments',     href: '/app/sales/payments',     icon: <CreditCard size={15} /> },
+      { label: 'Credit Notes', href: '/app/sales/credit-notes', icon: <RotateCcw size={15} /> },
     ],
   },
   {
     label: 'Compliance',
     items: [
-      { label: 'ZATCA Onboarding', href: '/app/compliance/zatca/onboarding', icon: '🔏' },
+      { label: 'ZATCA', href: '/app/compliance/zatca/onboarding', icon: <Shield size={15} /> },
     ],
   },
 ]
 
-function AppSidebar({ collapsed }: { collapsed?: boolean }) {
-  const location = useLocation()
-  const currentPath = location.pathname
-
-  return (
-    <div className="flex flex-col flex-1 min-h-0">
-      {/* Brand header */}
-      <div className={`flex items-center gap-3 px-4 py-4 border-b border-white/10 ${collapsed ? 'justify-center px-2' : ''}`}>
-        <Logo size={28} showName={!collapsed} className="text-white [&_span]:text-white" />
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 space-y-6">
-        {NAV_SECTIONS.map((section) => (
-          <div key={section.label}>
-            {!collapsed && (
-              <p className="px-4 text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1">
-                {section.label}
-              </p>
-            )}
-            <div className="space-y-0.5 px-2">
-              {section.items.map((item) => {
-                const active = currentPath.startsWith(item.href)
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={[
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-[#14b8a6]/20 text-[#5eead4]'
-                        : 'text-gray-400 hover:bg-white/8 hover:text-white',
-                    ].join(' ')}
-                  >
-                    <span className="flex-shrink-0 w-5 text-center text-base">{item.icon}</span>
-                    {!collapsed && <span>{item.label}</span>}
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-    </div>
-  )
-}
-
 export function AppLayout() {
+  const location = useLocation()
   const navigate = useNavigate()
   const { user, organization, organizations, switchOrg, logout } = useAuthStore()
 
@@ -90,15 +44,48 @@ export function AppLayout() {
 
   return (
     <AppShell
-      sidebarClassName="bg-[#1a1f36]"
-      sidebar={<AppSidebar />}
+      sidebarClassName="bg-[var(--sidebar-bg)]"
+      sidebar={
+        <Sidebar
+          sections={NAV_SECTIONS}
+          currentPath={location.pathname}
+          header={<Logo size={28} showName nameClassName="font-semibold text-white tracking-tight" />}
+          renderLink={(item, active, collapsed) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              title={collapsed ? item.label : undefined}
+              className={[
+                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                collapsed ? 'justify-center px-2' : '',
+                active
+                  ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-text-active)]'
+                  : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)]',
+              ].filter(Boolean).join(' ')}
+            >
+              {item.icon && (
+                <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                  {item.icon}
+                </span>
+              )}
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          )}
+        />
+      }
       topbar={
         <TopBar
-          organizationName={organization?.name ?? ''}
+          user={{ name: user?.name ?? '', email: user?.email }}
+          organizationName={organization?.name}
           organizations={organizations}
           onSwitchOrg={handleSwitchOrg}
-          userName={user?.name ?? ''}
           onLogout={handleLogout}
+          controls={
+            <div className="flex items-center gap-1.5">
+              <ThemeToggle />
+              <DirectionToggle />
+            </div>
+          }
         />
       }
     >

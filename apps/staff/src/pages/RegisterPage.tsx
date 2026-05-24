@@ -85,7 +85,7 @@ export function RegisterPage() {
         <p className="mb-4 text-sm text-red-600">{errors.root.message}</p>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <Field label="Full name" error={errors.name?.message}>
           <input {...field('name')} type="text" autoComplete="name" placeholder="Jane Smith" className={inputCls} />
         </Field>

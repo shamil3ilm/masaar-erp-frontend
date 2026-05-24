@@ -75,7 +75,7 @@ export function ResetPasswordPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">New password</label>
           <PasswordInput {...register('password')} autoComplete="new-password" placeholder="Min. 8 characters" />
