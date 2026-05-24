@@ -1,3 +1,5 @@
+import { Logo } from './Logo'
+
 interface TopBarProps {
   organizationName: string
   organizations: { id: string; name: string }[]
@@ -18,7 +20,7 @@ export function TopBar({
   return (
     <div className="flex items-center justify-between w-full">
       <div className="flex items-center gap-4">
-        <img src="/logo.svg" alt="ERP" width={28} height={28} />
+        <Logo size={28} showName />
         {organizations.length > 1 ? (
           <select
             value={organizationName}

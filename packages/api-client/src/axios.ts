@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios'
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, AxiosError } from 'axios'
 import type { ValidationErrors } from '@erp/types'
 
 export type TokenGetter = () => string | null

@@ -16,7 +16,7 @@ const createInvoiceSchema = z.object({
   buyer_name: z.string().min(1, 'Buyer name is required'),
   buyer_vat: z.string().min(15, 'VAT number must be 15 digits').max(15),
   invoice_type: z.enum(['standard', 'simplified']),
-  currency: z.string().default('SAR'),
+  currency: z.string().min(1),
   line_items: z.array(lineItemSchema).min(1, 'At least one line item required'),
 })
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Logo } from '@erp/ui'
 import { useNavigate } from '@tanstack/react-router'
 import { useAuthStore } from '../store/auth'
 import { getApiClient } from '@erp/api-client'
@@ -40,8 +41,10 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow p-8">
         <div className="flex flex-col items-center mb-6">
-          <img src="/logo.svg" alt="ERP" width={56} height={56} className="mb-3" />
-          <h1 className="text-2xl font-bold text-gray-900">Sign in to ERP</h1>
+          <div className="mb-3">
+            <Logo size={48} showName />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Sign in to LoopERP</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
