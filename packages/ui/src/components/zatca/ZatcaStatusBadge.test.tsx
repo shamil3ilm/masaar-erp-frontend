@@ -23,4 +23,9 @@ describe('ZatcaStatusBadge', () => {
     render(<ZatcaStatusBadge status="submitted" />)
     expect(screen.getByText('Submitted')).toBeInTheDocument()
   })
+
+  it('renders "Reported" for reported status', () => {
+    render(<ZatcaStatusBadge status="reported" />)
+    expect(screen.getByText('Reported')).toBeInTheDocument()
+  })
 })

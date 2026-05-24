@@ -6,7 +6,7 @@ const MODULE_CARDS = [
   {
     icon: '🧾',
     name: 'ZATCA Compliance',
-    description: 'Manage e-invoicing, onboarding, and compliance reports for Saudi Arabia.',
+    description: 'Manage e-invoicing and ZATCA device onboarding for Saudi Arabia.',
     href: '/app/compliance/zatca/onboarding',
   },
 ] as const
@@ -15,14 +15,6 @@ const GETTING_STARTED_STEPS = [
   {
     label: 'Complete ZATCA Onboarding',
     href: '/app/compliance/zatca/onboarding',
-  },
-  {
-    label: 'Create your first invoice',
-    href: '/app/compliance/zatca/invoices/create',
-  },
-  {
-    label: 'View compliance reports',
-    href: '/app/compliance/zatca/reports',
   },
 ] as const
 
@@ -42,7 +34,6 @@ export function DashboardPage() {
         cards below to navigate to your modules.
       </p>
 
-      {/* Module cards */}
       <section className="mb-10">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Modules</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -69,7 +60,6 @@ export function DashboardPage() {
         </div>
       </section>
 
-      {/* Getting started checklist */}
       <section>
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Getting started</h2>
         <ul className="flex flex-col gap-2">
@@ -79,7 +69,6 @@ export function DashboardPage() {
                 to={step.href}
                 className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
-                {/* Checkbox icon */}
                 <svg
                   className="h-4 w-4 shrink-0 text-gray-400"
                   viewBox="0 0 16 16"

@@ -5,9 +5,6 @@ import { useAuthStore } from './store/auth'
 import { LoginPage } from './pages/LoginPage'
 import { OrgPickerPage } from './pages/OrgPickerPage'
 import { OnboardingPage } from './pages/zatca/OnboardingPage'
-import { InvoicesPage } from './pages/zatca/InvoicesPage'
-import { CreateInvoicePage } from './pages/zatca/CreateInvoicePage'
-import { ReportsPage } from './pages/zatca/ReportsPage'
 import { DashboardPage } from './pages/DashboardPage'
 
 const queryClient = createQueryClient()
@@ -56,32 +53,10 @@ const indexRoute = createRoute({
   },
 })
 
-// ZATCA onboarding
 const zatcaOnboardingRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/compliance/zatca/onboarding',
   component: OnboardingPage,
-})
-
-// ZATCA invoices list
-const zatcaInvoicesRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: '/compliance/zatca/invoices',
-  component: InvoicesPage,
-})
-
-// ZATCA create invoice
-const zatcaCreateInvoiceRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: '/compliance/zatca/invoices/create',
-  component: CreateInvoicePage,
-})
-
-// ZATCA reports
-const zatcaReportsRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: '/compliance/zatca/reports',
-  component: ReportsPage,
 })
 
 const routeTree = rootRoute.addChildren([
@@ -91,9 +66,6 @@ const routeTree = rootRoute.addChildren([
   appRoute.addChildren([
     dashboardRoute,
     zatcaOnboardingRoute,
-    zatcaInvoicesRoute,
-    zatcaCreateInvoiceRoute,
-    zatcaReportsRoute,
   ]),
 ])
 
