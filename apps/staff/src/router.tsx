@@ -4,8 +4,21 @@ import { createQueryClient } from '@erp/api-client'
 import { useAuthStore } from './store/auth'
 import { LoginPage } from './pages/LoginPage'
 import { OrgPickerPage } from './pages/OrgPickerPage'
-import { OnboardingPage } from './pages/zatca/OnboardingPage'
 import { DashboardPage } from './pages/DashboardPage'
+// ZATCA
+import { OnboardingPage } from './pages/zatca/OnboardingPage'
+// Sales
+import { ContactsPage } from './pages/sales/ContactsPage'
+import { CreateContactPage } from './pages/sales/CreateContactPage'
+import { QuotationsPage } from './pages/sales/QuotationsPage'
+import { CreateQuotationPage } from './pages/sales/CreateQuotationPage'
+import { SalesOrdersPage } from './pages/sales/SalesOrdersPage'
+import { InvoicesPage } from './pages/sales/InvoicesPage'
+import { CreateInvoicePage } from './pages/sales/CreateInvoicePage'
+import { PaymentsPage } from './pages/sales/PaymentsPage'
+import { CreatePaymentPage } from './pages/sales/CreatePaymentPage'
+import { CreditNotesPage } from './pages/sales/CreditNotesPage'
+import { CreateCreditNotePage } from './pages/sales/CreateCreditNotePage'
 
 const queryClient = createQueryClient()
 
@@ -53,11 +66,93 @@ const indexRoute = createRoute({
   },
 })
 
+// ─── ZATCA ────────────────────────────────────────────────────────────────────
+
 const zatcaOnboardingRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/compliance/zatca/onboarding',
   component: OnboardingPage,
 })
+
+// ─── Sales: Contacts ──────────────────────────────────────────────────────────
+
+const contactsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/contacts',
+  component: ContactsPage,
+})
+
+const createContactRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/contacts/new',
+  component: CreateContactPage,
+})
+
+// ─── Sales: Quotations ────────────────────────────────────────────────────────
+
+const quotationsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/quotations',
+  component: QuotationsPage,
+})
+
+const createQuotationRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/quotations/new',
+  component: CreateQuotationPage,
+})
+
+// ─── Sales: Sales Orders ──────────────────────────────────────────────────────
+
+const salesOrdersRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/sales-orders',
+  component: SalesOrdersPage,
+})
+
+// ─── Sales: Invoices ──────────────────────────────────────────────────────────
+
+const salesInvoicesRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/invoices',
+  component: InvoicesPage,
+})
+
+const createSalesInvoiceRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/invoices/new',
+  component: CreateInvoicePage,
+})
+
+// ─── Sales: Payments ──────────────────────────────────────────────────────────
+
+const paymentsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/payments',
+  component: PaymentsPage,
+})
+
+const createPaymentRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/payments/new',
+  component: CreatePaymentPage,
+})
+
+// ─── Sales: Credit Notes ──────────────────────────────────────────────────────
+
+const creditNotesRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/credit-notes',
+  component: CreditNotesPage,
+})
+
+const createCreditNoteRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/sales/credit-notes/new',
+  component: CreateCreditNotePage,
+})
+
+// ─── Route Tree ───────────────────────────────────────────────────────────────
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -65,7 +160,20 @@ const routeTree = rootRoute.addChildren([
   orgPickerRoute,
   appRoute.addChildren([
     dashboardRoute,
+    // ZATCA
     zatcaOnboardingRoute,
+    // Sales
+    contactsRoute,
+    createContactRoute,
+    quotationsRoute,
+    createQuotationRoute,
+    salesOrdersRoute,
+    salesInvoicesRoute,
+    createSalesInvoiceRoute,
+    paymentsRoute,
+    createPaymentRoute,
+    creditNotesRoute,
+    createCreditNoteRoute,
   ]),
 ])
 
