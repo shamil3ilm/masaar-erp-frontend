@@ -1,73 +1,58 @@
-# React + TypeScript + Vite
+# @erp/staff — Internal Staff Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The primary application for internal staff. Handles day-to-day ERP operations including ZATCA e-invoicing compliance, HR, and financial workflows.
 
-Currently, two official plugins are available:
+## What's Implemented
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **ZATCA Compliance module** — Saudi e-invoicing (Phase 2)
+  - Onboarding wizard (CSID registration, cryptographic stamp setup)
+  - Invoice list with status tracking (cleared, reported, rejected)
+  - Create invoice form with Zod validation
+  - Compliance reports and dashboard widgets
 
-## React Compiler
+## Routes
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Route | Description |
+|-------|-------------|
+| `/login` | JWT authentication (username + password) |
+| `/org-picker` | Organization selector after login (multi-tenant) |
+| `/app/dashboard` | Main dashboard |
+| `/app/compliance/zatca` | ZATCA compliance overview |
+| `/app/compliance/zatca/onboarding` | CSID onboarding wizard |
+| `/app/compliance/zatca/invoices` | Invoice list |
+| `/app/compliance/zatca/invoices/create` | Create new ZATCA invoice |
+| `/app/compliance/zatca/reports` | Compliance reports |
 
-## Expanding the ESLint configuration
+## Authentication
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- JWT token stored in `localStorage`
+- Axios interceptor attaches `Authorization: Bearer <token>` to all requests and handles 401 refresh
+- Active organization stored in Zustand; switching org re-scopes all API calls
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Commands
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# Development (port 5173)
+pnpm --filter @erp/staff dev
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Unit tests (Vitest)
+pnpm --filter @erp/staff test
+
+# E2E tests (Playwright)
+pnpm --filter @erp/staff e2e
+
+# Type check
+pnpm --filter @erp/staff typecheck
+
+# Production build
+pnpm --filter @erp/staff build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create `apps/staff/.env.local`:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_API_URL=http://localhost:8000/api/v1
+VITE_APP_NAME=LoopERP Staff
 ```
