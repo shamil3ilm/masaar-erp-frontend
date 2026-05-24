@@ -1,0 +1,1613 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Masaar — UI Design Template</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+          mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        },
+        colors: {
+          // Surfaces
+          bg: 'var(--color-bg)',
+          surface: 'var(--color-surface)',
+          'surface-2': 'var(--color-surface-2)',
+          // Borders
+          border: 'var(--color-border)',
+          'border-strong': 'var(--color-border-strong)',
+          // Text
+          text: 'var(--color-text)',
+          muted: 'var(--color-muted)',
+          faint: 'var(--color-faint)',
+          // Brand
+          brand: {
+            DEFAULT: 'var(--color-brand)',
+            dark: 'var(--color-brand-dark)',
+            fg: 'var(--color-brand-fg)',
+            subtle: 'var(--color-brand-subtle)',
+          },
+          // Feedback
+          danger:  { DEFAULT: 'var(--color-danger)',  fg: 'var(--color-danger-fg)',  subtle: 'var(--color-danger-subtle)'  },
+          success: { DEFAULT: 'var(--color-success)', fg: 'var(--color-success-fg)', subtle: 'var(--color-success-subtle)' },
+          warning: { DEFAULT: 'var(--color-warning)', fg: 'var(--color-warning-fg)', subtle: 'var(--color-warning-subtle)' },
+          info:    { DEFAULT: 'var(--color-info)',    fg: 'var(--color-info-fg)',    subtle: 'var(--color-info-subtle)'    },
+          // Fixed brand neutrals (used by sidebar in both themes)
+          navy:   '#1A1F36',
+          'navy-2': '#222842',
+          'navy-3': '#2A314F',
+          cream:  '#EADBC8',
+        },
+        borderRadius: {
+          DEFAULT: 'var(--radius)',
+        },
+        boxShadow: {
+          card:   '0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)',
+          pop:    '0 8px 24px -4px rgb(15 23 42 / 0.12), 0 4px 8px -2px rgb(15 23 42 / 0.08)',
+          'card-dark': '0 1px 2px 0 rgb(0 0 0 / 0.4), 0 1px 3px 0 rgb(0 0 0 / 0.3)',
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  /* =========================================================
+     Design tokens — light theme (default)
+     ========================================================= */
+  :root {
+    /* Surfaces */
+    --color-bg:           #F8FAFC;
+    --color-surface:      #FFFFFF;
+    --color-surface-2:    #F1F5F9;
+
+    /* Borders */
+    --color-border:        #E2E8F0;
+    --color-border-strong: #CBD5E1;
+
+    /* Text */
+    --color-text:   #0F172A;
+    --color-muted:  #475569;
+    --color-faint:  #94A3B8;
+
+    /* Brand */
+    --color-brand:        #14B8A6;
+    --color-brand-dark:   #0D9488;
+    --color-brand-fg:     #FFFFFF;
+    --color-brand-subtle: #CCFBF1;
+
+    /* Feedback */
+    --color-danger:         #DC2626;
+    --color-danger-fg:      #FFFFFF;
+    --color-danger-subtle:  #FEE2E2;
+    --color-success:        #16A34A;
+    --color-success-fg:     #FFFFFF;
+    --color-success-subtle: #DCFCE7;
+    --color-warning:        #D97706;
+    --color-warning-fg:     #FFFFFF;
+    --color-warning-subtle: #FEF3C7;
+    --color-info:           #2563EB;
+    --color-info-fg:        #FFFFFF;
+    --color-info-subtle:    #DBEAFE;
+
+    /* Geometry */
+    --radius: 0.625rem;
+  }
+
+  /* =========================================================
+     Design tokens — dark theme
+     ========================================================= */
+  .dark {
+    --color-bg:           #0D1117;
+    --color-surface:      #161B27;
+    --color-surface-2:    #1F2535;
+
+    --color-border:        #283044;
+    --color-border-strong: #3A4360;
+
+    --color-text:   #F1F5F9;
+    --color-muted:  #94A3B8;
+    --color-faint:  #64748B;
+
+    --color-brand:        #2DD4BF;
+    --color-brand-dark:   #14B8A6;
+    --color-brand-fg:     #042F2E;
+    --color-brand-subtle: #134E4A;
+
+    --color-danger:         #F87171;
+    --color-danger-fg:      #450A0A;
+    --color-danger-subtle:  #3F1212;
+    --color-success:        #4ADE80;
+    --color-success-fg:     #052E16;
+    --color-success-subtle: #14331E;
+    --color-warning:        #FBBF24;
+    --color-warning-fg:     #422006;
+    --color-warning-subtle: #3A2A0A;
+    --color-info:           #60A5FA;
+    --color-info-fg:        #0C2A4D;
+    --color-info-subtle:    #142647;
+  }
+
+  html, body { font-family: 'Inter', system-ui, sans-serif; }
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Inter variable-style fallback */
+  .font-display { font-family: 'Inter', system-ui, sans-serif; letter-spacing: -0.02em; }
+
+  /* Custom focus ring style — used via .focus-ring utility */
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+
+  /* Subtle code blocks */
+  pre.code, code.code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    line-height: 1.55;
+  }
+  code.inline {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.85em;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 1px 6px;
+  }
+
+  /* Animated underline for sidebar active state */
+  .sb-active {
+    background: rgba(45, 212, 191, 0.12);
+    color: #5EEAD4;
+    box-shadow: inset 2px 0 0 #2DD4BF;
+  }
+  [dir="rtl"] .sb-active { box-shadow: inset -2px 0 0 #2DD4BF; }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+  .skeleton {
+    background: linear-gradient(90deg,
+      var(--color-surface-2) 0%,
+      color-mix(in oklab, var(--color-surface-2) 60%, var(--color-border)) 50%,
+      var(--color-surface-2) 100%);
+    background-size: 800px 100%;
+    animation: shimmer 1.6s infinite linear;
+    border-radius: 6px;
+  }
+
+  /* Hide scrollbars in component preview rows but keep scrollability */
+  .scroll-x { overflow-x: auto; }
+  .scroll-x::-webkit-scrollbar { height: 8px; }
+  .scroll-x::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 8px; }
+
+  /* Mock app shell — keep its own scroll body */
+  .shell-frame {
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--color-surface);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 30px -10px rgb(15 23 42 / 0.10);
+  }
+  .dark .shell-frame { box-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 40px -10px rgb(0 0 0 / 0.5); }
+
+  /* Toast slide-in */
+  @keyframes toastIn { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .toast { animation: toastIn .25s ease-out both; }
+
+  /* Reduce motion respect */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton, .toast { animation: none; }
+  }
+
+  /* Section anchor offset for sticky bar */
+  .section { scroll-margin-top: 80px; }
+
+  /* Helpers for the docs */
+  .swatch { aspect-ratio: 16 / 9; border-radius: 10px; border: 1px solid var(--color-border); }
+  .swatch.checker {
+    background-image:
+      linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+      linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+      linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+
+  /* Logical-property utilities Tailwind v3 already ships (ps-, pe-, ms-, me-, start-, end-, text-start, text-end). */
+</style>
+</head>
+
+<body class="min-h-screen">
+
+<!-- =========================================================
+     TOP TOOLBAR (sticky)
+     ========================================================= -->
+<header class="sticky top-0 z-40 backdrop-blur bg-bg/85 border-b border-border">
+  <div class="max-w-[1280px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
+    <!-- Brand mark -->
+    <a href="#top" class="flex items-center gap-2.5 focus-ring rounded">
+      <svg width="28" height="28" viewBox="0 0 56 56" aria-hidden="true">
+        <defs>
+          <linearGradient id="tealA" x1="14" y1="42" x2="42" y2="14" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#0D9488"/><stop offset="1" stop-color="#2DD4BF"/>
+          </linearGradient>
+        </defs>
+        <rect x="6" y="6" width="44" height="44" rx="12" fill="#1A1F36"/>
+        <path d="M17 39 V19 L28 30 L39 19 V39" stroke="url(#tealA)" stroke-width="4.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="39" cy="19" r="3" fill="#EADBC8"/>
+      </svg>
+      <span class="font-display text-[17px] font-semibold tracking-tight">Masaar</span>
+      <span class="hidden sm:inline-block ms-2 text-[11px] uppercase tracking-[0.14em] text-muted">UI Template</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-1 ms-6 text-sm">
+      <a href="#brand"      class="px-2.5 py-1.5 rounded hover:bg-surface-2 text-muted hover:text-text focus-ring">Brand</a>
+      <a href="#tokens"     class="px-2.5 py-1.5 rounded hover:bg-surface-2 text-muted hover:text-text focus-ring">Tokens</a>
+      <a href="#type"       class="px-2.5 py-1.5 rounded hover:bg-surface-2 text-muted hover:text-text focus-ring">Type</a>
+      <a href="#components" class="px-2.5 py-1.5 rounded hover:bg-surface-2 text-muted hover:text-text focus-ring">Components</a>
+      <a href="#shell"      class="px-2.5 py-1.5 rounded hover:bg-surface-2 text-muted hover:text-text focus-ring">App shell</a>
+      <a href="#dashboard"  class="px-2.5 py-1.5 rounded hover:bg-surface-2 text-muted hover:text-text focus-ring">Dashboard</a>
+    </nav>
+
+    <div class="ms-auto flex items-center gap-2">
+      <!-- Direction toggle -->
+      <div class="inline-flex rounded-[var(--radius)] border border-border bg-surface p-0.5 text-xs font-medium" role="group" aria-label="Direction">
+        <button data-dir="ltr" class="dir-btn px-2.5 py-1 rounded-[6px] focus-ring" aria-pressed="true">LTR</button>
+        <button data-dir="rtl" class="dir-btn px-2.5 py-1 rounded-[6px] focus-ring" aria-pressed="false">RTL</button>
+      </div>
+      <!-- Theme toggle -->
+      <button id="themeToggle" class="inline-flex items-center justify-center w-9 h-9 rounded-[var(--radius)] border border-border bg-surface hover:bg-surface-2 focus-ring" aria-label="Toggle theme">
+        <i data-lucide="moon" class="w-4 h-4 hidden dark:inline"></i>
+        <i data-lucide="sun"  class="w-4 h-4 dark:hidden"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<main class="max-w-[1280px] mx-auto px-4 sm:px-6 py-10 space-y-20">
+
+  <!-- ==========================================================================
+       HERO / INTRO
+       ========================================================================== -->
+  <section class="section">
+    <div class="grid lg:grid-cols-[1fr_360px] gap-8 items-end">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-brand-subtle text-brand-dark dark:text-brand text-[11px] font-semibold uppercase tracking-[0.12em]">
+          <span class="w-1.5 h-1.5 rounded-full bg-brand"></span> Design Template · v1.0
+        </div>
+        <h1 class="mt-3 font-display text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+          The single source of truth for every Masaar screen.
+        </h1>
+        <p class="mt-4 text-muted text-lg max-w-2xl">
+          One design language across every app in the platform. Tokens, components and an
+          application shell — wired to Tailwind v4 <code class="inline">@theme</code>,
+          ready for React 19 + TypeScript, with first-class light/dark and RTL support.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3 text-xs">
+          <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface border border-border text-muted"><i data-lucide="package" class="w-3.5 h-3.5"></i> Shared UI package</span>
+          <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface border border-border text-muted"><i data-lucide="palette" class="w-3.5 h-3.5"></i> Semantic tokens</span>
+          <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface border border-border text-muted"><i data-lucide="languages" class="w-3.5 h-3.5"></i> RTL via logical properties</span>
+          <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-surface border border-border text-muted"><i data-lucide="accessibility" class="w-3.5 h-3.5"></i> WCAG AA</span>
+        </div>
+      </div>
+
+      <!-- Logo card -->
+      <div id="brand" class="rounded-[14px] border border-border overflow-hidden">
+        <div class="bg-navy p-8 flex items-center justify-center">
+          <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Masaar logo">
+            <defs>
+              <linearGradient id="heroTeal" x1="32" y1="88" x2="88" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#0D9488"/><stop offset="1" stop-color="#2DD4BF"/>
+              </linearGradient>
+            </defs>
+            <rect x="8" y="8" width="104" height="104" rx="26" fill="#1A1F36"/>
+            <path d="M33 87 V41 L60 67 L87 41 V87" stroke="url(#heroTeal)" stroke-width="9" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="87" cy="41" r="6.5" fill="#EADBC8"/>
+          </svg>
+        </div>
+        <dl class="grid grid-cols-3 text-[11px] bg-surface">
+          <div class="p-3 border-e border-border">
+            <dt class="text-faint uppercase tracking-wider">Mark</dt>
+            <dd class="mt-1 text-muted">Navy · gradient · cream node</dd>
+          </div>
+          <div class="p-3 border-e border-border">
+            <dt class="text-faint uppercase tracking-wider">Wordmark</dt>
+            <dd class="mt-1 text-muted">Inter · 600 · -0.5 tracking</dd>
+          </div>
+          <div class="p-3">
+            <dt class="text-faint uppercase tracking-wider">Clearspace</dt>
+            <dd class="mt-1 text-muted">≥ 1× container radius</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       PALETTE READ FROM LOGO
+       ========================================================================== -->
+  <section class="section">
+    <header class="mb-6 flex items-end justify-between gap-4 flex-wrap">
+      <div>
+        <p class="text-[11px] uppercase tracking-[0.18em] text-faint">Step 01</p>
+        <h2 class="font-display text-2xl font-semibold tracking-tight mt-1">Palette read from the mark</h2>
+        <p class="text-muted mt-1 max-w-2xl">Four colors come out of the logo. Everything else in the system derives from these.</p>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <!-- Navy -->
+      <div class="rounded-[var(--radius)] overflow-hidden border border-border bg-surface">
+        <div class="h-24" style="background:#1A1F36;"></div>
+        <div class="p-3">
+          <div class="text-[11px] uppercase tracking-wider text-faint">Container · Sidebar</div>
+          <div class="mt-1 font-semibold text-sm">Navy 900</div>
+          <div class="mt-1 text-xs text-muted font-mono">#1A1F36</div>
+        </div>
+      </div>
+      <!-- Brand dark -->
+      <div class="rounded-[var(--radius)] overflow-hidden border border-border bg-surface">
+        <div class="h-24" style="background:#0D9488;"></div>
+        <div class="p-3">
+          <div class="text-[11px] uppercase tracking-wider text-faint">Brand · Dark</div>
+          <div class="mt-1 font-semibold text-sm">Teal 600</div>
+          <div class="mt-1 text-xs text-muted font-mono">#0D9488</div>
+        </div>
+      </div>
+      <!-- Brand -->
+      <div class="rounded-[var(--radius)] overflow-hidden border border-border bg-surface">
+        <div class="h-24" style="background:linear-gradient(135deg,#0D9488 0%, #2DD4BF 100%);"></div>
+        <div class="p-3">
+          <div class="text-[11px] uppercase tracking-wider text-faint">Brand · Stroke</div>
+          <div class="mt-1 font-semibold text-sm">Teal 500 → 400</div>
+          <div class="mt-1 text-xs text-muted font-mono">#14B8A6 · #2DD4BF</div>
+        </div>
+      </div>
+      <!-- Cream -->
+      <div class="rounded-[var(--radius)] overflow-hidden border border-border bg-surface">
+        <div class="h-24" style="background:#EADBC8;"></div>
+        <div class="p-3">
+          <div class="text-[11px] uppercase tracking-wider text-faint">Accent · Node</div>
+          <div class="mt-1 font-semibold text-sm">Cream</div>
+          <div class="mt-1 text-xs text-muted font-mono">#EADBC8</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       SEMANTIC TOKENS
+       ========================================================================== -->
+  <section id="tokens" class="section">
+    <header class="mb-6">
+      <p class="text-[11px] uppercase tracking-[0.18em] text-faint">Step 02</p>
+      <h2 class="font-display text-2xl font-semibold tracking-tight mt-1">Semantic tokens</h2>
+      <p class="text-muted mt-1 max-w-2xl">Authored with Tailwind v4 <code class="inline">@theme</code>. Surface and feedback names — not raw colors — are used in product code.</p>
+    </header>
+
+    <div class="grid lg:grid-cols-2 gap-4">
+      <!-- LIGHT -->
+      <div class="rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sun" class="w-4 h-4 text-warning"></i>
+            <span class="font-semibold text-sm">Light theme</span>
+          </div>
+          <code class="inline">:root</code>
+        </div>
+        <div class="p-4 grid grid-cols-2 gap-3 text-xs">
+          <!-- surfaces -->
+          <div class="col-span-2 text-[10px] uppercase tracking-widest text-faint">Surfaces</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded border border-border-strong" style="background:#F8FAFC"></span><div><div class="font-medium">bg</div><div class="text-faint font-mono">#F8FAFC</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded border border-border-strong" style="background:#FFFFFF"></span><div><div class="font-medium">surface</div><div class="text-faint font-mono">#FFFFFF</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded border border-border-strong" style="background:#F1F5F9"></span><div><div class="font-medium">surface-2</div><div class="text-faint font-mono">#F1F5F9</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded border-2 border-dashed" style="border-color:#CBD5E1"></span><div><div class="font-medium">border-strong</div><div class="text-faint font-mono">#CBD5E1</div></div></div>
+          <!-- text -->
+          <div class="col-span-2 mt-2 text-[10px] uppercase tracking-widest text-faint">Text</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#0F172A"></span><div><div class="font-medium">text</div><div class="text-faint font-mono">#0F172A</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#475569"></span><div><div class="font-medium">muted</div><div class="text-faint font-mono">#475569</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#94A3B8"></span><div><div class="font-medium">faint</div><div class="text-faint font-mono">#94A3B8</div></div></div>
+          <!-- brand -->
+          <div class="col-span-2 mt-2 text-[10px] uppercase tracking-widest text-faint">Brand</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#14B8A6"></span><div><div class="font-medium">brand</div><div class="text-faint font-mono">#14B8A6</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#0D9488"></span><div><div class="font-medium">brand-dark</div><div class="text-faint font-mono">#0D9488</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#CCFBF1"></span><div><div class="font-medium">brand-subtle</div><div class="text-faint font-mono">#CCFBF1</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#FFFFFF;border:1px solid #E2E8F0"></span><div><div class="font-medium">brand-fg</div><div class="text-faint font-mono">#FFFFFF</div></div></div>
+          <!-- feedback -->
+          <div class="col-span-2 mt-2 text-[10px] uppercase tracking-widest text-faint">Feedback</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#DC2626"></span><div><div class="font-medium">danger</div><div class="text-faint font-mono">#DC2626</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#16A34A"></span><div><div class="font-medium">success</div><div class="text-faint font-mono">#16A34A</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#D97706"></span><div><div class="font-medium">warning</div><div class="text-faint font-mono">#D97706</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#2563EB"></span><div><div class="font-medium">info</div><div class="text-faint font-mono">#2563EB</div></div></div>
+        </div>
+      </div>
+
+      <!-- DARK -->
+      <div class="rounded-[var(--radius)] border border-border overflow-hidden" style="background:#161B27;color:#F1F5F9;">
+        <div class="px-4 py-3 flex items-center justify-between" style="border-bottom:1px solid #283044">
+          <div class="flex items-center gap-2">
+            <i data-lucide="moon" class="w-4 h-4" style="color:#FBBF24"></i>
+            <span class="font-semibold text-sm">Dark theme</span>
+          </div>
+          <code class="inline" style="background:#1F2535;border-color:#283044;color:#F1F5F9">.dark</code>
+        </div>
+        <div class="p-4 grid grid-cols-2 gap-3 text-xs">
+          <div class="col-span-2 text-[10px] uppercase tracking-widest" style="color:#64748B">Surfaces</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#0D1117;border:1px solid #3A4360"></span><div><div class="font-medium">bg</div><div style="color:#64748B" class="font-mono">#0D1117</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#161B27;border:1px solid #3A4360"></span><div><div class="font-medium">surface</div><div style="color:#64748B" class="font-mono">#161B27</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#1F2535;border:1px solid #3A4360"></span><div><div class="font-medium">surface-2</div><div style="color:#64748B" class="font-mono">#1F2535</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded border-2 border-dashed" style="border-color:#3A4360"></span><div><div class="font-medium">border-strong</div><div style="color:#64748B" class="font-mono">#3A4360</div></div></div>
+
+          <div class="col-span-2 mt-2 text-[10px] uppercase tracking-widest" style="color:#64748B">Text</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#F1F5F9"></span><div><div class="font-medium">text</div><div style="color:#64748B" class="font-mono">#F1F5F9</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#94A3B8"></span><div><div class="font-medium">muted</div><div style="color:#64748B" class="font-mono">#94A3B8</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#64748B"></span><div><div class="font-medium">faint</div><div style="color:#64748B" class="font-mono">#64748B</div></div></div>
+
+          <div class="col-span-2 mt-2 text-[10px] uppercase tracking-widest" style="color:#64748B">Brand</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#2DD4BF"></span><div><div class="font-medium">brand</div><div style="color:#64748B" class="font-mono">#2DD4BF</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#14B8A6"></span><div><div class="font-medium">brand-dark</div><div style="color:#64748B" class="font-mono">#14B8A6</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#134E4A"></span><div><div class="font-medium">brand-subtle</div><div style="color:#64748B" class="font-mono">#134E4A</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#042F2E"></span><div><div class="font-medium">brand-fg</div><div style="color:#64748B" class="font-mono">#042F2E</div></div></div>
+
+          <div class="col-span-2 mt-2 text-[10px] uppercase tracking-widest" style="color:#64748B">Feedback</div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#F87171"></span><div><div class="font-medium">danger</div><div style="color:#64748B" class="font-mono">#F87171</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#4ADE80"></span><div><div class="font-medium">success</div><div style="color:#64748B" class="font-mono">#4ADE80</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#FBBF24"></span><div><div class="font-medium">warning</div><div style="color:#64748B" class="font-mono">#FBBF24</div></div></div>
+          <div class="flex items-center gap-3"><span class="w-9 h-9 rounded" style="background:#60A5FA"></span><div><div class="font-medium">info</div><div style="color:#64748B" class="font-mono">#60A5FA</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Token sample code -->
+    <details class="mt-4 rounded-[var(--radius)] border border-border bg-surface">
+      <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium flex items-center gap-2">
+        <i data-lucide="code-2" class="w-4 h-4 text-muted"></i> Tailwind v4 — <code class="inline">app.css</code>
+      </summary>
+<pre class="code !rounded-t-none !border-0 !border-t border-border">@import "tailwindcss";
+
+@theme {
+  --color-bg:           #F8FAFC;
+  --color-surface:      #FFFFFF;
+  --color-surface-2:    #F1F5F9;
+  --color-border:       #E2E8F0;
+  --color-border-strong:#CBD5E1;
+  --color-text:         #0F172A;
+  --color-muted:        #475569;
+  --color-faint:        #94A3B8;
+  --color-brand:        #14B8A6;
+  --color-brand-dark:   #0D9488;
+  --color-brand-fg:     #FFFFFF;
+  --color-brand-subtle: #CCFBF1;
+  /* …feedback tokens omitted… */
+  --radius: 0.625rem;
+}
+
+@layer base {
+  .dark {
+    --color-bg:        #0D1117;
+    --color-surface:   #161B27;
+    --color-surface-2: #1F2535;
+    /* …etc… */
+  }
+}</pre>
+    </details>
+  </section>
+
+  <!-- ==========================================================================
+       TYPOGRAPHY
+       ========================================================================== -->
+  <section id="type" class="section">
+    <header class="mb-6">
+      <p class="text-[11px] uppercase tracking-[0.18em] text-faint">Step 03</p>
+      <h2 class="font-display text-2xl font-semibold tracking-tight mt-1">Type scale</h2>
+      <p class="text-muted mt-1 max-w-2xl">Inter, variable, self-hosted. One ramp used everywhere.</p>
+    </header>
+
+    <div class="rounded-[var(--radius)] border border-border bg-surface divide-y divide-border">
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">h1 / display</div>
+        <div class="font-display text-4xl md:text-5xl font-semibold leading-tight">A clean, dense ERP.</div>
+        <code class="inline justify-self-end text-end">text-4xl md:text-5xl · 600</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">h2</div>
+        <div class="font-display text-3xl font-semibold tracking-tight">Section heading</div>
+        <code class="inline justify-self-end text-end">text-3xl · 600</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">h3</div>
+        <div class="text-2xl font-semibold tracking-tight">Card / page title</div>
+        <code class="inline justify-self-end text-end">text-2xl · 600</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">h4</div>
+        <div class="text-xl font-semibold">Subsection</div>
+        <code class="inline justify-self-end text-end">text-xl · 600</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">h5</div>
+        <div class="text-base font-semibold">Component title</div>
+        <code class="inline justify-self-end text-end">text-base · 600</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">h6</div>
+        <div class="text-sm font-semibold uppercase tracking-wider">Eyebrow</div>
+        <code class="inline justify-self-end text-end">text-sm · 600 · uppercase</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">Body</div>
+        <div class="text-[15px] text-text leading-relaxed">The body style is set at 15px with generous line-height for sustained reading inside dense product UI.</div>
+        <code class="inline justify-self-end text-end">text-[15px] · 400</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">Caption</div>
+        <div class="text-xs text-muted">Helpful microcopy that supports a control.</div>
+        <code class="inline justify-self-end text-end">text-xs · 400 · muted</code>
+      </div>
+      <div class="grid grid-cols-[120px_1fr_180px] items-baseline px-5 py-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">Label</div>
+        <div class="text-[13px] font-medium">Form field label</div>
+        <code class="inline justify-self-end text-end">text-[13px] · 500</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       COMPONENTS
+       ========================================================================== -->
+  <section id="components" class="section">
+    <header class="mb-6">
+      <p class="text-[11px] uppercase tracking-[0.18em] text-faint">Step 04</p>
+      <h2 class="font-display text-2xl font-semibold tracking-tight mt-1">Core components</h2>
+      <p class="text-muted mt-1 max-w-2xl">Every component below is a <code class="inline">cva</code> recipe. Variants are class-merged with <code class="inline">cn()</code>.</p>
+    </header>
+
+    <!-- ===== Button ===== -->
+    <article class="rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+      <header class="px-5 py-3.5 border-b border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="square-mouse-pointer" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">Button</h3>
+        </div>
+        <code class="inline">Button.tsx</code>
+      </header>
+      <div class="p-5 space-y-6">
+
+        <!-- Variants -->
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-faint mb-3">Variants</div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="btn-primary focus-ring">Primary</button>
+            <button class="btn-secondary focus-ring">Secondary</button>
+            <button class="btn-outline focus-ring">Outline</button>
+            <button class="btn-ghost focus-ring">Ghost</button>
+            <button class="btn-danger focus-ring">Danger</button>
+          </div>
+        </div>
+
+        <!-- Sizes -->
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-faint mb-3">Sizes</div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="btn-primary btn-sm focus-ring">Small</button>
+            <button class="btn-primary focus-ring">Medium</button>
+            <button class="btn-primary btn-lg focus-ring">Large</button>
+          </div>
+        </div>
+
+        <!-- Icons + loading -->
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-faint mb-3">Icon slots & loading</div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="btn-primary focus-ring"><i data-lucide="plus" class="w-4 h-4 -ms-0.5"></i> New item</button>
+            <button class="btn-secondary focus-ring">Export <i data-lucide="download" class="w-4 h-4 -me-0.5"></i></button>
+            <button class="btn-outline focus-ring" aria-label="Settings"><i data-lucide="settings" class="w-4 h-4"></i></button>
+            <button class="btn-primary focus-ring opacity-90 cursor-progress" aria-busy="true">
+              <svg class="w-4 h-4 -ms-0.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+              Saving…
+            </button>
+            <button class="btn-primary focus-ring" disabled>Disabled</button>
+          </div>
+        </div>
+
+        <details class="rounded-[var(--radius)] border border-border bg-surface-2/60">
+          <summary class="cursor-pointer select-none px-3 py-2 text-xs font-medium flex items-center gap-2 text-muted">
+            <i data-lucide="braces" class="w-3.5 h-3.5"></i> cva config
+          </summary>
+<pre class="code !rounded-t-none">import { cva } from "class-variance-authority";
+
+export const button = cva(
+  "inline-flex items-center justify-center gap-2 font-medium rounded-[--radius] " +
+  "transition-colors disabled:opacity-50 disabled:pointer-events-none " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 " +
+  "focus-visible:ring-offset-bg",
+  {
+    variants: {
+      variant: {
+        primary:   "bg-brand text-brand-fg hover:bg-brand-dark",
+        secondary: "bg-surface-2 text-text hover:bg-border",
+        outline:   "border border-border-strong text-text hover:bg-surface-2",
+        ghost:     "text-text hover:bg-surface-2",
+        danger:    "bg-danger text-danger-fg hover:opacity-90",
+      },
+      size: {
+        sm: "h-8  px-2.5 text-xs",
+        md: "h-9  px-3.5 text-sm",
+        lg: "h-11 px-5   text-[15px]",
+      },
+    },
+    defaultVariants: { variant: "primary", size: "md" },
+  }
+);</pre>
+        </details>
+      </div>
+    </article>
+
+    <!-- ===== Form controls ===== -->
+    <article class="mt-6 rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+      <header class="px-5 py-3.5 border-b border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="text-cursor-input" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">Input · Select · Textarea · FormField</h3>
+        </div>
+        <code class="inline">FormField.tsx</code>
+      </header>
+      <div class="p-5 grid md:grid-cols-2 gap-6">
+        <!-- FormField with hint -->
+        <div>
+          <label for="ff-1" class="block text-[13px] font-medium mb-1.5">Item name</label>
+          <input id="ff-1" class="field focus-ring" placeholder="e.g. New item" />
+          <p class="mt-1.5 text-xs text-muted flex items-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5"></i> Visible everywhere this record appears.</p>
+        </div>
+        <!-- FormField with error -->
+        <div>
+          <label for="ff-2" class="block text-[13px] font-medium mb-1.5">Email</label>
+          <div class="relative">
+            <input id="ff-2" class="field field-error focus-ring pe-9" value="not-an-email" />
+            <i data-lucide="circle-alert" class="w-4 h-4 text-danger absolute end-3 top-1/2 -translate-y-1/2"></i>
+          </div>
+          <p class="mt-1.5 text-xs text-danger flex items-center gap-1"><i data-lucide="circle-x" class="w-3.5 h-3.5"></i> Enter a valid email address.</p>
+        </div>
+        <!-- Select -->
+        <div>
+          <label for="ff-3" class="block text-[13px] font-medium mb-1.5">Status</label>
+          <div class="relative">
+            <select id="ff-3" class="field focus-ring pe-8 appearance-none">
+              <option>Draft</option>
+              <option>In review</option>
+              <option>Published</option>
+              <option>Archived</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-muted absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+        <!-- Disabled input with leading icon -->
+        <div>
+          <label for="ff-4" class="block text-[13px] font-medium mb-1.5">Customer name</label>
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-faint absolute start-3 top-1/2 -translate-y-1/2"></i>
+            <input id="ff-4" class="field focus-ring ps-9" placeholder="Search…" />
+          </div>
+        </div>
+        <!-- Textarea -->
+        <div class="md:col-span-2">
+          <label for="ff-5" class="block text-[13px] font-medium mb-1.5">Description</label>
+          <textarea id="ff-5" rows="3" class="field focus-ring resize-y" placeholder="Notes about this record…"></textarea>
+          <p class="mt-1.5 text-xs text-faint">Supports plain text. Markdown coming soon.</p>
+        </div>
+        <!-- Checkbox + Switch -->
+        <div class="flex flex-wrap items-center gap-6">
+          <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand" checked />
+            Notify watchers
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" class="peer sr-only" checked />
+            <span class="relative w-9 h-5 rounded-full bg-border-strong peer-checked:bg-brand transition-colors">
+              <span class="absolute top-0.5 start-0.5 w-4 h-4 bg-white rounded-full transition-all peer-checked:start-[18px]"></span>
+            </span>
+            Auto-archive on close
+          </label>
+        </div>
+        <!-- Radio group -->
+        <div class="flex flex-wrap items-center gap-4">
+          <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+            <input type="radio" name="r1" class="w-4 h-4 border-border-strong text-brand focus:ring-brand" checked />
+            Standard
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+            <input type="radio" name="r1" class="w-4 h-4 border-border-strong text-brand focus:ring-brand" />
+            Priority
+          </label>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== Badges ===== -->
+    <article class="mt-6 rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+      <header class="px-5 py-3.5 border-b border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="tag" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">Badge & StatusBadge</h3>
+        </div>
+        <code class="inline">Badge.tsx</code>
+      </header>
+      <div class="p-5 space-y-5">
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-faint mb-3">Tonal badges</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge bg-surface-2 text-text border-border">Neutral</span>
+            <span class="badge bg-brand-subtle text-brand-dark dark:text-brand border-transparent">Brand</span>
+            <span class="badge bg-info-subtle text-info border-transparent">Info</span>
+            <span class="badge bg-success-subtle text-success border-transparent">Success</span>
+            <span class="badge bg-warning-subtle text-warning border-transparent">Warning</span>
+            <span class="badge bg-danger-subtle text-danger border-transparent">Danger</span>
+          </div>
+        </div>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-faint mb-3">StatusBadge</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge bg-success-subtle text-success border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-success"></span> Active</span>
+            <span class="badge bg-warning-subtle text-warning border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-warning"></span> Pending</span>
+            <span class="badge bg-info-subtle text-info border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-info"></span> Review</span>
+            <span class="badge bg-danger-subtle text-danger border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-danger"></span> Blocked</span>
+            <span class="badge bg-surface-2 text-muted border-border"><span class="w-1.5 h-1.5 rounded-full bg-faint"></span> Archived</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== Cards + StatCard ===== -->
+    <article class="mt-6 rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+      <header class="px-5 py-3.5 border-b border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layout-panel-top" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">Card · CardHeader · CardBody · StatCard</h3>
+        </div>
+      </header>
+      <div class="p-5 grid gap-5 lg:grid-cols-[1fr_1.2fr]">
+
+        <!-- Basic card -->
+        <div class="rounded-[var(--radius)] border border-border bg-surface">
+          <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+            <div>
+              <div class="text-sm font-semibold">Card title</div>
+              <div class="text-xs text-muted mt-0.5">Short description for context.</div>
+            </div>
+            <button class="btn-ghost btn-sm focus-ring" aria-label="More"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+          </div>
+          <div class="p-4 text-sm text-muted">
+            CardBody is a neutral surface. Compose freely.
+          </div>
+          <div class="px-4 py-3 border-t border-border bg-surface-2/50 flex items-center justify-end gap-2">
+            <button class="btn-ghost btn-sm focus-ring">Cancel</button>
+            <button class="btn-primary btn-sm focus-ring">Confirm</button>
+          </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- card 1 -->
+          <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex w-8 h-8 rounded-md bg-brand-subtle items-center justify-center text-brand-dark dark:text-brand"><i data-lucide="users" class="w-4 h-4"></i></span>
+              <span class="badge bg-success-subtle text-success border-transparent"><i data-lucide="trending-up" class="w-3 h-3"></i> +12%</span>
+            </div>
+            <div class="mt-3 text-[11px] uppercase tracking-wider text-faint">Active users</div>
+            <div class="mt-1 text-2xl font-semibold tracking-tight">8,420</div>
+            <div class="text-xs text-muted">vs. last 30 days</div>
+          </div>
+          <!-- card 2 -->
+          <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex w-8 h-8 rounded-md bg-info-subtle items-center justify-center text-info"><i data-lucide="file-text" class="w-4 h-4"></i></span>
+              <span class="badge bg-success-subtle text-success border-transparent"><i data-lucide="trending-up" class="w-3 h-3"></i> +3.1%</span>
+            </div>
+            <div class="mt-3 text-[11px] uppercase tracking-wider text-faint">Open items</div>
+            <div class="mt-1 text-2xl font-semibold tracking-tight">312</div>
+            <div class="text-xs text-muted">across all apps</div>
+          </div>
+          <!-- card 3 -->
+          <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex w-8 h-8 rounded-md bg-warning-subtle items-center justify-center text-warning"><i data-lucide="clock" class="w-4 h-4"></i></span>
+              <span class="badge bg-danger-subtle text-danger border-transparent"><i data-lucide="trending-down" class="w-3 h-3"></i> −1.4%</span>
+            </div>
+            <div class="mt-3 text-[11px] uppercase tracking-wider text-faint">Avg. response</div>
+            <div class="mt-1 text-2xl font-semibold tracking-tight">2h 14m</div>
+            <div class="text-xs text-muted">first reply time</div>
+          </div>
+          <!-- card 4 -->
+          <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex w-8 h-8 rounded-md bg-success-subtle items-center justify-center text-success"><i data-lucide="check-circle-2" class="w-4 h-4"></i></span>
+              <span class="badge bg-success-subtle text-success border-transparent"><i data-lucide="trending-up" class="w-3 h-3"></i> +0.6%</span>
+            </div>
+            <div class="mt-3 text-[11px] uppercase tracking-wider text-faint">Completion rate</div>
+            <div class="mt-1 text-2xl font-semibold tracking-tight">94.2%</div>
+            <div class="text-xs text-muted">last 7 days</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== Table + Pagination ===== -->
+    <article class="mt-6 rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+      <header class="px-5 py-3.5 border-b border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="table" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">Table primitives & Pagination</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="relative hidden sm:block">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-faint absolute start-2.5 top-1/2 -translate-y-1/2"></i>
+            <input class="field h-8 text-xs ps-8 w-56 focus-ring" placeholder="Filter records…" />
+          </div>
+          <button class="btn-secondary btn-sm focus-ring"><i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> View</button>
+          <button class="btn-primary btn-sm focus-ring"><i data-lucide="plus" class="w-3.5 h-3.5"></i> New</button>
+        </div>
+      </header>
+      <div class="scroll-x">
+        <table class="w-full text-sm min-w-[720px]">
+          <thead>
+            <tr class="bg-surface-2/60 text-muted">
+              <th class="text-start font-medium px-4 py-2.5 w-8"><input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand" /></th>
+              <th class="text-start font-medium px-4 py-2.5">Item</th>
+              <th class="text-start font-medium px-4 py-2.5">Status</th>
+              <th class="text-start font-medium px-4 py-2.5">Owner</th>
+              <th class="text-end font-medium px-4 py-2.5">Updated</th>
+              <th class="text-end font-medium px-4 py-2.5 w-12"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <tr class="hover:bg-surface-2/50">
+              <td class="px-4 py-3"><input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand" /></td>
+              <td class="px-4 py-3">
+                <div class="font-medium">Record A-1024</div>
+                <div class="text-xs text-muted">Item · Category 1</div>
+              </td>
+              <td class="px-4 py-3"><span class="badge bg-success-subtle text-success border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-success"></span> Active</span></td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-brand-subtle text-brand-dark dark:text-brand text-[10px] font-semibold inline-flex items-center justify-center">AB</span> Customer name</div>
+              </td>
+              <td class="px-4 py-3 text-end text-muted">2 min ago</td>
+              <td class="px-4 py-3 text-end"><button class="btn-ghost btn-sm focus-ring" aria-label="More"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+            <tr class="hover:bg-surface-2/50">
+              <td class="px-4 py-3"><input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand" /></td>
+              <td class="px-4 py-3">
+                <div class="font-medium">Record A-1023</div>
+                <div class="text-xs text-muted">Item · Category 2</div>
+              </td>
+              <td class="px-4 py-3"><span class="badge bg-warning-subtle text-warning border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-warning"></span> Pending</span></td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-info-subtle text-info text-[10px] font-semibold inline-flex items-center justify-center">CD</span> Customer name</div>
+              </td>
+              <td class="px-4 py-3 text-end text-muted">1h ago</td>
+              <td class="px-4 py-3 text-end"><button class="btn-ghost btn-sm focus-ring" aria-label="More"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+            <tr class="hover:bg-surface-2/50">
+              <td class="px-4 py-3"><input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand" checked /></td>
+              <td class="px-4 py-3">
+                <div class="font-medium">Record A-1022</div>
+                <div class="text-xs text-muted">Item · Category 1</div>
+              </td>
+              <td class="px-4 py-3"><span class="badge bg-info-subtle text-info border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-info"></span> Review</span></td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-warning-subtle text-warning text-[10px] font-semibold inline-flex items-center justify-center">EF</span> Customer name</div>
+              </td>
+              <td class="px-4 py-3 text-end text-muted">Yesterday</td>
+              <td class="px-4 py-3 text-end"><button class="btn-ghost btn-sm focus-ring" aria-label="More"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+            <tr class="hover:bg-surface-2/50">
+              <td class="px-4 py-3"><input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand" /></td>
+              <td class="px-4 py-3">
+                <div class="font-medium">Record A-1021</div>
+                <div class="text-xs text-muted">Item · Category 3</div>
+              </td>
+              <td class="px-4 py-3"><span class="badge bg-danger-subtle text-danger border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-danger"></span> Blocked</span></td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-success-subtle text-success text-[10px] font-semibold inline-flex items-center justify-center">GH</span> Customer name</div>
+              </td>
+              <td class="px-4 py-3 text-end text-muted">3 days ago</td>
+              <td class="px-4 py-3 text-end"><button class="btn-ghost btn-sm focus-ring" aria-label="More"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="px-4 py-3 border-t border-border flex items-center justify-between flex-wrap gap-3 text-sm">
+        <div class="text-muted text-xs">Showing <span class="text-text font-medium">1–4</span> of <span class="text-text font-medium">126</span></div>
+        <nav class="inline-flex items-center gap-1" aria-label="Pagination">
+          <button class="btn-ghost btn-sm focus-ring" aria-label="Previous"><i data-lucide="chevron-left" class="w-3.5 h-3.5 rtl-flip"></i></button>
+          <button class="btn-sm focus-ring rounded-[var(--radius)] w-8 h-8 inline-flex items-center justify-center bg-brand text-brand-fg">1</button>
+          <button class="btn-sm focus-ring rounded-[var(--radius)] w-8 h-8 inline-flex items-center justify-center hover:bg-surface-2">2</button>
+          <button class="btn-sm focus-ring rounded-[var(--radius)] w-8 h-8 inline-flex items-center justify-center hover:bg-surface-2">3</button>
+          <span class="text-faint px-1">…</span>
+          <button class="btn-sm focus-ring rounded-[var(--radius)] w-8 h-8 inline-flex items-center justify-center hover:bg-surface-2">32</button>
+          <button class="btn-ghost btn-sm focus-ring" aria-label="Next"><i data-lucide="chevron-right" class="w-3.5 h-3.5 rtl-flip"></i></button>
+        </nav>
+      </div>
+    </article>
+
+    <!-- ===== Skeleton + EmptyState ===== -->
+    <div class="mt-6 grid lg:grid-cols-2 gap-6">
+      <article class="rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+        <header class="px-5 py-3.5 border-b border-border flex items-center gap-2">
+          <i data-lucide="loader" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">Skeleton loaders</h3>
+        </header>
+        <div class="p-5 space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="skeleton w-10 h-10 rounded-full"></div>
+            <div class="flex-1 space-y-2">
+              <div class="skeleton h-3 w-1/3"></div>
+              <div class="skeleton h-3 w-1/2"></div>
+            </div>
+          </div>
+          <div class="skeleton h-3 w-full"></div>
+          <div class="skeleton h-3 w-5/6"></div>
+          <div class="skeleton h-3 w-2/3"></div>
+          <div class="grid grid-cols-3 gap-3 pt-2">
+            <div class="skeleton h-16"></div>
+            <div class="skeleton h-16"></div>
+            <div class="skeleton h-16"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+        <header class="px-5 py-3.5 border-b border-border flex items-center gap-2">
+          <i data-lucide="inbox" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">EmptyState</h3>
+        </header>
+        <div class="p-8 text-center">
+          <div class="mx-auto w-12 h-12 rounded-full bg-brand-subtle text-brand-dark dark:text-brand inline-flex items-center justify-center">
+            <i data-lucide="folder-open" class="w-6 h-6"></i>
+          </div>
+          <h4 class="mt-3 text-base font-semibold">No items yet</h4>
+          <p class="text-sm text-muted mt-1 max-w-sm mx-auto">Create your first item to get started. You can change everything later.</p>
+          <div class="mt-4 flex items-center justify-center gap-2">
+            <button class="btn-secondary btn-sm focus-ring">Learn more</button>
+            <button class="btn-primary btn-sm focus-ring"><i data-lucide="plus" class="w-3.5 h-3.5"></i> New item</button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- ===== Alerts + Toasts ===== -->
+    <article class="mt-6 rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+      <header class="px-5 py-3.5 border-b border-border flex items-center gap-2">
+        <i data-lucide="megaphone" class="w-4 h-4 text-muted"></i>
+        <h3 class="text-base font-semibold">Alerts & Toasts</h3>
+      </header>
+      <div class="p-5 space-y-3">
+        <div class="alert border-info-subtle bg-info-subtle text-info">
+          <i data-lucide="info" class="w-4 h-4 mt-0.5"></i>
+          <div>
+            <div class="text-sm font-semibold">Heads up</div>
+            <div class="text-sm/relaxed opacity-90">A neutral informational message lives here. Keep it short.</div>
+          </div>
+        </div>
+        <div class="alert border-success-subtle bg-success-subtle text-success">
+          <i data-lucide="check-circle-2" class="w-4 h-4 mt-0.5"></i>
+          <div>
+            <div class="text-sm font-semibold">Saved</div>
+            <div class="text-sm/relaxed opacity-90">Your changes have been saved.</div>
+          </div>
+        </div>
+        <div class="alert border-warning-subtle bg-warning-subtle text-warning">
+          <i data-lucide="triangle-alert" class="w-4 h-4 mt-0.5"></i>
+          <div>
+            <div class="text-sm font-semibold">Action required</div>
+            <div class="text-sm/relaxed opacity-90">Something needs attention before you continue.</div>
+          </div>
+        </div>
+        <div class="alert border-danger-subtle bg-danger-subtle text-danger">
+          <i data-lucide="circle-x" class="w-4 h-4 mt-0.5"></i>
+          <div>
+            <div class="text-sm font-semibold">Couldn't save</div>
+            <div class="text-sm/relaxed opacity-90">An error occurred. Try again or contact support.</div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-border">
+          <div class="text-[11px] uppercase tracking-wider text-faint mb-2">Toast</div>
+          <div class="toast inline-flex items-start gap-3 max-w-md rounded-[var(--radius)] border border-border bg-surface shadow-pop p-3 ps-3.5">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-success mt-0.5"></i>
+            <div class="text-sm flex-1">
+              <div class="font-medium">Item created</div>
+              <div class="text-muted">Record A-1025 was added.</div>
+            </div>
+            <button class="btn-ghost btn-sm focus-ring" aria-label="Dismiss"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===== Breadcrumbs + Tabs + Modal trigger ===== -->
+    <div class="mt-6 grid lg:grid-cols-2 gap-6">
+      <article class="rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+        <header class="px-5 py-3.5 border-b border-border flex items-center gap-2">
+          <i data-lucide="chevrons-right" class="w-4 h-4 text-muted"></i>
+          <h3 class="text-base font-semibold">Breadcrumbs</h3>
+        </header>
+        <div class="p-5">
+          <nav aria-label="Breadcrumb" class="text-sm">
+            <ol class="flex items-center flex-wrap gap-1 text-muted">
+              <li><a class="hover:text-text focus-ring rounded px-1" href="#">Dashboard</a></li>
+              <li class="text-faint"><i data-lucide="chevron-right" class="w-3.5 h-3.5 rtl-flip"></i></li>
+              <li><a class="hover:text-text focus-ring rounded px-1" href="#">Reports</a></li>
+              <li class="text-faint"><i data-lucide="chevron-right" class="w-3.5 h-3.5 rtl-flip"></i></li>
+              <li class="text-text font-medium px-1" aria-current="page">Item details</li>
+            </ol>
+          </nav>
+        </div>
+      </article>
+
+      <article class="rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+        <header class="px-5 py-3.5 border-b border-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="square-stack" class="w-4 h-4 text-muted"></i>
+            <h3 class="text-base font-semibold">Tabs</h3>
+          </div>
+          <button id="openModal" class="btn-secondary btn-sm focus-ring"><i data-lucide="square" class="w-3.5 h-3.5"></i> Open dialog</button>
+        </header>
+        <div class="p-5">
+          <div class="border-b border-border flex items-center gap-1 -mb-px" role="tablist">
+            <button class="tab tab-active focus-ring" role="tab" aria-selected="true">Overview</button>
+            <button class="tab focus-ring" role="tab" aria-selected="false">Activity <span class="badge bg-surface-2 text-muted border-border ms-1.5">12</span></button>
+            <button class="tab focus-ring" role="tab" aria-selected="false">Settings</button>
+          </div>
+          <div class="pt-4 text-sm text-muted">
+            Tab content lives here. Switch with arrow keys; keyboard handled by Radix in production.
+          </div>
+        </div>
+      </article>
+    </div>
+
+  </section>
+
+  <!-- ==========================================================================
+       APP SHELL
+       ========================================================================== -->
+  <section id="shell" class="section">
+    <header class="mb-6">
+      <p class="text-[11px] uppercase tracking-[0.18em] text-faint">Step 05</p>
+      <h2 class="font-display text-2xl font-semibold tracking-tight mt-1">The application shell</h2>
+      <p class="text-muted mt-1 max-w-2xl">A dark-navy sidebar (in <em>both</em> themes), a topbar with profile + theme + direction controls, and a page header. Sidebar collapses to a rail on lg+, becomes an off-canvas drawer below lg.</p>
+    </header>
+
+    <!-- A miniature, scaled-down version of the shell showing rail + drawer states is in the dashboard below. Here we annotate the parts. -->
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">Sidebar</div>
+        <h4 class="text-base font-semibold mt-1">Dark navy, in any theme</h4>
+        <p class="text-sm text-muted mt-1">Grouped nav with lucide icons; active item gets a tinted background + 2px inset start border; collapses to a 64px rail.</p>
+      </div>
+      <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">TopBar</div>
+        <h4 class="text-base font-semibold mt-1">Workspace, theme, dir, profile</h4>
+        <p class="text-sm text-muted mt-1">Breadcrumb slot, theme + direction toggles, prominent profile menu (avatar · name · role).</p>
+      </div>
+      <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+        <div class="text-[11px] uppercase tracking-wider text-faint">PageHeader</div>
+        <h4 class="text-base font-semibold mt-1">Title + actions + back</h4>
+        <p class="text-sm text-muted mt-1">Optional back button uses logical icon flip; primary action is end-aligned.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       SAMPLE DASHBOARD — LIGHT
+       ========================================================================== -->
+  <section id="dashboard" class="section">
+    <header class="mb-6">
+      <p class="text-[11px] uppercase tracking-[0.18em] text-faint">Step 06</p>
+      <h2 class="font-display text-2xl font-semibold tracking-tight mt-1">Sample dashboard</h2>
+      <p class="text-muted mt-1 max-w-2xl">Everything above, assembled. Shown in light, dark, and a mirrored RTL pass.</p>
+    </header>
+
+    <!-- LIGHT -->
+    <div class="mb-3 flex items-center gap-2 text-xs">
+      <span class="badge bg-warning-subtle text-warning border-transparent"><i data-lucide="sun" class="w-3 h-3"></i> Light · LTR</span>
+      <span class="text-faint">Default theme</span>
+    </div>
+    <div class="shell-frame" data-shell="light" dir="ltr"><!-- forced light --></div>
+
+    <!-- DARK -->
+    <div class="mt-10 mb-3 flex items-center gap-2 text-xs">
+      <span class="badge bg-info-subtle text-info border-transparent"><i data-lucide="moon" class="w-3 h-3"></i> Dark · LTR</span>
+      <span class="text-faint">Same shell, dark tokens</span>
+    </div>
+    <div class="shell-frame dark" data-shell="dark" dir="ltr" style="background:#0D1117;color:#F1F5F9"></div>
+
+    <!-- RTL -->
+    <div class="mt-10 mb-3 flex items-center gap-2 text-xs">
+      <span class="badge bg-brand-subtle text-brand-dark dark:text-brand border-transparent"><i data-lucide="languages" class="w-3 h-3"></i> Light · RTL</span>
+      <span class="text-faint">Mirrored via logical properties only</span>
+    </div>
+    <div class="shell-frame" data-shell="rtl" dir="rtl"></div>
+  </section>
+
+  <!-- ==========================================================================
+       FOOT
+       ========================================================================== -->
+  <footer class="pt-6 pb-12 border-t border-border text-xs text-muted flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-2">
+      <svg width="18" height="18" viewBox="0 0 56 56" aria-hidden="true">
+        <rect x="6" y="6" width="44" height="44" rx="12" fill="#1A1F36"/>
+        <path d="M17 39 V19 L28 30 L39 19 V39" stroke="#2DD4BF" stroke-width="4.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="39" cy="19" r="3" fill="#EADBC8"/>
+      </svg>
+      <span>Masaar UI Template · v1.0 · Inter · Tailwind v4 · React 19</span>
+    </div>
+    <div>Every screen, one language.</div>
+  </footer>
+
+</main>
+
+<!-- =========================================================
+     MODAL (component preview)
+     ========================================================= -->
+<div id="modalRoot" class="hidden fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-navy/60 backdrop-blur-sm" data-close></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="w-full max-w-md rounded-[14px] bg-surface border border-border shadow-pop overflow-hidden">
+      <div class="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h3 id="modalTitle" class="text-base font-semibold">Confirm change</h3>
+        <button class="btn-ghost btn-sm focus-ring" data-close aria-label="Close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 text-sm text-muted">
+        This is the canonical dialog. It uses the same tokens as everything else and supports focus trapping in production.
+      </div>
+      <div class="px-5 py-4 border-t border-border bg-surface-2/50 flex items-center justify-end gap-2">
+        <button class="btn-secondary btn-sm focus-ring" data-close>Cancel</button>
+        <button class="btn-primary btn-sm focus-ring" data-close>Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     SHARED UTILITY CLASSES (manual Tailwind apply equivalents)
+     ========================================================= -->
+<style>
+  /* Button recipe (mirrors cva config above) */
+  .btn-primary, .btn-secondary, .btn-outline, .btn-ghost, .btn-danger {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 0.5rem; font-weight: 500; border-radius: var(--radius);
+    transition: background-color .15s, color .15s, border-color .15s, box-shadow .15s, opacity .15s;
+    white-space: nowrap;
+    height: 2.25rem; padding: 0 0.875rem; font-size: 14px;
+    border: 1px solid transparent;
+  }
+  .btn-primary:disabled, .btn-secondary:disabled, .btn-outline:disabled, .btn-ghost:disabled, .btn-danger:disabled { opacity: .5; pointer-events: none; }
+  .btn-sm { height: 2rem; padding: 0 0.625rem; font-size: 12px; }
+  .btn-lg { height: 2.75rem; padding: 0 1.25rem; font-size: 15px; }
+
+  .btn-primary   { background: var(--color-brand);    color: var(--color-brand-fg); }
+  .btn-primary:hover { background: var(--color-brand-dark); }
+  .btn-secondary { background: var(--color-surface-2); color: var(--color-text); }
+  .btn-secondary:hover { background: var(--color-border); }
+  .btn-outline   { background: transparent; color: var(--color-text); border-color: var(--color-border-strong); }
+  .btn-outline:hover { background: var(--color-surface-2); }
+  .btn-ghost     { background: transparent; color: var(--color-text); }
+  .btn-ghost:hover { background: var(--color-surface-2); }
+  .btn-danger    { background: var(--color-danger); color: var(--color-danger-fg); }
+  .btn-danger:hover { opacity: .9; }
+
+  /* Form field */
+  .field {
+    width: 100%;
+    height: 2.25rem;
+    padding-inline: 0.75rem;
+    font-size: 14px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius);
+    transition: border-color .15s, box-shadow .15s, background-color .15s;
+  }
+  textarea.field { height: auto; padding-block: 0.5rem; }
+  select.field { padding-inline-end: 2rem; }
+  .field::placeholder { color: var(--color-faint); }
+  .field:hover { border-color: var(--color-muted); }
+  .field:focus-visible {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-brand) 25%, transparent);
+  }
+  .field-error { border-color: var(--color-danger); }
+  .field-error:focus-visible {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-danger) 25%, transparent);
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 11px; font-weight: 600;
+    border-radius: 999px;
+    border: 1px solid;
+    line-height: 1.5;
+  }
+
+  /* Alert */
+  .alert {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid;
+  }
+
+  /* Tabs */
+  .tab {
+    padding: 0.5rem 0.875rem;
+    font-size: 13px; font-weight: 500;
+    color: var(--color-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    display: inline-flex; align-items: center;
+  }
+  .tab:hover { color: var(--color-text); }
+  .tab-active { color: var(--color-text); border-bottom-color: var(--color-brand); }
+
+  /* RTL icon flip for directional glyphs (chevrons, arrows) */
+  [dir="rtl"] .rtl-flip { transform: scaleX(-1); }
+</style>
+
+<!-- =========================================================
+     SCRIPT — theme + dir toggles, shell rendering, modal
+     ========================================================= -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  // --------- Theme toggle ---------
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const stored = localStorage.getItem('theme');
+  if (stored === 'dark' || (!stored && prefersDark)) root.classList.add('dark');
+  themeToggle.addEventListener('click', () => {
+    root.classList.toggle('dark');
+    localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+  });
+
+  // --------- Direction toggle ---------
+  document.querySelectorAll('.dir-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const dir = b.dataset.dir;
+      root.setAttribute('dir', dir);
+      document.querySelectorAll('.dir-btn').forEach(x => {
+        const active = x.dataset.dir === dir;
+        x.setAttribute('aria-pressed', active);
+        x.classList.toggle('bg-brand', active);
+        x.classList.toggle('text-brand-fg', active);
+        x.classList.toggle('text-muted', !active);
+      });
+    });
+  });
+  // initialize button look
+  document.querySelector('[data-dir="ltr"]').classList.add('bg-brand','text-brand-fg');
+  document.querySelector('[data-dir="rtl"]').classList.add('text-muted');
+
+  // --------- Modal ---------
+  const modal = document.getElementById('modalRoot');
+  document.getElementById('openModal').addEventListener('click', () => modal.classList.remove('hidden'));
+  modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => modal.classList.add('hidden')));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.add('hidden'); });
+
+  // --------- Shell HTML (rendered into each shell-frame) ---------
+  const NAV = [
+    { group: 'Workspace', items: [
+      { icon: 'layout-dashboard', label: 'Dashboard', active: true },
+      { icon: 'inbox',            label: 'Inbox',     badge: '4' },
+      { icon: 'list-checks',      label: 'Items' },
+      { icon: 'users',            label: 'Customers' },
+    ]},
+    { group: 'Insights', items: [
+      { icon: 'bar-chart-3',  label: 'Reports' },
+      { icon: 'pie-chart',    label: 'Analytics' },
+    ]},
+    { group: 'Admin', items: [
+      { icon: 'settings',     label: 'Settings' },
+      { icon: 'shield-check', label: 'Permissions' },
+    ]},
+  ];
+
+  function shellMarkup({ rtlNote = false } = {}) {
+    const navHtml = NAV.map(g => `
+      <div class="px-2 mt-4">
+        <div class="px-2.5 mb-1 text-[10px] uppercase tracking-[0.16em] text-white/40">${g.group}</div>
+        ${g.items.map(it => `
+          <a href="#" class="group flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] text-white/75 hover:bg-white/5 hover:text-white ${it.active ? 'sb-active' : ''}">
+            <i data-lucide="${it.icon}" class="w-4 h-4 ${it.active ? '' : 'text-white/55 group-hover:text-white/80'}"></i>
+            <span class="flex-1">${it.label}</span>
+            ${it.badge ? `<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-brand text-brand-fg">${it.badge}</span>` : ''}
+          </a>
+        `).join('')}
+      </div>
+    `).join('');
+
+    return `
+      <div class="flex min-h-[640px]">
+        <!-- SIDEBAR -->
+        <aside class="hidden md:flex w-[240px] shrink-0 flex-col" style="background:#1A1F36;color:#fff">
+          <div class="h-14 px-4 flex items-center gap-2.5 border-b border-white/5">
+            <svg width="26" height="26" viewBox="0 0 56 56" aria-hidden="true">
+              <defs><linearGradient id="sbT" x1="14" y1="42" x2="42" y2="14" gradientUnits="userSpaceOnUse"><stop stop-color="#0D9488"/><stop offset="1" stop-color="#2DD4BF"/></linearGradient></defs>
+              <rect x="6" y="6" width="44" height="44" rx="12" fill="#222842"/>
+              <path d="M17 39 V19 L28 30 L39 19 V39" stroke="url(#sbT)" stroke-width="4.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="39" cy="19" r="3" fill="#EADBC8"/>
+            </svg>
+            <div class="font-display text-[15px] font-semibold tracking-tight">Masaar</div>
+            <button class="ms-auto w-7 h-7 rounded-md hover:bg-white/10 inline-flex items-center justify-center text-white/60" aria-label="Collapse sidebar">
+              <i data-lucide="panel-left-close" class="w-4 h-4 rtl-flip"></i>
+            </button>
+          </div>
+          <nav class="flex-1 overflow-y-auto py-1">${navHtml}</nav>
+          <div class="p-3 border-t border-white/5">
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] text-white/70 hover:bg-white/5 hover:text-white">
+              <i data-lucide="life-buoy" class="w-4 h-4"></i> Help & support
+            </a>
+          </div>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="flex-1 min-w-0 flex flex-col" style="background:var(--color-bg)">
+          <!-- TopBar -->
+          <header class="h-14 border-b border-border flex items-center px-4 gap-3" style="background:var(--color-surface)">
+            <button class="md:hidden btn-ghost btn-sm focus-ring" aria-label="Open menu"><i data-lucide="menu" class="w-4 h-4"></i></button>
+            <nav class="hidden sm:block text-sm text-muted" aria-label="Breadcrumb">
+              <ol class="flex items-center gap-1.5">
+                <li><a class="hover:text-text" href="#">Workspace</a></li>
+                <li class="text-faint"><i data-lucide="chevron-right" class="w-3.5 h-3.5 rtl-flip"></i></li>
+                <li class="text-text font-medium">Dashboard</li>
+              </ol>
+            </nav>
+            <div class="ms-auto flex items-center gap-2">
+              <div class="relative hidden md:block">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-faint absolute start-2.5 top-1/2 -translate-y-1/2"></i>
+                <input class="field h-8 text-xs ps-8 w-56" placeholder="Search…" />
+                <kbd class="hidden lg:inline-flex absolute end-2 top-1/2 -translate-y-1/2 text-[10px] text-faint border border-border rounded px-1 py-0.5 bg-surface-2">⌘K</kbd>
+              </div>
+              <button class="btn-ghost btn-sm focus-ring" aria-label="Direction"><i data-lucide="languages" class="w-4 h-4"></i></button>
+              <button class="btn-ghost btn-sm focus-ring" aria-label="Theme"><i data-lucide="sun-moon" class="w-4 h-4"></i></button>
+              <button class="btn-ghost btn-sm focus-ring relative" aria-label="Notifications">
+                <i data-lucide="bell" class="w-4 h-4"></i>
+                <span class="absolute top-1 end-1 w-1.5 h-1.5 rounded-full bg-danger"></span>
+              </button>
+              <span class="hidden md:block w-px h-6 bg-border mx-1"></span>
+              <button class="inline-flex items-center gap-2 ps-1 pe-2.5 h-8 rounded-[var(--radius)] hover:bg-surface-2 focus-ring">
+                <span class="w-6 h-6 rounded-full inline-flex items-center justify-center text-[10px] font-semibold bg-brand text-brand-fg">SS</span>
+                <span class="hidden md:flex flex-col text-start leading-tight">
+                  <span class="text-[12px] font-medium">User name</span>
+                  <span class="text-[10px] text-muted">Administrator</span>
+                </span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-muted"></i>
+              </button>
+            </div>
+          </header>
+
+          <!-- Page header -->
+          <div class="px-6 pt-5 pb-3 flex items-end justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-3">
+              <button class="btn-ghost btn-sm focus-ring -ms-1" aria-label="Back"><i data-lucide="arrow-left" class="w-4 h-4 rtl-flip"></i></button>
+              <div>
+                <div class="text-[11px] uppercase tracking-[0.16em] text-faint">Workspace</div>
+                <h1 class="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn-secondary btn-sm focus-ring"><i data-lucide="filter" class="w-3.5 h-3.5"></i> Filter</button>
+              <button class="btn-secondary btn-sm focus-ring"><i data-lucide="download" class="w-3.5 h-3.5"></i> Export</button>
+              <button class="btn-primary btn-sm focus-ring"><i data-lucide="plus" class="w-3.5 h-3.5"></i> New item</button>
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="px-6 pb-6 space-y-5">
+            <!-- KPI row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              ${[
+                {icon:'users',         tone:'brand',   label:'Active users',    value:'8,420',  trend:'+12%',   up:true},
+                {icon:'file-text',     tone:'info',    label:'Open items',      value:'312',    trend:'+3.1%',  up:true},
+                {icon:'clock',         tone:'warning', label:'Avg. response',   value:'2h 14m', trend:'-1.4%',  up:false},
+                {icon:'check-circle-2',tone:'success', label:'Completion rate', value:'94.2%',  trend:'+0.6%',  up:true},
+              ].map(c => `
+                <div class="rounded-[var(--radius)] border border-border bg-surface p-4">
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex w-8 h-8 rounded-md items-center justify-center bg-${c.tone}-subtle text-${c.tone === 'brand' ? 'brand-dark dark:text-brand' : c.tone}">
+                      <i data-lucide="${c.icon}" class="w-4 h-4"></i>
+                    </span>
+                    <span class="badge ${c.up ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} border-transparent">
+                      <i data-lucide="${c.up ? 'trending-up' : 'trending-down'}" class="w-3 h-3"></i> ${c.trend}
+                    </span>
+                  </div>
+                  <div class="mt-3 text-[11px] uppercase tracking-wider text-faint">${c.label}</div>
+                  <div class="mt-1 text-2xl font-semibold tracking-tight">${c.value}</div>
+                  <div class="text-xs text-muted">vs. previous period</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Chart + side card -->
+            <div class="grid lg:grid-cols-[1.7fr_1fr] gap-4">
+              <div class="rounded-[var(--radius)] border border-border bg-surface">
+                <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-semibold">Activity</div>
+                    <div class="text-xs text-muted mt-0.5">Items created & resolved · last 14 days</div>
+                  </div>
+                  <div class="inline-flex rounded-[8px] border border-border bg-surface text-[11px] font-medium p-0.5">
+                    <button class="px-2 py-1 rounded-[6px] bg-surface-2 text-text">14d</button>
+                    <button class="px-2 py-1 rounded-[6px] text-muted">30d</button>
+                    <button class="px-2 py-1 rounded-[6px] text-muted">90d</button>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <!-- Faux chart -->
+                  <svg viewBox="0 0 480 160" class="w-full h-40" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%"  stop-color="#14B8A6" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#14B8A6" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <g stroke="currentColor" stroke-opacity="0.08">
+                      <line x1="0" y1="40"  x2="480" y2="40"/>
+                      <line x1="0" y1="80"  x2="480" y2="80"/>
+                      <line x1="0" y1="120" x2="480" y2="120"/>
+                    </g>
+                    <path d="M0,120 C40,110 60,80 100,90 C140,100 160,60 200,55 C240,50 270,90 310,80 C350,70 380,40 420,50 C450,55 470,40 480,30 L480,160 L0,160 Z" fill="url(#chartFill)"/>
+                    <path d="M0,120 C40,110 60,80 100,90 C140,100 160,60 200,55 C240,50 270,90 310,80 C350,70 380,40 420,50 C450,55 470,40 480,30" fill="none" stroke="#14B8A6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                    <path d="M0,130 C40,125 70,115 110,118 C160,120 200,95 240,100 C280,105 310,120 350,115 C390,110 430,95 480,90" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 4" opacity="0.8"/>
+                  </svg>
+                  <div class="mt-3 flex items-center gap-4 text-xs text-muted">
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#14B8A6"></span> Created</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-faint"></span> Resolved</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[var(--radius)] border border-border bg-surface">
+                <div class="px-4 py-3 border-b border-border">
+                  <div class="text-sm font-semibold">Recent activity</div>
+                  <div class="text-xs text-muted mt-0.5">Updates from your workspace</div>
+                </div>
+                <ul class="divide-y divide-border text-sm">
+                  ${[
+                    {icon:'check-circle-2', tone:'success', text:'Record A-1024 marked complete', when:'2m'},
+                    {icon:'message-square', tone:'info',    text:'New comment on A-1023', when:'14m'},
+                    {icon:'user-plus',      tone:'brand',   text:'User name joined the workspace', when:'1h'},
+                    {icon:'alert-triangle', tone:'warning', text:'Threshold reached on Item 7', when:'3h'},
+                    {icon:'archive',        tone:'muted',   text:'Record A-1010 archived', when:'1d'},
+                  ].map(a => `
+                    <li class="px-4 py-2.5 flex items-start gap-3">
+                      <span class="mt-0.5 inline-flex w-7 h-7 rounded-md items-center justify-center ${a.tone === 'muted' ? 'bg-surface-2 text-muted' : `bg-${a.tone}-subtle text-${a.tone === 'brand' ? 'brand-dark dark:text-brand' : a.tone}`}">
+                        <i data-lucide="${a.icon}" class="w-3.5 h-3.5"></i>
+                      </span>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-[13px] truncate">${a.text}</div>
+                        <div class="text-[11px] text-faint">${a.when} ago</div>
+                      </div>
+                    </li>
+                  `).join('')}
+                </ul>
+                <div class="px-4 py-2.5 border-t border-border text-end">
+                  <a class="text-xs font-medium text-brand-dark dark:text-brand hover:underline" href="#">View all <i data-lucide="arrow-right" class="w-3 h-3 inline rtl-flip"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="rounded-[var(--radius)] border border-border bg-surface overflow-hidden">
+              <div class="px-4 py-3 border-b border-border flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <div class="text-sm font-semibold">Items</div>
+                  <div class="text-xs text-muted mt-0.5">All records across the workspace</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button class="btn-secondary btn-sm focus-ring"><i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> View</button>
+                  <button class="btn-primary btn-sm focus-ring"><i data-lucide="plus" class="w-3.5 h-3.5"></i> New</button>
+                </div>
+              </div>
+              <div class="scroll-x">
+                <table class="w-full text-sm min-w-[720px]">
+                  <thead>
+                    <tr class="bg-surface-2/60 text-muted">
+                      <th class="text-start font-medium px-4 py-2.5 w-8"><input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand"/></th>
+                      <th class="text-start font-medium px-4 py-2.5">Item</th>
+                      <th class="text-start font-medium px-4 py-2.5">Status</th>
+                      <th class="text-start font-medium px-4 py-2.5">Owner</th>
+                      <th class="text-end font-medium px-4 py-2.5">Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border">
+                    ${[
+                      {id:'A-1024', cat:'Category 1', status:'Active',  tone:'success', owner:'AB', when:'2m ago'},
+                      {id:'A-1023', cat:'Category 2', status:'Pending', tone:'warning', owner:'CD', when:'1h ago'},
+                      {id:'A-1022', cat:'Category 1', status:'Review',  tone:'info',    owner:'EF', when:'Yesterday'},
+                      {id:'A-1021', cat:'Category 3', status:'Blocked', tone:'danger',  owner:'GH', when:'3d ago'},
+                      {id:'A-1020', cat:'Category 2', status:'Active',  tone:'success', owner:'IJ', when:'4d ago'},
+                    ].map(r => `
+                      <tr class="hover:bg-surface-2/50">
+                        <td class="px-4 py-3"><input type="checkbox" class="w-4 h-4 rounded-[4px] border-border-strong text-brand focus:ring-brand"/></td>
+                        <td class="px-4 py-3">
+                          <div class="font-medium">Record ${r.id}</div>
+                          <div class="text-xs text-muted">Item · ${r.cat}</div>
+                        </td>
+                        <td class="px-4 py-3"><span class="badge bg-${r.tone}-subtle text-${r.tone} border-transparent"><span class="w-1.5 h-1.5 rounded-full bg-${r.tone}"></span> ${r.status}</span></td>
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-brand-subtle text-brand-dark dark:text-brand text-[10px] font-semibold inline-flex items-center justify-center">${r.owner}</span> Customer name</div>
+                        </td>
+                        <td class="px-4 py-3 text-end text-muted">${r.when}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+              <div class="px-4 py-2.5 border-t border-border flex items-center justify-between text-xs">
+                <div class="text-muted">Showing <span class="text-text font-medium">1–5</span> of <span class="text-text font-medium">126</span></div>
+                <div class="inline-flex items-center gap-1">
+                  <button class="btn-ghost btn-sm focus-ring" aria-label="Previous"><i data-lucide="chevron-left" class="w-3.5 h-3.5 rtl-flip"></i></button>
+                  <button class="rounded-[var(--radius)] w-7 h-7 inline-flex items-center justify-center bg-brand text-brand-fg">1</button>
+                  <button class="rounded-[var(--radius)] w-7 h-7 inline-flex items-center justify-center hover:bg-surface-2">2</button>
+                  <button class="rounded-[var(--radius)] w-7 h-7 inline-flex items-center justify-center hover:bg-surface-2">3</button>
+                  <button class="btn-ghost btn-sm focus-ring" aria-label="Next"><i data-lucide="chevron-right" class="w-3.5 h-3.5 rtl-flip"></i></button>
+                </div>
+              </div>
+            </div>
+
+            ${rtlNote ? `
+              <div class="alert border-info-subtle bg-info-subtle text-info">
+                <i data-lucide="languages" class="w-4 h-4 mt-0.5"></i>
+                <div>
+                  <div class="text-sm font-semibold">Mirrored layout</div>
+                  <div class="text-sm/relaxed opacity-90">This frame is rendered with <code class="inline">dir="rtl"</code>. Spacing and alignment use logical properties only — no physical left/right.</div>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Inject shells
+  document.querySelector('[data-shell="light"]').innerHTML = shellMarkup();
+  document.querySelector('[data-shell="dark"]').innerHTML  = shellMarkup();
+  document.querySelector('[data-shell="rtl"]').innerHTML   = shellMarkup({ rtlNote: true });
+
+  // Initial lucide render — run AFTER shells are injected
+  lucide.createIcons();
+</script>
+
+</body>
+</html>
