@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Logo, Input, PasswordInput, Button, FormField, Alert } from '@erp/ui'
+import { AuthLayout, Logo, Input, PasswordInput, Button, FormField, Alert } from '@erp/ui'
 import { getApiClient } from '@erp/api-client'
 import type { AxiosError } from 'axios'
 
@@ -9,6 +9,25 @@ interface AdminLoginProps {
 
 interface LoginResponse {
   data: { token: string }
+}
+
+function AdminBrandPanel() {
+  return (
+    <>
+      <div className="auth-left-logo">
+        <Logo size={44} showName nameClassName="font-semibold text-white tracking-tight" />
+      </div>
+
+      <div className="mt-auto space-y-3">
+        <p className="text-2xl font-semibold text-white leading-snug">
+          Masaar<br />Admin Console
+        </p>
+        <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'rgba(148,163,184,0.9)' }}>
+          Manage organizations, users, and platform settings.
+        </p>
+      </div>
+    </>
+  )
 }
 
 export function AdminLogin({ onLogin }: AdminLoginProps) {
@@ -37,68 +56,46 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Brand panel */}
-      <div className="hidden lg:flex lg:w-[400px] flex-col bg-[var(--sidebar-bg)] px-12 py-14 relative overflow-hidden shrink-0">
-        <div className="pointer-events-none absolute -bottom-40 -left-40 w-[480px] h-[480px] rounded-full border border-brand/10" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 w-[320px] h-[320px] rounded-full border border-brand/15" />
-        <div className="pointer-events-none absolute -bottom-8  -left-8  w-[180px] h-[180px] rounded-full border border-brand/20" />
-        <div className="pointer-events-none absolute bottom-0 left-0 w-[200px] h-[200px] rounded-full bg-brand/5 blur-3xl" />
-
-        <Logo size={44} showName nameClassName="font-semibold text-white tracking-tight" />
-
-        <div className="mt-auto space-y-3 relative z-10">
-          <p className="text-2xl font-semibold text-white leading-snug">
-            Masaar<br />Admin Console
-          </p>
-          <p className="text-sm text-[var(--sidebar-text)] leading-relaxed max-w-xs">
-            Manage organizations, users, and platform settings.
-          </p>
-        </div>
+    <AuthLayout leftPanel={<AdminBrandPanel />}>
+      <div className="auth-right-logo">
+        <Logo size={40} showName />
       </div>
 
-      {/* Form panel */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-bg">
-        <div className="lg:hidden mb-10">
-          <Logo size={40} showName />
-        </div>
-        <div className="w-full max-w-[360px]">
-          <h1 className="text-2xl font-semibold text-text mb-1">Admin sign in</h1>
-          <p className="text-sm text-muted mb-8">Restricted access — authorized staff only.</p>
-
-          {error && (
-            <Alert variant="danger" className="mb-5">{error}</Alert>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <FormField label="Email address" htmlFor="email">
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@masaar.app"
-              />
-            </FormField>
-            <FormField label="Password" htmlFor="password">
-              <PasswordInput
-                id="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-            </FormField>
-
-            <Button type="submit" className="w-full" loading={loading}>
-              Sign in
-            </Button>
-          </form>
-        </div>
+      <div className="auth-form-header">
+        <h1>Admin sign in</h1>
+        <p>Restricted access — authorized staff only.</p>
       </div>
-    </div>
+
+      {error && (
+        <Alert variant="danger" className="mb-5">{error}</Alert>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormField label="Email address" htmlFor="email">
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@masaar.app"
+          />
+        </FormField>
+        <FormField label="Password" htmlFor="password">
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+          />
+        </FormField>
+        <Button type="submit" fullWidth size="lg" loading={loading}>
+          Sign in
+        </Button>
+      </form>
+    </AuthLayout>
   )
 }

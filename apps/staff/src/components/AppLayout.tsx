@@ -1,9 +1,10 @@
 import { Outlet, Link, useLocation, useNavigate } from '@tanstack/react-router'
 import {
   AppShell, Sidebar, TopBar, Logo, ThemeToggle, DirectionToggle,
+  sidebarLinkClass, SidebarItemContent,
   type NavSection,
   Users, FileText, ShoppingCart, Receipt, CreditCard, RotateCcw,
-  Shield,
+  Shield, User, LifeBuoy,
 } from '@erp/ui'
 import { useAuthStore } from '../store/auth'
 
@@ -23,6 +24,13 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Compliance',
     items: [
       { label: 'ZATCA', href: '/app/compliance/zatca/onboarding', icon: <Shield size={15} /> },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { label: 'Profile',        href: '/app/profile', icon: <User size={15} /> },
+      { label: 'Help & support', href: '/app/support', icon: <LifeBuoy size={15} /> },
     ],
   },
 ]
@@ -55,20 +63,9 @@ export function AppLayout() {
               key={item.href}
               to={item.href}
               title={collapsed ? item.label : undefined}
-              className={[
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                collapsed ? 'justify-center px-2' : '',
-                active
-                  ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-text-active)]'
-                  : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)]',
-              ].filter(Boolean).join(' ')}
+              className={sidebarLinkClass(active, collapsed)}
             >
-              {item.icon && (
-                <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-                  {item.icon}
-                </span>
-              )}
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              <SidebarItemContent icon={item.icon} label={item.label} collapsed={collapsed} />
             </Link>
           )}
         />

@@ -1,11 +1,6 @@
 import type { ReactNode } from 'react'
-import { Logo } from '@erp/ui'
+import { AuthLayout as SharedAuthLayout, Logo } from '@erp/ui'
 
-interface AuthLayoutProps {
-  children: ReactNode
-}
-
-// SVG icons — no emoji dependency
 function IconInvoice() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -45,75 +40,62 @@ function IconLedger() {
 }
 
 const ACTIVITY = [
-  { Icon: IconInvoice, title: 'ZATCA invoice generated',  sub: 'INV-2024-0891 · SAR 24,500',  tag: 'Compliant' },
-  { Icon: IconCheck,   title: 'VAT return filed',          sub: 'Q4 2024 · AED 8,200',          tag: 'Filed'     },
-  { Icon: IconPayment, title: 'Payment reconciled',        sub: 'SABB Bank · SAR 145,000',      tag: 'Matched'   },
-  { Icon: IconLedger,  title: 'Journal entry posted',      sub: 'FY2024 · 14 lines',            tag: 'Posted'    },
+  { Icon: IconInvoice, title: 'ZATCA invoice generated', sub: 'INV-2024-0891 · SAR 24,500', tag: 'Compliant' },
+  { Icon: IconCheck,   title: 'VAT return filed',         sub: 'Q4 2024 · AED 8,200',       tag: 'Filed'     },
+  { Icon: IconPayment, title: 'Payment reconciled',       sub: 'SABB Bank · SAR 145,000',   tag: 'Matched'   },
+  { Icon: IconLedger,  title: 'Journal entry posted',     sub: 'FY2024 · 14 lines',         tag: 'Posted'    },
 ]
 
 const STATS = [
-  { value: '500+', label: 'Companies'  },
-  { value: '6',    label: 'Countries'  },
-  { value: '99.9%', label: 'Uptime'   },
+  { value: '500+',  label: 'Companies' },
+  { value: '6',     label: 'Countries' },
+  { value: '99.9%', label: 'Uptime'    },
 ]
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+function StaffBrandPanel() {
   return (
-    <div className="auth-root">
-
-      {/* ── LEFT ──────────────────────────────────────────────────────────── */}
-      <div className="auth-left">
-        <div className="auth-orb auth-orb-1" />
-        <div className="auth-orb auth-orb-2" />
-        <div className="auth-orb auth-orb-3" />
-        <div className="auth-dot-grid" />
-
-        <div className="auth-left-inner">
-          <div className="auth-left-logo">
-            <Logo size={38} showName nameClassName="font-semibold text-white tracking-tight" />
-          </div>
-
-          <div className="auth-headline">
-            <h1>The ERP built<br />for GCC &amp; India</h1>
-            <p>ZATCA e-invoicing, VAT, multi-currency accounting, and payroll — in one platform your whole team will use.</p>
-          </div>
-
-          <div className="auth-feed">
-            {ACTIVITY.map(({ Icon, title, sub, tag }, i) => (
-              <div key={title} className="auth-feed-item" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
-                <span className="auth-feed-icon"><Icon /></span>
-                <div className="auth-feed-body">
-                  <span className="auth-feed-title">{title}</span>
-                  <span className="auth-feed-sub">{sub}</span>
-                </div>
-                <span className="auth-feed-tag">{tag}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="auth-stats">
-            {STATS.map((s) => (
-              <div key={s.label} className="auth-stat">
-                <span className="auth-stat-value">{s.value}</span>
-                <span className="auth-stat-label">{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+    <>
+      <div className="auth-left-logo">
+        <Logo size={38} showName nameClassName="font-semibold text-white tracking-tight" />
       </div>
 
-      {/* ── RIGHT ─────────────────────────────────────────────────────────── */}
-      <div className="auth-right">
-        <div className="auth-form-wrap">
-          {/* Logo mark — visible on right panel (desktop branding + mobile only logo) */}
-          <div className="auth-right-logo">
-            <Logo size={34} showName nameClassName="font-semibold text-gray-900 tracking-tight" />
-          </div>
-
-          {children}
-        </div>
+      <div className="auth-headline">
+        <h1>The ERP built<br />for GCC &amp; India</h1>
+        <p>ZATCA e-invoicing, VAT, multi-currency accounting, and payroll — in one platform your whole team will use.</p>
       </div>
 
-    </div>
+      <div className="auth-feed">
+        {ACTIVITY.map(({ Icon, title, sub, tag }, i) => (
+          <div key={title} className="auth-feed-item" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
+            <span className="auth-feed-icon"><Icon /></span>
+            <div className="auth-feed-body">
+              <span className="auth-feed-title">{title}</span>
+              <span className="auth-feed-sub">{sub}</span>
+            </div>
+            <span className="auth-feed-tag">{tag}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="auth-stats">
+        {STATS.map((s) => (
+          <div key={s.label} className="auth-stat">
+            <span className="auth-stat-value">{s.value}</span>
+            <span className="auth-stat-label">{s.label}</span>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+export function AuthLayout({ children }: { children: ReactNode }) {
+  return (
+    <SharedAuthLayout leftPanel={<StaffBrandPanel />}>
+      <div className="auth-right-logo">
+        <Logo size={34} showName nameClassName="font-semibold text-gray-900 tracking-tight" />
+      </div>
+      {children}
+    </SharedAuthLayout>
   )
 }

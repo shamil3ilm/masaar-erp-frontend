@@ -1,6 +1,6 @@
-# LoopERP Frontend
+# Masaar ERP Frontend
 
-Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing three React applications and shared packages.
+Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing three React applications and a shared component system.
 
 ## Monorepo Structure
 
@@ -8,17 +8,27 @@ Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing th
 
 | App | Package | Port | Description |
 |-----|---------|------|-------------|
-| `apps/staff` | `@erp/staff` | 5173 | Internal staff portal (ZATCA, invoicing, HR, etc.) |
-| `apps/admin` | `@erp/admin` | 5174 | Super-admin portal (tenant management, org oversight) |
-| `apps/portal` | `@erp/portal` | 5175 | Vendor/customer self-service portal |
+| `apps/staff` | `@erp/staff` | 5173 | Internal staff portal (ZATCA, invoicing, accounting, HR, sales, etc.) |
+| `apps/admin` | `@erp/admin` | 5174 | Super-admin console (tenant management, org oversight) |
+| `apps/portal` | `@erp/portal` | 5181 | Vendor self-service portal (tokenized invoice viewer) |
 
 ### Shared Packages
 
 | Package | Description |
 |---------|-------------|
-| `@erp/types` | TypeScript interfaces (Organization, User, ZatcaInvoice, etc.) |
-| `@erp/api-client` | Axios instance, TanStack Query hooks, MSW mocks |
-| `@erp/ui` | Shared components (AppShell, Sidebar, TopBar, Logo, ZatcaStatusBadge, etc.) |
+| `@erp/types` | TypeScript interfaces (Organization, User, ZatcaInvoice, VendorInvoice, etc.) |
+| `@erp/api-client` | Axios instance, TanStack Query hooks, auth helpers |
+| `@erp/ui` | Masaar design system — tokens, components, auth layout, app shell |
+
+## Design System
+
+All three apps share a single design system defined in `@erp/ui`:
+
+- **Token source:** `packages/ui/src/styles/theme.css` — CSS variables for light + dark mode (brand teal, navy sidebar, semantic feedback colors).
+- **Preset:** `packages/ui/src/styles/preset.css` — the single file every app imports. Owns the Tailwind import, token→utility mapping, shadow tokens, and dark-mode variant. Never duplicate `@theme` blocks in app CSS.
+- **Shared components:** `Button` (cva variants + sizes + loading), `Input`/`PasswordInput`/`Select`/`Textarea`, `FormField` (label + hint + error + labelRight), `Label`, `Alert`, `Badge`/`StatusBadge`, `Card`/`StatCard`, `Table`/`Pagination`, `Skeleton`, `AppShell`, `Sidebar`, `TopBar`, `PageHeader`, `AuthLayout`, `Logo`, `EmptyState`, `ConfirmDialog`, `ProfilePage`, `SupportPage`, and more.
+- **Auth layout:** `AuthLayout` (exported from `@erp/ui`) — the two-panel dark-brand-left + form-right shell used by both staff and admin login flows.
+- **Icon source:** All icons come from `@erp/ui`'s curated Lucide re-exports. Apps without a direct `lucide-react` dep (staff, portal) must use only these.
 
 ## Prerequisites
 
@@ -28,10 +38,6 @@ Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing th
 ## Getting Started
 
 ```bash
-# Clone the repository
-git clone https://github.com/shamil3ilm/masaar-frontend.git
-cd masaar-frontend
-
 # Install all dependencies
 pnpm install
 
@@ -53,37 +59,43 @@ pnpm dev
 |---------|-------------|
 | `pnpm dev` | Start all apps in dev mode |
 | `pnpm build` | Build all apps |
-| `pnpm test` | Run Vitest across all packages |
+| `pnpm build --force` | Build bypassing Turborepo cache |
 | `pnpm typecheck` | TypeScript check across all packages |
 | `pnpm lint` | Lint all packages |
 
 ### Per-App
 
-| Command | Description |
-|---------|-------------|
-| `pnpm --filter @erp/staff dev` | Start only the staff app |
-| `pnpm --filter @erp/admin dev` | Start only the admin app |
-| `pnpm --filter @erp/portal dev` | Start only the portal app |
-| `pnpm --filter @erp/staff test` | Run unit tests for staff app |
-| `pnpm --filter @erp/staff e2e` | Run Playwright E2E tests for staff app |
+```bash
+pnpm --filter @erp/staff dev        # Staff app only (port 5173)
+pnpm --filter @erp/admin dev        # Admin app only (port 5174)
+pnpm --filter @erp/portal dev       # Portal app only (port 5181)
+pnpm --filter @erp/staff build      # Build staff only
+pnpm --filter @erp/staff typecheck  # Type-check staff only
+```
 
 ## Environment Variables
 
-Each app reads from its own `.env.local`. Copy the example file and adjust values:
+Each app reads from its own `.env.local`:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `VITE_API_URL` | Backend API base URL | `http://localhost:8000/api/v1` |
-| `VITE_APP_NAME` | App display name | `LoopERP Staff` |
+| `VITE_API_URL` | Backend API base URL | `http://erp-backend.test/api/v1` |
 
 ## Tech Stack
 
 - **Build system:** Turborepo, pnpm workspaces
 - **Framework:** React 19, TypeScript 5, Vite 5
-- **Routing:** TanStack Router v1 (code-based)
+- **Routing:** TanStack Router v1 (code-based, type-safe)
 - **Data fetching:** TanStack Query v5
 - **State management:** Zustand v5
-- **UI:** shadcn/ui, Tailwind CSS v4, AG Grid Community
+- **Styling:** Tailwind CSS v4, custom Masaar design system (no shadcn/ui)
+- **Component variants:** class-variance-authority (cva)
 - **Forms & validation:** React Hook Form, Zod
 - **HTTP client:** Axios with JWT interceptors
-- **Testing:** Vitest + jsdom, MSW v2 (API mocking), Playwright (E2E)
+- **Testing:** Vitest + jsdom, Playwright (E2E)
+- **Icons:** Lucide React (curated re-exports via `@erp/ui`)
+
+## Known Issues
+
+- `pnpm typecheck` fails in `packages/api-client/src/mocks/zatca.ts` — some ZATCA mock types are not exported from `@erp/types`. Not caused by design system work; fix separately.
+- Staff JS bundle is ~610 KB (minified) — above Vite's 500 KB warning. Code splitting via dynamic imports is a future improvement.

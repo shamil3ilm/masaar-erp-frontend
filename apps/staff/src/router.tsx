@@ -10,6 +10,8 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage'
 import { OrgPickerPage } from './pages/OrgPickerPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { SupportPage } from './pages/SupportPage'
 // ZATCA
 import { OnboardingPage } from './pages/zatca/OnboardingPage'
 // Sales
@@ -85,6 +87,18 @@ const dashboardRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/dashboard',
   component: DashboardPage,
+})
+
+const profileRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/profile',
+  component: ProfilePage,
+})
+
+const supportRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/support',
+  component: SupportPage,
 })
 
 const indexRoute = createRoute({
@@ -193,6 +207,8 @@ const routeTree = rootRoute.addChildren([
   orgPickerRoute,
   appRoute.addChildren([
     dashboardRoute,
+    profileRoute,
+    supportRoute,
     // ZATCA
     zatcaOnboardingRoute,
     // Sales

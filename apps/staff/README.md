@@ -1,33 +1,43 @@
 # @erp/staff — Internal Staff Portal
 
-The primary application for internal staff. Handles day-to-day ERP operations including ZATCA e-invoicing compliance, HR, and financial workflows.
+The primary application for internal staff. Handles day-to-day ERP operations including ZATCA e-invoicing compliance, accounting, sales, HR, and more.
+
+**Dev server:** `http://localhost:5173`
 
 ## What's Implemented
 
-- **ZATCA Compliance module** — Saudi e-invoicing (Phase 2)
-  - Onboarding wizard (CSID registration, cryptographic stamp setup)
-  - Invoice list with status tracking (cleared, reported, rejected)
-  - Create invoice form with Zod validation
-  - Compliance reports and dashboard widgets
+### Design System
+- Full Masaar design system via `@erp/ui` — tokens, components, auth shell
+- Light / dark mode with toggle (persisted, respects system preference)
+- RTL layout support (Arabic) via direction toggle
+- Responsive layout from mobile to wide desktop
 
-## Routes
+### Authentication Flow
+All auth pages share the `AuthLayout` wrapper (staff brand panel + form panel) and use `FormField`, `Input`/`PasswordInput`, `Button`, `Alert` from `@erp/ui`.
 
-| Route | Description |
-|-------|-------------|
-| `/login` | JWT authentication (username + password) |
-| `/org-picker` | Organization selector after login (multi-tenant) |
-| `/app/dashboard` | Main dashboard |
-| `/app/compliance/zatca` | ZATCA compliance overview |
-| `/app/compliance/zatca/onboarding` | CSID onboarding wizard |
-| `/app/compliance/zatca/invoices` | Invoice list |
-| `/app/compliance/zatca/invoices/create` | Create new ZATCA invoice |
-| `/app/compliance/zatca/reports` | Compliance reports |
+| Page | Route | Notes |
+|------|-------|-------|
+| Login | `/login` | Email + password; 2FA challenge inline |
+| Register | `/register` | Full org + user registration with Zod validation |
+| Verify email | `/verify-email` | 6-digit code entry |
+| Forgot password | `/forgot-password` | Email link request |
+| Reset password | `/reset-password` | Token-based new password form |
+| Org picker | `/org-picker` | Multi-org selector post-login |
 
-## Authentication
+### App Shell
+- Collapsible sidebar with section groups and active state
+- TopBar with org switcher, notification bell, profile dropdown (avatar initials, role, sign-out)
+- Theme toggle (light/dark/system) and direction toggle (LTR/RTL) in topbar
+- Shared `ProfilePage` and `SupportPage` (from `@erp/ui`)
 
-- JWT token stored in `localStorage`
-- Axios interceptor attaches `Authorization: Bearer <token>` to all requests and handles 401 refresh
-- Active organization stored in Zustand; switching org re-scopes all API calls
+### Modules
+
+| Module | Route prefix | Status |
+|--------|-------------|--------|
+| Dashboard | `/app/dashboard` | KPI cards + activity |
+| ZATCA Compliance | `/app/compliance/zatca` | Onboarding wizard, invoice list + create, reports |
+| Sales | `/app/sales` | Contacts, invoices, payments, quotations |
+| More modules | `/app/*` | Stubs / in progress |
 
 ## Commands
 
@@ -35,17 +45,14 @@ The primary application for internal staff. Handles day-to-day ERP operations in
 # Development (port 5173)
 pnpm --filter @erp/staff dev
 
-# Unit tests (Vitest)
-pnpm --filter @erp/staff test
-
-# E2E tests (Playwright)
-pnpm --filter @erp/staff e2e
+# Production build
+pnpm --filter @erp/staff build
 
 # Type check
 pnpm --filter @erp/staff typecheck
 
-# Production build
-pnpm --filter @erp/staff build
+# E2E tests (Playwright)
+pnpm --filter @erp/staff e2e
 ```
 
 ## Environment Variables
@@ -53,6 +60,13 @@ pnpm --filter @erp/staff build
 Create `apps/staff/.env.local`:
 
 ```env
-VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=LoopERP Staff
+VITE_API_URL=http://erp-backend.test/api/v1
 ```
+
+## CSS Architecture
+
+`apps/staff/src/index.css` imports `packages/ui/src/styles/preset.css` (which owns Tailwind + tokens) then adds only staff-specific primitives:
+- `.field`, `.badge`, `.alert`, `.tab` — Masaar template-aligned form/feedback primitives
+- `.focus-ring`, `.rtl-flip` — utilities
+
+Auth layout CSS (`.auth-root`, `.auth-left`, `.auth-right`, `auth-*` classes) lives in `packages/ui/src/styles/theme.css` so it's available to all apps.

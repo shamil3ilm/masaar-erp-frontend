@@ -3,12 +3,21 @@ export { ThemeProvider, useTheme } from './components/ThemeProvider'
 export { ThemeToggle } from './components/ThemeToggle'
 export { DirectionToggle } from './components/DirectionToggle'
 
+// Auth layout
+export { AuthLayout } from './components/AuthLayout'
+
 // Layout shell
 export { AppShell } from './components/AppShell'
-export { Sidebar } from './components/Sidebar'
+export { Sidebar, sidebarLinkClass, SidebarItemContent } from './components/Sidebar'
 export type { NavItem, NavSection } from './components/Sidebar'
 export { TopBar } from './components/TopBar'
 export { PageHeader } from './components/PageHeader'
+
+// Shared common pages (composed from the primitives above)
+export { ProfilePage } from './components/ProfilePage'
+export type { ProfilePageProps, ProfileOrganization } from './components/ProfilePage'
+export { SupportPage } from './components/SupportPage'
+export type { SupportPageProps, SupportResource } from './components/SupportPage'
 
 // Base components
 export { Logo } from './components/Logo'
@@ -53,7 +62,7 @@ export {
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
   Menu, X, ArrowLeft, ArrowRight, ExternalLink,
   Plus, Pencil, Trash2, Download, Upload, Copy, Check, RefreshCw,
-  Search, Filter, MoreHorizontal, MoreVertical, Settings, LogOut, User,
+  Search, Filter, MoreHorizontal, MoreVertical, Settings, LogOut, User, LifeBuoy, HelpCircle,
   AlertCircle, AlertTriangle, CheckCircle2, Info, XCircle, Loader2,
   Sun, Moon, Monitor,
   LayoutDashboard, Users, FileText, ShoppingCart, Receipt, CreditCard,

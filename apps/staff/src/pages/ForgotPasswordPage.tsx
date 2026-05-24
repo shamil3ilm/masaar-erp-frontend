@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useForgotPassword } from '@erp/api-client'
 import { AuthLayout } from '../components/AuthLayout'
+import { Input, FormField, Button, Alert } from '@erp/ui'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -24,12 +25,12 @@ export function ForgotPasswordPage() {
     return (
       <AuthLayout>
         <div className="text-4xl mb-5">📧</div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Check your inbox</h1>
-        <p className="text-sm text-gray-500 mb-8">
+        <h1 className="text-2xl font-semibold text-text mb-2">Check your inbox</h1>
+        <p className="text-sm text-muted mb-8">
           We sent a reset link to{' '}
-          <span className="font-medium text-gray-700">{email}</span>. It may take a minute or two.
+          <span className="font-medium text-text">{email}</span>. It may take a minute or two.
         </p>
-        <Link to="/login" className="text-sm text-blue-600 hover:underline">
+        <Link to="/login" className="auth-link auth-link-sm">
           ← Back to sign in
         </Link>
       </AuthLayout>
@@ -38,38 +39,33 @@ export function ForgotPasswordPage() {
 
   return (
     <AuthLayout>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Forgot your password?</h1>
-      <p className="text-sm text-gray-500 mb-8">
+      <h1 className="text-2xl font-semibold text-text mb-1">Forgot your password?</h1>
+      <p className="text-sm text-muted mb-8">
         Enter your email and we'll send a reset link.
       </p>
 
-      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+      {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
-          <input
+        <FormField label="Email address" htmlFor="email">
+          <Input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
             placeholder="you@company.com"
-            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
           />
-        </div>
+        </FormField>
 
-        <button
-          type="submit"
-          disabled={forgotPassword.isPending}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
+        <Button type="submit" fullWidth loading={forgotPassword.isPending}>
           {forgotPassword.isPending ? 'Sending…' : 'Send reset link'}
-        </button>
+        </Button>
       </form>
 
-      <p className="mt-6 text-sm text-gray-400">
-        <Link to="/login" className="hover:text-gray-600">← Back to sign in</Link>
+      <p className="mt-6 text-sm text-muted">
+        <Link to="/login" className="hover:text-text transition-colors">← Back to sign in</Link>
       </p>
     </AuthLayout>
   )

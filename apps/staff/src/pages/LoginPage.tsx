@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useAuthStore } from '../store/auth'
 import { getApiClient, useVerify2fa } from '@erp/api-client'
 import { AuthLayout } from '../components/AuthLayout'
-import { Input, PasswordInput, Alert } from '@erp/ui'
+import { Input, PasswordInput, Alert, FormField, Button, Lock } from '@erp/ui'
 import type { ApiResponse, User } from '@erp/types'
 
 interface LoginSuccessData {
@@ -78,7 +78,11 @@ export function LoginPage() {
     return (
       <AuthLayout>
         <div className="auth-form-header">
-          <div className="auth-2fa-icon">🔐</div>
+          <div className="auth-2fa-icon">
+            <span className="inline-flex w-12 h-12 items-center justify-center rounded-xl bg-brand-subtle">
+              <Lock size={22} className="text-brand-dark" />
+            </span>
+          </div>
           <h1>Two-step verification</h1>
           <p>Enter the 6-digit code from your authenticator app.</p>
         </div>
@@ -87,24 +91,28 @@ export function LoginPage() {
           <Alert variant="danger" className="mb-5">{error}</Alert>
         )}
 
-        <form onSubmit={handle2fa} noValidate className="auth-form-body">
-          <input
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            placeholder="000 000"
-            value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-            className="auth-otp-input"
-          />
-          <button
+        <form onSubmit={handle2fa} noValidate className="space-y-4">
+          <FormField label="Verification code">
+            <Input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              placeholder="000 000"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+              className="text-center text-2xl tracking-[0.4em] font-mono h-14"
+            />
+          </FormField>
+          <Button
             type="submit"
+            fullWidth
+            size="lg"
             disabled={verify2fa.isPending || otpCode.length !== 6}
-            className="auth-btn"
+            loading={verify2fa.isPending}
           >
-            {verify2fa.isPending ? 'Verifying…' : 'Verify code'}
-          </button>
+            Verify code
+          </Button>
         </form>
 
         <button onClick={() => setChallengeToken(null)} className="auth-back-link">
@@ -133,9 +141,8 @@ export function LoginPage() {
         <Alert variant="danger" className="mb-5">{error}</Alert>
       )}
 
-      <form onSubmit={handleLogin} noValidate className="auth-form-body">
-        <div className="auth-field">
-          <label htmlFor="email">Email address</label>
+      <form onSubmit={handleLogin} noValidate className="space-y-4">
+        <FormField label="Email address" htmlFor="email">
           <Input
             id="email"
             type="email"
@@ -144,13 +151,15 @@ export function LoginPage() {
             autoComplete="email"
             placeholder="you@company.com"
           />
-        </div>
+        </FormField>
 
-        <div className="auth-field">
-          <div className="auth-field-row">
-            <label htmlFor="password">Password</label>
+        <FormField
+          label="Password"
+          htmlFor="password"
+          labelRight={
             <Link to="/forgot-password" className="auth-link auth-link-sm">Forgot password?</Link>
-          </div>
+          }
+        >
           <PasswordInput
             id="password"
             value={password}
@@ -158,13 +167,11 @@ export function LoginPage() {
             autoComplete="current-password"
             placeholder="Enter your password"
           />
-        </div>
+        </FormField>
 
-        <button type="submit" disabled={loading} className="auth-btn">
-          {loading
-            ? <><span className="auth-spinner" /> Signing in…</>
-            : 'Sign in'}
-        </button>
+        <Button type="submit" fullWidth size="lg" loading={loading}>
+          Sign in
+        </Button>
       </form>
 
       <div className="auth-divider"><span>Trusted by 500+ companies across GCC &amp; India</span></div>

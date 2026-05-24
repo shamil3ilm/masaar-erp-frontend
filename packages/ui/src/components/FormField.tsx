@@ -10,15 +10,21 @@ interface FormFieldProps {
   error?: string
   children: ReactNode
   className?: string
+  labelRight?: ReactNode
 }
 
-export function FormField({ label, htmlFor, required, hint, error, children, className }: FormFieldProps) {
+export function FormField({ label, htmlFor, required, hint, error, children, className, labelRight }: FormFieldProps) {
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      {label && (
-        <Label htmlFor={htmlFor} required={required}>
-          {label}
-        </Label>
+      {(label || labelRight) && (
+        <div className="flex items-center justify-between gap-2">
+          {label && (
+            <Label htmlFor={htmlFor} required={required}>
+              {label}
+            </Label>
+          )}
+          {labelRight && <div>{labelRight}</div>}
+        </div>
       )}
       {children}
       {hint && !error && (

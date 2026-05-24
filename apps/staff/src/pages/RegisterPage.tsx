@@ -5,7 +5,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { useRegister } from '@erp/api-client'
 import { useAuthStore } from '../store/auth'
 import { AuthLayout } from '../components/AuthLayout'
-import { PasswordInput } from '@erp/ui'
+import { Input, PasswordInput, FormField, Button, Alert } from '@erp/ui'
 
 const schema = z
   .object({
@@ -21,27 +21,6 @@ const schema = z
   })
 
 type FormValues = z.infer<typeof schema>
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string
-  error?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-      {children}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-    </div>
-  )
-}
-
-const inputCls =
-  'w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -75,44 +54,40 @@ export function RegisterPage() {
 
   return (
     <AuthLayout>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Create your account</h1>
-      <p className="text-sm text-gray-500 mb-8">
+      <h1 className="text-2xl font-semibold text-text mb-1">Create your account</h1>
+      <p className="text-sm text-muted mb-8">
         Already have one?{' '}
-        <Link to="/login" className="text-blue-600 hover:underline font-medium">Sign in</Link>
+        <Link to="/login" className="auth-link auth-link-sm">Sign in</Link>
       </p>
 
       {errors.root && (
-        <p className="mb-4 text-sm text-red-600">{errors.root.message}</p>
+        <Alert variant="danger" className="mb-4">{errors.root.message}</Alert>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-        <Field label="Full name" error={errors.name?.message}>
-          <input {...field('name')} type="text" autoComplete="name" placeholder="Jane Smith" className={inputCls} />
-        </Field>
+        <FormField label="Full name" error={errors.name?.message}>
+          <Input {...field('name')} type="text" autoComplete="name" placeholder="Jane Smith" error={!!errors.name} />
+        </FormField>
 
-        <Field label="Organization name" error={errors.organization_name?.message}>
-          <input {...field('organization_name')} type="text" placeholder="Acme Trading Co." className={inputCls} />
-        </Field>
+        <FormField label="Organization name" error={errors.organization_name?.message}>
+          <Input {...field('organization_name')} type="text" placeholder="Acme Trading Co." error={!!errors.organization_name} />
+        </FormField>
 
-        <Field label="Work email" error={errors.email?.message}>
-          <input {...field('email')} type="email" autoComplete="email" placeholder="jane@acme.com" className={inputCls} />
-        </Field>
+        <FormField label="Work email" error={errors.email?.message}>
+          <Input {...field('email')} type="email" autoComplete="email" placeholder="jane@acme.com" error={!!errors.email} />
+        </FormField>
 
-        <Field label="Password" error={errors.password?.message}>
-          <PasswordInput {...field('password')} autoComplete="new-password" placeholder="Min. 8 characters" />
-        </Field>
+        <FormField label="Password" error={errors.password?.message}>
+          <PasswordInput {...field('password')} autoComplete="new-password" placeholder="Min. 8 characters" error={!!errors.password} />
+        </FormField>
 
-        <Field label="Confirm password" error={errors.password_confirmation?.message}>
-          <PasswordInput {...field('password_confirmation')} autoComplete="new-password" placeholder="Repeat your password" />
-        </Field>
+        <FormField label="Confirm password" error={errors.password_confirmation?.message}>
+          <PasswordInput {...field('password_confirmation')} autoComplete="new-password" placeholder="Repeat your password" error={!!errors.password_confirmation} />
+        </FormField>
 
-        <button
-          type="submit"
-          disabled={register.isPending}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
+        <Button type="submit" fullWidth loading={register.isPending}>
           {register.isPending ? 'Creating account…' : 'Create account'}
-        </button>
+        </Button>
       </form>
     </AuthLayout>
   )

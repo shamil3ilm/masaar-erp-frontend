@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useResetPassword } from '@erp/api-client'
 import { AuthLayout } from '../components/AuthLayout'
-import { PasswordInput } from '@erp/ui'
+import { PasswordInput, FormField, Button, Alert } from '@erp/ui'
 
 const schema = z
   .object({
@@ -55,47 +55,37 @@ export function ResetPasswordPage() {
     return (
       <AuthLayout>
         <div className="text-4xl mb-5">✅</div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Password updated</h1>
-        <p className="text-sm text-gray-500">Redirecting you to sign in…</p>
+        <h1 className="text-2xl font-semibold text-text mb-2">Password updated</h1>
+        <p className="text-sm text-muted">Redirecting you to sign in…</p>
       </AuthLayout>
     )
   }
 
   return (
     <AuthLayout>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Set new password</h1>
-      <p className="text-sm text-gray-500 mb-8">Choose a strong password for your account.</p>
+      <h1 className="text-2xl font-semibold text-text mb-1">Set new password</h1>
+      <p className="text-sm text-muted mb-8">Choose a strong password for your account.</p>
 
-      {errors.root && <p className="mb-4 text-sm text-red-600">{errors.root.message}</p>}
+      {errors.root && <Alert variant="danger" className="mb-4">{errors.root.message}</Alert>}
 
       {!token && (
-        <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
+        <Alert variant="warning" className="mb-4">
           Invalid reset link.{' '}
           <Link to="/forgot-password" className="underline">Request a new one.</Link>
-        </div>
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">New password</label>
-          <PasswordInput {...register('password')} autoComplete="new-password" placeholder="Min. 8 characters" />
-          {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm new password</label>
-          <PasswordInput {...register('password_confirmation')} autoComplete="new-password" placeholder="Repeat your password" />
-          {errors.password_confirmation && (
-            <p className="mt-1 text-xs text-red-600">{errors.password_confirmation.message}</p>
-          )}
-        </div>
+        <FormField label="New password" error={errors.password?.message}>
+          <PasswordInput {...register('password')} autoComplete="new-password" placeholder="Min. 8 characters" error={!!errors.password} />
+        </FormField>
+        <FormField label="Confirm new password" error={errors.password_confirmation?.message}>
+          <PasswordInput {...register('password_confirmation')} autoComplete="new-password" placeholder="Repeat your password" error={!!errors.password_confirmation} />
+        </FormField>
 
-        <button
-          type="submit"
-          disabled={resetPassword.isPending || !token}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
+        <Button type="submit" fullWidth loading={resetPassword.isPending} disabled={!token}>
           {resetPassword.isPending ? 'Updating…' : 'Update password'}
-        </button>
+        </Button>
       </form>
     </AuthLayout>
   )

@@ -14,22 +14,22 @@ export function OrgPickerPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white rounded-lg shadow p-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">Select Organization</h1>
+    <div className="min-h-screen flex items-center justify-center bg-bg p-4">
+      <div className="max-w-md w-full bg-surface rounded-[var(--radius)] border border-border shadow-card p-8">
+        <h1 className="text-xl font-semibold tracking-tight text-text mb-4">Select organization</h1>
         <div className="space-y-2">
           {organizations.map((org) => (
             <button
               key={org.id}
               onClick={() => handleSelect(org.id)}
-              className={`w-full text-left px-4 py-3 rounded-lg border text-sm font-medium transition-colors ${
+              className={`w-full text-start px-4 py-3 rounded-[var(--radius)] border text-sm font-medium transition-colors ${
                 organization?.id === org.id
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:bg-gray-50 text-gray-900'
+                  ? 'border-brand bg-brand-subtle text-brand-dark dark:text-brand'
+                  : 'border-border hover:bg-surface-2 text-text'
               }`}
             >
               {org.name}
-              <span className="block text-xs text-gray-500 font-normal">{org.country} · {org.currency}</span>
+              <span className="block text-xs text-muted font-normal">{org.country} · {org.currency}</span>
             </button>
           ))}
         </div>

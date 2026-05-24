@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import {
   AppShell, Sidebar, TopBar, Logo, ThemeToggle, DirectionToggle, EmptyState, PageHeader,
+  ProfilePage, SupportPage, sidebarLinkClass, SidebarItemContent,
   type NavSection,
-  LayoutDashboard, Building2, Users, Boxes, Shield, Settings,
+  LayoutDashboard, Building2, Users, Boxes, Shield, Settings, User, LifeBuoy,
 } from '@erp/ui'
 import { AdminDashboard } from '../pages/AdminDashboard'
 
@@ -26,6 +27,13 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: 'Audit Log', href: 'audit',    icon: <Shield size={15} /> },
       { label: 'Settings',  href: 'settings', icon: <Settings size={15} /> },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { label: 'Profile',        href: 'profile', icon: <User size={15} /> },
+      { label: 'Help & support', href: 'support', icon: <LifeBuoy size={15} /> },
     ],
   },
 ]
@@ -55,20 +63,9 @@ export function AdminShell({ onLogout }: { onLogout: () => void }) {
               type="button"
               onClick={() => setView(item.href)}
               title={collapsed ? item.label : undefined}
-              className={[
-                'flex w-full items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                collapsed ? 'justify-center px-2' : '',
-                active
-                  ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-text-active)]'
-                  : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)]',
-              ].filter(Boolean).join(' ')}
+              className={sidebarLinkClass(active, collapsed)}
             >
-              {item.icon && (
-                <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-                  {item.icon}
-                </span>
-              )}
-              {!collapsed && <span className="truncate text-start flex-1">{item.label}</span>}
+              <SidebarItemContent icon={item.icon} label={item.label} collapsed={collapsed} />
             </button>
           )}
         />
@@ -87,19 +84,25 @@ export function AdminShell({ onLogout }: { onLogout: () => void }) {
         />
       }
     >
-      {view === 'dashboard' ? (
-        <AdminDashboard />
-      ) : (
+      {view === 'dashboard' && <AdminDashboard />}
+
+      {view === 'profile' && (
+        <ProfilePage name="Administrator" role="Super Admin" onSignOut={onLogout} />
+      )}
+
+      {view === 'support' && <SupportPage />}
+
+      {PLACEHOLDER[view] && (
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6">
           <PageHeader
-            title={PLACEHOLDER[view]?.title ?? 'Admin'}
-            breadcrumbs={[{ label: 'Admin', href: '#' }, { label: PLACEHOLDER[view]?.title ?? '' }]}
+            title={PLACEHOLDER[view].title}
+            breadcrumbs={[{ label: 'Admin', href: '#' }, { label: PLACEHOLDER[view].title }]}
           />
           <div className="rounded-[var(--radius)] border border-border bg-surface shadow-card">
             <EmptyState
               icon={Boxes}
-              title={`${PLACEHOLDER[view]?.title ?? 'This section'} — coming soon`}
-              description={PLACEHOLDER[view]?.description}
+              title={`${PLACEHOLDER[view].title} — coming soon`}
+              description={PLACEHOLDER[view].description}
             />
           </div>
         </div>

@@ -33,6 +33,29 @@ function hasPermission(item: NavItem, permissions: string[]): boolean {
   return permissions.includes(item.permission)
 }
 
+/** Canonical class string for a sidebar nav link — shared by every app's shell so
+    the active / hover treatment never drifts between apps. */
+export function sidebarLinkClass(active: boolean, collapsed = false): string {
+  return cn(
+    'flex items-center gap-3 py-2 text-sm font-medium transition-colors',
+    collapsed
+      ? 'justify-center px-2 rounded-lg'
+      : active
+        ? 'sb-active -mx-2 pl-5 pr-3'
+        : 'px-3 rounded-lg text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)]',
+  )
+}
+
+/** Icon + label inner content for a sidebar nav link. */
+export function SidebarItemContent({ icon, label, collapsed }: { icon?: ReactNode; label: string; collapsed?: boolean }) {
+  return (
+    <>
+      {icon && <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">{icon}</span>}
+      {!collapsed && <span className="truncate">{label}</span>}
+    </>
+  )
+}
+
 export function Sidebar({
   sections,
   permissions = [],
@@ -85,21 +108,9 @@ export function Sidebar({
                       key={item.href}
                       href={item.href}
                       title={collapsed ? item.label : undefined}
-                      className={cn(
-                        'flex items-center gap-3 py-2 text-sm font-medium transition-colors',
-                        collapsed
-                          ? 'justify-center px-2 rounded-lg'
-                          : active
-                            ? 'sb-active -mx-2 pl-5 pr-3'
-                            : 'px-3 rounded-lg text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-text-active)]',
-                      )}
+                      className={sidebarLinkClass(active, collapsed)}
                     >
-                      {item.icon && (
-                        <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-                          {item.icon}
-                        </span>
-                      )}
-                      {!collapsed && <span className="truncate">{item.label}</span>}
+                      <SidebarItemContent icon={item.icon} label={item.label} collapsed={collapsed} />
                     </a>
                   )
                 })}

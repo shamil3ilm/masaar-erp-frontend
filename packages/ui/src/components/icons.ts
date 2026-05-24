@@ -28,6 +28,8 @@ export {
   Settings,
   LogOut,
   User,
+  LifeBuoy,
+  HelpCircle,
 
   // Status / feedback
   AlertCircle,
