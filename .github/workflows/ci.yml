@@ -1,0 +1,52 @@
+# Continuous integration for the Masaar ERP frontend.
+#
+# The workspace scope was renamed @erp/* -> @masaar/* across six packages and
+# 191 imports. Nothing would have failed if that rename had been incomplete:
+# the packages resolve through pnpm workspace links, so a missed import surfaces
+# as a build error on someone's machine, days later. This turns that into a
+# push-time failure.
+#
+# --frozen-lockfile is the point of the install step. It fails when
+# pnpm-lock.yaml disagrees with the package.json files, which is exactly the
+# state a hand-edited lockfile leaves behind.
+
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm turbo typecheck
+
+      - name: Build
+        run: pnpm turbo build
