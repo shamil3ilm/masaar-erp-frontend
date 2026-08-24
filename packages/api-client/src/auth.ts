@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import type { ApiResponse, User } from '@erp/types'
+import type { ApiResponse, User } from '@masaar/types'
 import { getApiClient } from './axios'
 
 interface AuthTokenResponse {
@@ -57,7 +57,8 @@ export function useResetPassword() {
 }
 
 export interface VerifyEmailPayload {
-  token: string
+  email: string
+  code: string
 }
 
 export function useVerifyEmail() {

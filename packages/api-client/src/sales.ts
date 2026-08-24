@@ -14,7 +14,7 @@ import type {
   CreditNote,
   ApiResponse,
   PaginatedResponse,
-} from '@erp/types'
+} from '@masaar/types'
 import { getApiClient } from './axios'
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────

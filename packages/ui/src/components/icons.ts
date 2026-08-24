@@ -1,0 +1,72 @@
+// Curated lucide-react re-exports — import icons from '@masaar/ui' instead of 'lucide-react'
+// directly so the app has one canonical import point.
+export {
+  // Navigation
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Menu,
+  X,
+  ArrowLeft,
+  ArrowRight,
+  ExternalLink,
+
+  // Actions
+  Plus,
+  Pencil,
+  Trash2,
+  Download,
+  Upload,
+  Copy,
+  Check,
+  RefreshCw,
+  Search,
+  Filter,
+  MoreHorizontal,
+  MoreVertical,
+  Settings,
+  LogOut,
+  User,
+  LifeBuoy,
+  HelpCircle,
+
+  // Status / feedback
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  XCircle,
+  Loader2,
+
+  // Theme
+  Sun,
+  Moon,
+  Monitor,
+
+  // Modules
+  LayoutDashboard,
+  Users,
+  FileText,
+  ShoppingCart,
+  Receipt,
+  CreditCard,
+  RotateCcw,
+  Shield,
+  Building2,
+  Briefcase,
+  BarChart3,
+  Boxes,
+  Truck,
+  Wrench,
+  Globe,
+  Bell,
+  Calendar,
+  Clock,
+  Mail,
+  Phone,
+  MapPin,
+  Lock,
+  Eye,
+  EyeOff,
+} from 'lucide-react'

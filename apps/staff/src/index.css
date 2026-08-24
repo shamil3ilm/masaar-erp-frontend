@@ -1,47 +1,79 @@
-@import "tailwindcss";
+/* Staff app — shared style comes from the @masaar/ui preset.
+   Below it: staff-specific primitives only. Auth layout CSS lives in theme.css. */
+@import "../../../packages/ui/src/styles/preset.css";
 
-@source "../../packages/ui/src/**/*.{ts,tsx}";
+/* ── Global component primitives ──────────────────────────────────────────── */
 
-/* ── Brand palette derived from the Masaar logo ───────────────────────────
-   Logo colors:
-     Navy   #1A1F36  (square background)
-     Teal   #14B8A6  (wave — Tailwind teal-500)
-     Cream  #EADBC8  (dot accent)
-
-   We remap the blue scale → teal so every existing bg-blue-* / text-blue-*
-   class automatically renders the brand color with no component changes.
-──────────────────────────────────────────────────────────────────────────── */
-@theme {
-  /* Brand teal scale (replaces Tailwind blue) */
-  --color-blue-50:  #f0fdfa;
-  --color-blue-100: #ccfbf1;
-  --color-blue-200: #99f6e4;
-  --color-blue-300: #5eead4;
-  --color-blue-400: #2dd4bf;
-  --color-blue-500: #14b8a6;
-  --color-blue-600: #0d9488;
-  --color-blue-700: #0f766e;
-  --color-blue-800: #115e59;
-  --color-blue-900: #134e4a;
-  --color-blue-950: #042f2e;
-
-  /* Named brand tokens */
-  --color-brand:         #14b8a6;
-  --color-brand-dark:    #0d9488;
-  --color-surface-dark:  #1a1f36;
-  --color-accent-warm:   #eadbc8;
+/* Focus ring */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--radius);
 }
 
-* {
-  box-sizing: border-box;
+/* Form field */
+.field {
+  width: 100%;
+  height: 2.25rem;
+  padding-inline: 0.75rem;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+textarea.field  { height: auto; padding-block: 0.5rem; }
+select.field    { padding-inline-end: 2rem; }
+.field::placeholder { color: var(--text-faint); }
+.field:hover        { border-color: var(--text-muted); }
+.field:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--brand) 25%, transparent);
+}
+.field-error { border-color: var(--danger); }
+.field-error:focus-visible {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--danger) 25%, transparent);
 }
 
-body {
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid;
+  line-height: 1.5;
 }
 
-#root {
-  display: contents;
+/* Alert */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid;
 }
+
+/* Tabs */
+.tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.tab:hover    { color: var(--text); }
+.tab-active   { color: var(--text); border-bottom-color: var(--brand); }
+
+/* RTL directional glyph flip */
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }

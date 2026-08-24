@@ -1,6 +1,6 @@
-import { useZatcaOnboardingStatus, useRequestCcsid, useComplianceCheck, useUpgradeToPcsid } from '@erp/api-client'
-import type { RequestCcsidPayload } from '@erp/api-client'
-import { ZatcaOnboardingWizard, LoadingSpinner, PageHeader } from '@erp/ui'
+import { useZatcaOnboardingStatus, useRequestCcsid, useComplianceCheck, useUpgradeToPcsid } from '@masaar/api-client'
+import type { RequestCcsidPayload } from '@masaar/api-client'
+import { ZatcaOnboardingWizard, LoadingSpinner, PageHeader } from '@masaar/ui'
 import { useAuthStore } from '../../store/auth'
 
 export function OnboardingPage() {
@@ -13,21 +13,19 @@ export function OnboardingPage() {
   const upgradeToPcsid = useUpgradeToPcsid(branchId)
 
   if (isLoading) return <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
-  if (isError || !onboarding) return <div className="p-6 text-red-600">Failed to load onboarding status.</div>
+  if (isError || !onboarding) return <div className="p-6 text-danger">Failed to load onboarding status.</div>
 
   function handleRequestCcsid(payload: RequestCcsidPayload) {
     requestCcsid.mutate(payload)
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="ZATCA Onboarding"
+        description="Register this branch with the ZATCA e-invoicing network to enable invoice submission."
         breadcrumbs={[{ label: 'Compliance' }, { label: 'ZATCA' }, { label: 'Onboarding' }]}
       />
-      <p className="text-sm text-gray-500 mb-6">
-        Register this branch with the ZATCA e-invoicing network to enable invoice submission.
-      </p>
       <ZatcaOnboardingWizard
         status={onboarding.zatca_onboarding_status}
         onRequestCcsid={handleRequestCcsid}

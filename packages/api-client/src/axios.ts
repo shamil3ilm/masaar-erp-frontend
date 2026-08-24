@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, AxiosError } from 'axios'
-import type { ValidationErrors } from '@erp/types'
+import type { ValidationErrors } from '@masaar/types'
 
 export type TokenGetter = () => string | null
 export type OrgIdGetter = () => string | null

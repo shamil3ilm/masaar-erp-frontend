@@ -1,4 +1,4 @@
-import type { VendorInvoice, VendorLineItem } from '@erp/types'
+import type { VendorInvoice, VendorLineItem } from '@masaar/types'
 
 interface Props {
   invoice: VendorInvoice
@@ -65,6 +65,7 @@ export function InvoiceViewer({ invoice }: Props) {
             )}
           </div>
           <div className="header-actions">
+            <StatusBadge status={invoice.status} />
             {invoice.pdf_url && (
               <a
                 href={invoice.pdf_url}

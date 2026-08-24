@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { ZatcaDeviceOnboarding, ApiResponse } from '@erp/types'
+import type { ZatcaDeviceOnboarding, ApiResponse } from '@masaar/types'
 import { getApiClient } from './axios'
 
 export const zatcaKeys = {

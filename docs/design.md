@@ -681,7 +681,7 @@ mkdir -p packages/api-client/src
 mkdir -p packages/types/src
 ```
 
-Each package needs a `package.json` with a name like `@erp/ui`, `@erp/api-client`, `@erp/types`.
+Each package needs a `package.json` with a name like `@masaar/ui`, `@masaar/api-client`, `@masaar/types`.
 
 ### Step 5: Install dependencies
 
