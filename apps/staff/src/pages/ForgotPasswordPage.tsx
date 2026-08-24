@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useForgotPassword } from '@erp/api-client'
+import { useForgotPassword } from '@masaar/api-client'
 import { AuthLayout } from '../components/AuthLayout'
-import { Input, FormField, Button, Alert } from '@erp/ui'
+import { Input, FormField, Button, Alert } from '@masaar/ui'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

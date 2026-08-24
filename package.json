@@ -1,5 +1,5 @@
 {
-  "name": "erp-frontend",
+  "name": "masaar-erp-frontend",
   "private": true,
   "scripts": {
     "dev": "turbo dev",

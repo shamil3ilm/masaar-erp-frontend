@@ -1,4 +1,4 @@
-import type { VendorInvoice, VendorLineItem } from '@erp/types'
+import type { VendorInvoice, VendorLineItem } from '@masaar/types'
 
 interface Props {
   invoice: VendorInvoice

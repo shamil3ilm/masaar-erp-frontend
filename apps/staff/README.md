@@ -1,4 +1,4 @@
-# @erp/staff — Internal Staff Portal
+# @masaar/staff — Internal Staff Portal
 
 The primary application for internal staff. Handles day-to-day ERP operations including ZATCA e-invoicing compliance, accounting, sales, HR, and more.
 
@@ -7,13 +7,13 @@ The primary application for internal staff. Handles day-to-day ERP operations in
 ## What's Implemented
 
 ### Design System
-- Full Masaar design system via `@erp/ui` — tokens, components, auth shell
+- Full Masaar design system via `@masaar/ui` — tokens, components, auth shell
 - Light / dark mode with toggle (persisted, respects system preference)
 - RTL layout support (Arabic) via direction toggle
 - Responsive layout from mobile to wide desktop
 
 ### Authentication Flow
-All auth pages share the `AuthLayout` wrapper (staff brand panel + form panel) and use `FormField`, `Input`/`PasswordInput`, `Button`, `Alert` from `@erp/ui`.
+All auth pages share the `AuthLayout` wrapper (staff brand panel + form panel) and use `FormField`, `Input`/`PasswordInput`, `Button`, `Alert` from `@masaar/ui`.
 
 | Page | Route | Notes |
 |------|-------|-------|
@@ -28,7 +28,7 @@ All auth pages share the `AuthLayout` wrapper (staff brand panel + form panel) a
 - Collapsible sidebar with section groups and active state
 - TopBar with org switcher, notification bell, profile dropdown (avatar initials, role, sign-out)
 - Theme toggle (light/dark/system) and direction toggle (LTR/RTL) in topbar
-- Shared `ProfilePage` and `SupportPage` (from `@erp/ui`)
+- Shared `ProfilePage` and `SupportPage` (from `@masaar/ui`)
 
 ### Modules
 
@@ -43,16 +43,16 @@ All auth pages share the `AuthLayout` wrapper (staff brand panel + form panel) a
 
 ```bash
 # Development (port 5173)
-pnpm --filter @erp/staff dev
+pnpm --filter @masaar/staff dev
 
 # Production build
-pnpm --filter @erp/staff build
+pnpm --filter @masaar/staff build
 
 # Type check
-pnpm --filter @erp/staff typecheck
+pnpm --filter @masaar/staff typecheck
 
 # E2E tests (Playwright)
-pnpm --filter @erp/staff e2e
+pnpm --filter @masaar/staff e2e
 ```
 
 ## Environment Variables

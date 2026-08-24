@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { AuthLayout, Logo, Input, PasswordInput, Button, FormField, Alert } from '@erp/ui'
-import { getApiClient } from '@erp/api-client'
+import { AuthLayout, Logo, Input, PasswordInput, Button, FormField, Alert } from '@masaar/ui'
+import { getApiClient } from '@masaar/api-client'
 import type { AxiosError } from 'axios'
 
 interface AdminLoginProps {

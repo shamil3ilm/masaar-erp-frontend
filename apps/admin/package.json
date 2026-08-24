@@ -1,5 +1,5 @@
 {
-  "name": "@erp/admin",
+  "name": "@masaar/admin",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -10,9 +10,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@erp/api-client": "workspace:*",
-    "@erp/types": "workspace:*",
-    "@erp/ui": "workspace:*",
+    "@masaar/api-client": "workspace:*",
+    "@masaar/types": "workspace:*",
+    "@masaar/ui": "workspace:*",
     "@tanstack/react-query": "^5.100.8",
     "axios": "^1.16.1",
     "react": "^19.0.0",

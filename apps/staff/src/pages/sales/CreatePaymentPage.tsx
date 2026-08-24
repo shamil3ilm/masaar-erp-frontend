@@ -2,8 +2,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useCreatePayment, useContacts } from '@erp/api-client'
-import { PageHeader, Card, FormField, Input, Select, Button } from '@erp/ui'
+import { useCreatePayment, useContacts } from '@masaar/api-client'
+import { PageHeader, Card, FormField, Input, Select, Button } from '@masaar/ui'
 
 const schema = z.object({
   customer_id: z.string().min(1, 'Customer is required'),

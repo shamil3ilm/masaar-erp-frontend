@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { ProfilePage as UIProfilePage } from '@erp/ui'
+import { ProfilePage as UIProfilePage } from '@masaar/ui'
 import { useAuthStore } from '../store/auth'
 
 export function ProfilePage() {

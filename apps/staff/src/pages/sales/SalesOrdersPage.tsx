@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useSalesOrders, useConfirmSalesOrder, useCancelSalesOrder, useConvertOrderToInvoice } from '@erp/api-client'
+import { useSalesOrders, useConfirmSalesOrder, useCancelSalesOrder, useConvertOrderToInvoice } from '@masaar/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge,
   Select, Table, THead, TBody, TR, TH, TD, Pagination, Button,
   ShoppingCart,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 
 export function SalesOrdersPage() {

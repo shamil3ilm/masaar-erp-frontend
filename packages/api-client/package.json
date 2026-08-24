@@ -1,5 +1,5 @@
 {
-  "name": "@erp/api-client",
+  "name": "@masaar/api-client",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -9,7 +9,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@erp/types": "workspace:*",
+    "@masaar/types": "workspace:*",
     "@tanstack/react-query": "^5.40.0",
     "axios": "^1.7.0"
   },

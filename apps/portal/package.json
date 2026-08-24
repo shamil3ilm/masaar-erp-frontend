@@ -1,5 +1,5 @@
 {
-  "name": "@erp/portal",
+  "name": "@masaar/portal",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@erp/types": "workspace:*",
+    "@masaar/types": "workspace:*",
     "axios": "^1.15.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

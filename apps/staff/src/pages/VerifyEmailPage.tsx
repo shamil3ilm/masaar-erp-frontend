@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useSearch, useNavigate } from '@tanstack/react-router'
-import { useVerifyEmail, useResendVerification } from '@erp/api-client'
+import { useVerifyEmail, useResendVerification } from '@masaar/api-client'
 import { AuthLayout } from '../components/AuthLayout'
-import { Input, Alert, FormField, Button, Mail } from '@erp/ui'
+import { Input, Alert, FormField, Button, Mail } from '@masaar/ui'
 
 export function VerifyEmailPage() {
   const search = useSearch({ strict: false }) as { email?: string }

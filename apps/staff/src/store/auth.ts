@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { User, Organization } from '@erp/types'
+import type { User, Organization } from '@masaar/types'
 
 interface AuthState {
   token: string | null

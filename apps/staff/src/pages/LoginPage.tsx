@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useAuthStore } from '../store/auth'
-import { getApiClient, useVerify2fa } from '@erp/api-client'
+import { getApiClient, useVerify2fa } from '@masaar/api-client'
 import { AuthLayout } from '../components/AuthLayout'
-import { Input, PasswordInput, Alert, FormField, Button, Lock } from '@erp/ui'
-import type { ApiResponse, User } from '@erp/types'
+import { Input, PasswordInput, Alert, FormField, Button, Lock } from '@masaar/ui'
+import type { ApiResponse, User } from '@masaar/types'
 
 interface LoginSuccessData {
   token: string

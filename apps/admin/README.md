@@ -1,4 +1,4 @@
-# @erp/admin — Super-Admin Console
+# @masaar/admin — Super-Admin Console
 
 The super-admin portal for platform-level tenant management and organization oversight.
 
@@ -7,23 +7,23 @@ The super-admin portal for platform-level tenant management and organization ove
 ## What's Implemented
 
 ### Authentication
-- `AdminLogin` — two-panel auth page using the shared `AuthLayout` from `@erp/ui` (dark brand panel left, form right)
-- Form uses `FormField`, `Input`, `PasswordInput`, `Button`, `Alert` from `@erp/ui`
+- `AdminLogin` — two-panel auth page using the shared `AuthLayout` from `@masaar/ui` (dark brand panel left, form right)
+- Form uses `FormField`, `Input`, `PasswordInput`, `Button`, `Alert` from `@masaar/ui`
 - Token stored in `localStorage`; logout via `AdminApp` state reset
 
 ### App Shell (`AdminShell`)
 - Same `AppShell` + `Sidebar` + `TopBar` pattern as staff
 - Theme toggle (light/dark) and profile dropdown
-- Shared `ProfilePage` and `SupportPage` from `@erp/ui`
+- Shared `ProfilePage` and `SupportPage` from `@masaar/ui`
 - Navigation: Dashboard, Organizations, Users, Settings, Support, Profile (state-based, no router)
 
 ### Dashboard
 - KPI `StatCard` grid (organizations, users, monthly revenue, uptime)
 - Recent activity list with `Badge` status indicators
-- Data table with `Table`/`TH`/`TD`/`TR`/`Pagination` from `@erp/ui`
+- Data table with `Table`/`TH`/`TD`/`TR`/`Pagination` from `@masaar/ui`
 
 ### Design System
-- Full Masaar design system via `@erp/ui`
+- Full Masaar design system via `@masaar/ui`
 - Light / dark mode toggle
 - No custom CSS — relies entirely on `preset.css` + Tailwind utilities
 
@@ -31,13 +31,13 @@ The super-admin portal for platform-level tenant management and organization ove
 
 ```bash
 # Development (port 5174)
-pnpm --filter @erp/admin dev
+pnpm --filter @masaar/admin dev
 
 # Production build
-pnpm --filter @erp/admin build
+pnpm --filter @masaar/admin build
 
 # Type check
-pnpm --filter @erp/admin typecheck
+pnpm --filter @masaar/admin typecheck
 ```
 
 ## Environment Variables
@@ -55,4 +55,4 @@ VITE_API_URL=http://erp-backend.test/api/v1
 @import "../../../packages/ui/src/styles/preset.css";
 ```
 
-No custom CSS. All styling via Tailwind utilities and `@erp/ui` components.
+No custom CSS. All styling via Tailwind utilities and `@masaar/ui` components.

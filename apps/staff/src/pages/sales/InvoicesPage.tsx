@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useInvoices, useInvoiceSummary, useSendInvoice, useVoidInvoice } from '@erp/api-client'
+import { useInvoices, useInvoiceSummary, useSendInvoice, useVoidInvoice } from '@masaar/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Receipt, CreditCard, AlertCircle, CheckCircle2,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 
 export function InvoicesPage() {

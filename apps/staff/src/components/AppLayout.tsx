@@ -5,7 +5,7 @@ import {
   type NavSection,
   Users, FileText, ShoppingCart, Receipt, CreditCard, RotateCcw,
   Shield, User, LifeBuoy,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { useAuthStore } from '../store/auth'
 
 const NAV_SECTIONS: NavSection[] = [

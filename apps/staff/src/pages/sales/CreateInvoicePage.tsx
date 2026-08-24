@@ -2,11 +2,11 @@ import { useNavigate } from '@tanstack/react-router'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useCreateInvoice, useContacts } from '@erp/api-client'
+import { useCreateInvoice, useContacts } from '@masaar/api-client'
 import {
   PageHeader, Card, CardHeader, FormField, Input, Select, Button,
   Plus, Trash2,
-} from '@erp/ui'
+} from '@masaar/ui'
 
 const lineSchema = z.object({
   description: z.string().min(1, 'Required'),

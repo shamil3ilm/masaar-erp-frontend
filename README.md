@@ -8,27 +8,27 @@ Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing th
 
 | App | Package | Port | Description |
 |-----|---------|------|-------------|
-| `apps/staff` | `@erp/staff` | 5173 | Internal staff portal (ZATCA, invoicing, accounting, HR, sales, etc.) |
-| `apps/admin` | `@erp/admin` | 5174 | Super-admin console (tenant management, org oversight) |
-| `apps/portal` | `@erp/portal` | 5181 | Vendor self-service portal (tokenized invoice viewer) |
+| `apps/staff` | `@masaar/staff` | 5173 | Internal staff portal (ZATCA, invoicing, accounting, HR, sales, etc.) |
+| `apps/admin` | `@masaar/admin` | 5174 | Super-admin console (tenant management, org oversight) |
+| `apps/portal` | `@masaar/portal` | 5181 | Vendor self-service portal (tokenized invoice viewer) |
 
 ### Shared Packages
 
 | Package | Description |
 |---------|-------------|
-| `@erp/types` | TypeScript interfaces (Organization, User, ZatcaInvoice, VendorInvoice, etc.) |
-| `@erp/api-client` | Axios instance, TanStack Query hooks, auth helpers |
-| `@erp/ui` | Masaar design system — tokens, components, auth layout, app shell |
+| `@masaar/types` | TypeScript interfaces (Organization, User, ZatcaInvoice, VendorInvoice, etc.) |
+| `@masaar/api-client` | Axios instance, TanStack Query hooks, auth helpers |
+| `@masaar/ui` | Masaar design system — tokens, components, auth layout, app shell |
 
 ## Design System
 
-All three apps share a single design system defined in `@erp/ui`:
+All three apps share a single design system defined in `@masaar/ui`:
 
 - **Token source:** `packages/ui/src/styles/theme.css` — CSS variables for light + dark mode (brand teal, navy sidebar, semantic feedback colors).
 - **Preset:** `packages/ui/src/styles/preset.css` — the single file every app imports. Owns the Tailwind import, token→utility mapping, shadow tokens, and dark-mode variant. Never duplicate `@theme` blocks in app CSS.
 - **Shared components:** `Button` (cva variants + sizes + loading), `Input`/`PasswordInput`/`Select`/`Textarea`, `FormField` (label + hint + error + labelRight), `Label`, `Alert`, `Badge`/`StatusBadge`, `Card`/`StatCard`, `Table`/`Pagination`, `Skeleton`, `AppShell`, `Sidebar`, `TopBar`, `PageHeader`, `AuthLayout`, `Logo`, `EmptyState`, `ConfirmDialog`, `ProfilePage`, `SupportPage`, and more.
-- **Auth layout:** `AuthLayout` (exported from `@erp/ui`) — the two-panel dark-brand-left + form-right shell used by both staff and admin login flows.
-- **Icon source:** All icons come from `@erp/ui`'s curated Lucide re-exports. Apps without a direct `lucide-react` dep (staff, portal) must use only these.
+- **Auth layout:** `AuthLayout` (exported from `@masaar/ui`) — the two-panel dark-brand-left + form-right shell used by both staff and admin login flows.
+- **Icon source:** All icons come from `@masaar/ui`'s curated Lucide re-exports. Apps without a direct `lucide-react` dep (staff, portal) must use only these.
 
 ## Prerequisites
 
@@ -67,11 +67,11 @@ pnpm dev
 ### Per-App
 
 ```bash
-pnpm --filter @erp/staff dev        # Staff app only (port 5173)
-pnpm --filter @erp/admin dev        # Admin app only (port 5174)
-pnpm --filter @erp/portal dev       # Portal app only (port 5181)
-pnpm --filter @erp/staff build      # Build staff only
-pnpm --filter @erp/staff typecheck  # Type-check staff only
+pnpm --filter @masaar/staff dev        # Staff app only (port 5173)
+pnpm --filter @masaar/admin dev        # Admin app only (port 5174)
+pnpm --filter @masaar/portal dev       # Portal app only (port 5181)
+pnpm --filter @masaar/staff build      # Build staff only
+pnpm --filter @masaar/staff typecheck  # Type-check staff only
 ```
 
 ## Environment Variables
@@ -94,7 +94,7 @@ Each app reads from its own `.env.local`:
 - **Forms & validation:** React Hook Form, Zod
 - **HTTP client:** Axios with JWT interceptors
 - **Testing:** Vitest + jsdom, Playwright (E2E)
-- **Icons:** Lucide React (curated re-exports via `@erp/ui`)
+- **Icons:** Lucide React (curated re-exports via `@masaar/ui`)
 
 ## Known Issues
 

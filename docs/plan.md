@@ -4,7 +4,7 @@
 
 **Goal:** Build a Turborepo monorepo at `erp-frontend` with three React + TypeScript apps (staff, admin, portal) and the full ZATCA compliance module as the first feature.
 
-**Architecture:** Turborepo monorepo with pnpm workspaces. Three Vite apps share code through three packages: `@erp/types` (TypeScript interfaces), `@erp/api-client` (Axios + TanStack Query hooks), and `@erp/ui` (shadcn/ui components). Staff app uses TanStack Router for routing and Zustand for auth state.
+**Architecture:** Turborepo monorepo with pnpm workspaces. Three Vite apps share code through three packages: `@masaar/types` (TypeScript interfaces), `@masaar/api-client` (Axios + TanStack Query hooks), and `@masaar/ui` (shadcn/ui components). Staff app uses TanStack Router for routing and Zustand for auth state.
 
 **Tech Stack:** React 19, TypeScript, Vite, Turborepo, pnpm, TanStack Router, TanStack Query, Zustand, shadcn/ui, Tailwind v4, AG Grid Community, React Hook Form, Zod, Axios, MSW, Vitest, Playwright
 
@@ -231,7 +231,7 @@ Replace the generated `package.json` with:
 
 ```json
 {
-  "name": "@erp/staff",
+  "name": "@masaar/staff",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -244,9 +244,9 @@ Replace the generated `package.json` with:
     "preview": "vite preview"
   },
   "dependencies": {
-    "@erp/api-client": "workspace:*",
-    "@erp/types": "workspace:*",
-    "@erp/ui": "workspace:*",
+    "@masaar/api-client": "workspace:*",
+    "@masaar/types": "workspace:*",
+    "@masaar/ui": "workspace:*",
     "@tanstack/react-query": "^5.40.0",
     "@tanstack/react-router": "^1.40.0",
     "axios": "^1.7.0",
@@ -273,7 +273,7 @@ Replace the generated `package.json` with:
 
 ```json
 {
-  "name": "@erp/admin",
+  "name": "@masaar/admin",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -283,9 +283,9 @@ Replace the generated `package.json` with:
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@erp/api-client": "workspace:*",
-    "@erp/types": "workspace:*",
-    "@erp/ui": "workspace:*",
+    "@masaar/api-client": "workspace:*",
+    "@masaar/types": "workspace:*",
+    "@masaar/ui": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -303,7 +303,7 @@ Replace the generated `package.json` with:
 
 ```json
 {
-  "name": "@erp/portal",
+  "name": "@masaar/portal",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -313,7 +313,7 @@ Replace the generated `package.json` with:
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@erp/types": "workspace:*",
+    "@masaar/types": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -361,7 +361,7 @@ git commit -m "chore: scaffold three Vite apps (staff, admin, portal)"
 
 ```json
 {
-  "name": "@erp/types",
+  "name": "@masaar/types",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -401,7 +401,7 @@ export * from './zatca'
 
 ```json
 {
-  "name": "@erp/api-client",
+  "name": "@masaar/api-client",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -410,7 +410,7 @@ export * from './zatca'
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@erp/types": "workspace:*",
+    "@masaar/types": "workspace:*",
     "@tanstack/react-query": "^5.40.0",
     "axios": "^1.7.0"
   },
@@ -449,7 +449,7 @@ export * from './zatca'
 
 ```json
 {
-  "name": "@erp/ui",
+  "name": "@masaar/ui",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -458,7 +458,7 @@ export * from './zatca'
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@erp/types": "workspace:*",
+    "@masaar/types": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -697,7 +697,7 @@ export interface CreateZatcaInvoicePayload {
 - [x] **Step 3: Run typecheck**
 
 ```bash
-pnpm --filter @erp/types typecheck
+pnpm --filter @masaar/types typecheck
 ```
 
 Expected: No errors.
@@ -753,7 +753,7 @@ describe('createApiClient', () => {
 - [x] **Step 2: Run test to verify it fails**
 
 ```bash
-pnpm --filter @erp/api-client test
+pnpm --filter @masaar/api-client test
 ```
 
 Expected: FAIL — `createApiClient` not found.
@@ -762,7 +762,7 @@ Expected: FAIL — `createApiClient` not found.
 
 ```ts
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios'
-import type { ValidationErrors } from '@erp/types'
+import type { ValidationErrors } from '@masaar/types'
 
 export type TokenGetter = () => string | null
 export type OrgIdGetter = () => string | null
@@ -888,7 +888,7 @@ export function createQueryClient(): QueryClient {
 - [x] **Step 5: Run tests to verify they pass**
 
 ```bash
-pnpm --filter @erp/api-client test
+pnpm --filter @masaar/api-client test
 ```
 
 Expected: PASS.
@@ -920,7 +920,7 @@ import type {
   CreateZatcaInvoicePayload,
   ApiResponse,
   PaginatedResponse,
-} from '@erp/types'
+} from '@masaar/types'
 import { getApiClient } from './axios'
 
 // Query keys
@@ -1066,7 +1066,7 @@ export function useComplianceReport(dateRange: { start: string; end: string }) {
 
 ```ts
 import { http, HttpResponse } from 'msw'
-import type { ZatcaDeviceOnboarding, ZatcaInvoice, ZatcaComplianceReport } from '@erp/types'
+import type { ZatcaDeviceOnboarding, ZatcaInvoice, ZatcaComplianceReport } from '@masaar/types'
 
 const BASE = '/api/v1'
 
@@ -1162,7 +1162,7 @@ export const allMockHandlers = [...zatcaMockHandlers]
 - [x] **Step 4: Typecheck**
 
 ```bash
-pnpm --filter @erp/api-client typecheck
+pnpm --filter @masaar/api-client typecheck
 ```
 
 Expected: No errors.
@@ -1235,7 +1235,7 @@ describe('useAuthStore', () => {
 - [x] **Step 2: Run test — verify it fails**
 
 ```bash
-pnpm --filter @erp/staff test
+pnpm --filter @masaar/staff test
 ```
 
 Expected: FAIL — `useAuthStore` not found.
@@ -1244,7 +1244,7 @@ Expected: FAIL — `useAuthStore` not found.
 
 ```ts
 import { create } from 'zustand'
-import type { User, Organization } from '@erp/types'
+import type { User, Organization } from '@masaar/types'
 
 interface AuthState {
   token: string | null
@@ -1314,7 +1314,7 @@ import '@testing-library/jest-dom'
 - [x] **Step 5: Run tests — verify they pass**
 
 ```bash
-pnpm --filter @erp/staff test
+pnpm --filter @masaar/staff test
 ```
 
 Expected: 3 tests PASS.
@@ -1340,7 +1340,7 @@ git commit -m "feat(staff): add Zustand auth store with tests"
 - [x] **Step 1: Install shadcn/ui dependencies in packages/ui**
 
 ```bash
-pnpm --filter @erp/ui add clsx tailwind-merge class-variance-authority lucide-react
+pnpm --filter @masaar/ui add clsx tailwind-merge class-variance-authority lucide-react
 ```
 
 - [x] **Step 2: Create utility `packages/ui/src/lib/utils.ts`**
@@ -1479,7 +1479,7 @@ describe('ZatcaStatusBadge', () => {
 - [x] **Step 2: Run test — verify it fails**
 
 ```bash
-pnpm --filter @erp/ui test
+pnpm --filter @masaar/ui test
 ```
 
 Expected: FAIL — component not found.
@@ -1488,7 +1488,7 @@ Expected: FAIL — component not found.
 
 ```tsx
 import { cn } from '../../lib/utils'
-import type { ZatcaInvoiceStatus } from '@erp/types'
+import type { ZatcaInvoiceStatus } from '@masaar/types'
 
 const statusConfig: Record<ZatcaInvoiceStatus, { label: string; className: string }> = {
   pending:   { label: 'Pending',   className: 'bg-gray-100 text-gray-700' },
@@ -1515,7 +1515,7 @@ export function ZatcaStatusBadge({ status, className }: ZatcaStatusBadgeProps) {
 - [x] **Step 4: Run tests — verify they pass**
 
 ```bash
-pnpm --filter @erp/ui test
+pnpm --filter @masaar/ui test
 ```
 
 Expected: 4 tests PASS.
@@ -1667,7 +1667,7 @@ describe('Sidebar', () => {
 - [x] **Step 4: Run test — verify it passes**
 
 ```bash
-pnpm --filter @erp/ui test
+pnpm --filter @masaar/ui test
 ```
 
 Expected: Sidebar tests PASS.
@@ -1876,7 +1876,7 @@ export class ErrorBoundary extends Component<Props, State> {
 - [x] **Step 10: Run tests**
 
 ```bash
-pnpm --filter @erp/ui test
+pnpm --filter @masaar/ui test
 ```
 
 Expected: All tests PASS including new Sidebar tests.
@@ -1919,7 +1919,7 @@ declare module '@tanstack/react-router' {
 ```tsx
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { createQueryClient } from '@erp/api-client'
+import { createQueryClient } from '@masaar/api-client'
 
 const queryClient = createQueryClient()
 
@@ -1938,8 +1938,8 @@ export const Route = createRootRoute({
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useAuthStore } from '../store/auth'
-import { getApiClient } from '@erp/api-client'
-import type { ApiResponse, User, Organization } from '@erp/types'
+import { getApiClient } from '@masaar/api-client'
+import type { ApiResponse, User, Organization } from '@masaar/types'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -2039,7 +2039,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'
-import { initApiClient } from '@erp/api-client'
+import { initApiClient } from '@masaar/api-client'
 import { useAuthStore } from './store/auth'
 import './index.css'
 
@@ -2064,7 +2064,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 - [x] **Step 6: Verify dev server starts**
 
 ```bash
-pnpm --filter @erp/staff dev
+pnpm --filter @masaar/staff dev
 ```
 
 Expected: Staff app runs at http://localhost:5173, login page visible.
@@ -2132,7 +2132,7 @@ describe('ZatcaOnboardingWizard', () => {
 - [x] **Step 2: Run test — verify it fails**
 
 ```bash
-pnpm --filter @erp/ui test
+pnpm --filter @masaar/ui test
 ```
 
 Expected: FAIL.
@@ -2141,7 +2141,7 @@ Expected: FAIL.
 
 ```tsx
 import { cn } from '../../lib/utils'
-import type { ZatcaOnboardingStatus } from '@erp/types'
+import type { ZatcaOnboardingStatus } from '@masaar/types'
 
 interface ZatcaOnboardingWizardProps {
   status: ZatcaOnboardingStatus
@@ -2247,7 +2247,7 @@ export function ZatcaOnboardingWizard({
 - [x] **Step 4: Run tests — verify they pass**
 
 ```bash
-pnpm --filter @erp/ui test
+pnpm --filter @masaar/ui test
 ```
 
 Expected: All tests PASS.
@@ -2270,8 +2270,8 @@ git commit -m "feat(ui): add ZatcaOnboardingWizard component with tests"
 
 ```tsx
 import { createFileRoute } from '@tanstack/react-router'
-import { useZatcaOnboardingStatus, useRequestCcsid, useUpgradeToPcsid } from '@erp/api-client'
-import { ZatcaOnboardingWizard, LoadingSpinner } from '@erp/ui'
+import { useZatcaOnboardingStatus, useRequestCcsid, useUpgradeToPcsid } from '@masaar/api-client'
+import { ZatcaOnboardingWizard, LoadingSpinner } from '@masaar/ui'
 import { useAuthStore } from '../../../../../store/auth'
 
 export const Route = createFileRoute('/app/compliance/zatca/onboarding/')({
@@ -2311,7 +2311,7 @@ function OnboardingPage() {
 - [x] **Step 2: Verify page renders in dev server**
 
 ```bash
-pnpm --filter @erp/staff dev
+pnpm --filter @masaar/staff dev
 ```
 
 Navigate to http://localhost:5173/app/compliance/zatca/onboarding — should show wizard.
@@ -2333,7 +2333,7 @@ git commit -m "feat(staff): add ZATCA onboarding page"
 - [x] **Step 1: Install AG Grid in staff app**
 
 ```bash
-pnpm --filter @erp/staff add ag-grid-react ag-grid-community
+pnpm --filter @masaar/staff add ag-grid-react ag-grid-community
 ```
 
 - [x] **Step 2: Create invoice list page**
@@ -2344,9 +2344,9 @@ Create `apps/staff/src/routes/app/compliance/zatca/invoices/index.tsx`:
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { AgGridReact } from 'ag-grid-react'
 import { ColDef } from 'ag-grid-community'
-import { useZatcaInvoices, useSubmitInvoice, useRetryInvoice } from '@erp/api-client'
-import { ZatcaStatusBadge, LoadingSpinner, EmptyState } from '@erp/ui'
-import type { ZatcaInvoice } from '@erp/types'
+import { useZatcaInvoices, useSubmitInvoice, useRetryInvoice } from '@masaar/api-client'
+import { ZatcaStatusBadge, LoadingSpinner, EmptyState } from '@masaar/ui'
+import type { ZatcaInvoice } from '@masaar/types'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
 
@@ -2458,7 +2458,7 @@ function ZatcaInvoicesPage() {
 - [x] **Step 3: Verify page renders**
 
 ```bash
-pnpm --filter @erp/staff dev
+pnpm --filter @masaar/staff dev
 ```
 
 Navigate to http://localhost:5173/app/compliance/zatca/invoices — grid should appear.
@@ -2480,7 +2480,7 @@ git commit -m "feat(staff): add ZATCA invoice list with AG Grid"
 - [x] **Step 1: Install React Hook Form + Zod in staff app (if not already)**
 
 ```bash
-pnpm --filter @erp/staff add react-hook-form zod @hookform/resolvers
+pnpm --filter @masaar/staff add react-hook-form zod @hookform/resolvers
 ```
 
 - [x] **Step 2: Create invoice create page**
@@ -2492,7 +2492,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useCreateZatcaInvoice } from '@erp/api-client'
+import { useCreateZatcaInvoice } from '@masaar/api-client'
 
 const lineItemSchema = z.object({
   description: z.string().min(1, 'Required'),
@@ -2701,8 +2701,8 @@ Create `apps/staff/src/routes/app/compliance/zatca/reports/index.tsx`:
 ```tsx
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useComplianceReport } from '@erp/api-client'
-import { ComplianceStatsCard, LoadingSpinner } from '@erp/ui'
+import { useComplianceReport } from '@masaar/api-client'
+import { ComplianceStatsCard, LoadingSpinner } from '@masaar/ui'
 
 export const Route = createFileRoute('/app/compliance/zatca/reports/')({
   component: ZatcaReportsPage,
@@ -2794,8 +2794,8 @@ git commit -m "feat(staff): add ZATCA compliance reports page with stats cards"
 - [x] **Step 1: Install Playwright**
 
 ```bash
-pnpm --filter @erp/staff add -D @playwright/test
-pnpm --filter @erp/staff exec playwright install chromium
+pnpm --filter @masaar/staff add -D @playwright/test
+pnpm --filter @masaar/staff exec playwright install chromium
 ```
 
 - [x] **Step 2: Create `apps/staff/playwright.config.ts`**
@@ -2862,8 +2862,8 @@ test.describe('ZATCA module', () => {
 - [x] **Step 4: Run E2E tests (with dev server running)**
 
 ```bash
-pnpm --filter @erp/staff dev &
-pnpm --filter @erp/staff exec playwright test
+pnpm --filter @masaar/staff dev &
+pnpm --filter @masaar/staff exec playwright test
 ```
 
 Expected: 4 tests PASS.

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { usePaymentsReceived, usePaymentSummary, useCompletePayment, useVoidPayment } from '@erp/api-client'
+import { usePaymentsReceived, usePaymentSummary, useCompletePayment, useVoidPayment } from '@masaar/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, CreditCard, CheckCircle2, AlertCircle,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 
 export function PaymentsPage() {

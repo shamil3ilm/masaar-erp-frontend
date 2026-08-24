@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { AuthLayout as SharedAuthLayout, Logo } from '@erp/ui'
+import { AuthLayout as SharedAuthLayout, Logo } from '@masaar/ui'
 
 function IconInvoice() {
   return (

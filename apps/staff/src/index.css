@@ -1,4 +1,4 @@
-/* Staff app — shared style comes from the @erp/ui preset.
+/* Staff app — shared style comes from the @masaar/ui preset.
    Below it: staff-specific primitives only. Auth layout CSS lives in theme.css. */
 @import "../../../packages/ui/src/styles/preset.css";
 

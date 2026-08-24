@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useCreditNotes, useApproveCreditNote, useVoidCreditNote } from '@erp/api-client'
+import { useCreditNotes, useApproveCreditNote, useVoidCreditNote } from '@masaar/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, RotateCcw,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 
 export function CreditNotesPage() {

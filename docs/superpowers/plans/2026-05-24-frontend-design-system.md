@@ -4,7 +4,7 @@
 
 **Goal:** Replace the plain, inconsistent ERP frontend with a modern SaaS design system shared across the `staff`, `admin`, and `portal` apps — with light/dark themes, RTL support, responsive layout, easy back-navigation, and a prominent profile/sidebar.
 
-**Architecture:** Build a token-driven, `cva`-based component library in `@erp/ui` (no new runtime deps — `lucide-react`, `class-variance-authority`, `tailwind-merge` already installed). Theming uses semantic CSS variables flipped by a `.dark` class; RTL uses Tailwind logical-property utilities driven by `dir` on `<html>`. Each app's `index.css` maps tokens into Tailwind 4 `@theme`. Then migrate apps phase-by-phase, verifying visually with live screenshots (light/dark, LTR/RTL, 4 widths).
+**Architecture:** Build a token-driven, `cva`-based component library in `@masaar/ui` (no new runtime deps — `lucide-react`, `class-variance-authority`, `tailwind-merge` already installed). Theming uses semantic CSS variables flipped by a `.dark` class; RTL uses Tailwind logical-property utilities driven by `dir` on `<html>`. Each app's `index.css` maps tokens into Tailwind 4 `@theme`. Then migrate apps phase-by-phase, verifying visually with live screenshots (light/dark, LTR/RTL, 4 widths).
 
 **Tech Stack:** React 19, Tailwind CSS 4 (`@tailwindcss/vite`), TanStack Router/Query, `cva`, `tailwind-merge`, `clsx`, `lucide-react`, Vitest + Testing Library, Playwright (`_shot.mjs` for screenshots).
 
@@ -847,7 +847,7 @@ git commit -m "chore: final design-system screenshots"
 ## Self-Review
 
 **Spec coverage:**
-- Shared system in `@erp/ui` → Tasks 1–11. ✓
+- Shared system in `@masaar/ui` → Tasks 1–11. ✓
 - Modern SaaS aesthetic → tokens (1), components (5–11), dashboards (13,17). ✓
 - Light/dark toggle → Tasks 1,2,3,9,12. ✓
 - RTL support → tokens/logical props (2,10,11), DirectionToggle (9), provider (3). ✓

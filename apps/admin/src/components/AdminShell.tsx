@@ -4,7 +4,7 @@ import {
   ProfilePage, SupportPage, sidebarLinkClass, SidebarItemContent,
   type NavSection,
   LayoutDashboard, Building2, Users, Boxes, Shield, Settings, User, LifeBuoy,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { AdminDashboard } from '../pages/AdminDashboard'
 
 const NAV_SECTIONS: NavSection[] = [

@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import type { ApiResponse, User } from '@erp/types'
+import type { ApiResponse, User } from '@masaar/types'
 import { getApiClient } from './axios'
 
 interface AuthTokenResponse {

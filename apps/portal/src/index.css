@@ -1,4 +1,4 @@
-/* Portal app — shared style comes from the @erp/ui preset (tokens, Inter, base).
+/* Portal app — shared style comes from the @masaar/ui preset (tokens, Inter, base).
    Below it: the print-focused invoice-document layout, recolored to design tokens
    so the public portal stays on-brand with the rest of the platform. */
 @import "../../../packages/ui/src/styles/preset.css";

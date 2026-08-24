@@ -3,7 +3,7 @@ import {
   PageHeader, StatCard, Card, CardHeader, CardBody, Button,
   Users, FileText, ShoppingCart, Receipt, CreditCard, RotateCcw, Shield,
   LayoutDashboard, Plus, ArrowRight,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { useAuthStore } from '../store/auth'
 
 const MODULE_CARDS = [

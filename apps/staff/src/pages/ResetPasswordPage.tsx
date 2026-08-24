@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { useResetPassword } from '@erp/api-client'
+import { useResetPassword } from '@masaar/api-client'
 import { AuthLayout } from '../components/AuthLayout'
-import { PasswordInput, FormField, Button, Alert } from '@erp/ui'
+import { PasswordInput, FormField, Button, Alert } from '@masaar/ui'
 
 const schema = z
   .object({

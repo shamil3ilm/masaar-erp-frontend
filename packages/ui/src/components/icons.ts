@@ -1,4 +1,4 @@
-// Curated lucide-react re-exports — import icons from '@erp/ui' instead of 'lucide-react'
+// Curated lucide-react re-exports — import icons from '@masaar/ui' instead of 'lucide-react'
 // directly so the app has one canonical import point.
 export {
   // Navigation

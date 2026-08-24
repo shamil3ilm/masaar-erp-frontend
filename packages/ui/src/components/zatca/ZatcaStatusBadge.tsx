@@ -1,5 +1,5 @@
 import { cn } from '../../lib/utils'
-import type { ZatcaComplianceStatus } from '@erp/types'
+import type { ZatcaComplianceStatus } from '@masaar/types'
 
 const statusConfig: Record<ZatcaComplianceStatus, { label: string; className: string }> = {
   pending: { label: 'Pending', className: 'bg-gray-100 text-gray-700' },

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { cn } from '../../lib/utils'
-import type { ZatcaOnboardingStatus } from '@erp/types'
+import type { ZatcaOnboardingStatus } from '@masaar/types'
 
 export interface RequestCcsidPayload {
   otp: string

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useContacts } from '@erp/api-client'
+import { useContacts } from '@masaar/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Badge,
   Button, Input, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Users,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { formatCurrency } from '../../lib/format'
 
 export function ContactsPage() {

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useQuotations, useSendQuotation, useConvertQuotation } from '@erp/api-client'
+import { useQuotations, useSendQuotation, useConvertQuotation } from '@masaar/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, FileText,
-} from '@erp/ui'
+} from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 
 export function QuotationsPage() {

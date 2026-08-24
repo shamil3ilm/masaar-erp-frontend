@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
-import { ErrorBoundary, ThemeProvider } from '@erp/ui'
+import { ErrorBoundary, ThemeProvider } from '@masaar/ui'
 import { router } from './router'
-import { initApiClient } from '@erp/api-client'
+import { initApiClient } from '@masaar/api-client'
 import { useAuthStore } from './store/auth'
 import './index.css'
 

@@ -10,7 +10,7 @@ The ERP frontend (`erp-frontend` monorepo: `staff`, `admin`, `portal` apps) look
 "plain, poor, and empty." Concrete causes:
 
 - **Emoji icons** (👥 📋 🛒) used everywhere instead of the `lucide-react` library
-  already shipped in `@erp/ui`.
+  already shipped in `@masaar/ui`.
 - **No component system** — buttons are raw inline `bg-blue-600` strings duplicated
   across every page; tables, selects, badges, and inputs are all hand-rolled and
   inconsistent.
@@ -23,7 +23,7 @@ The ERP frontend (`erp-frontend` monorepo: `staff`, `admin`, `portal` apps) look
 
 ## Goals
 
-1. A real, shared design system in `@erp/ui` consumed by all three apps.
+1. A real, shared design system in `@masaar/ui` consumed by all three apps.
 2. Modern SaaS ERP aesthetic (clean, dense, professional; Linear/Stripe/modern-Odoo feel).
 3. **Light + dark mode** with a user toggle, persisted, defaulting to system preference.
 4. **RTL layout support** (Arabic — required for GCC) via a direction toggle and CSS
@@ -50,7 +50,7 @@ The ERP frontend (`erp-frontend` monorepo: `staff`, `admin`, `portal` apps) look
 
 ### Theming (light/dark + RTL)
 
-- A `ThemeProvider` (in `@erp/ui`) manages `theme` (`light`/`dark`/`system`) and
+- A `ThemeProvider` (in `@masaar/ui`) manages `theme` (`light`/`dark`/`system`) and
   `dir` (`ltr`/`rtl`). It writes `class="dark"` and `dir`/`lang` onto `<html>`,
   persists to `localStorage`, and respects `prefers-color-scheme` for the `system` setting.
 - **Semantic design tokens** defined as CSS variables in a shared
@@ -69,7 +69,7 @@ The ERP frontend (`erp-frontend` monorepo: `staff`, `admin`, `portal` apps) look
 - A font: **Inter** (self-hosted via `@fontsource/inter` *or* a CSS `@font-face`/Google
   link — decide at implementation; prefer self-host to avoid network dependency).
 
-### Shared component library (`@erp/ui`)
+### Shared component library (`@masaar/ui`)
 
 Built with `cva` for variants and `cn()` (clsx + tailwind-merge) for class merging:
 
@@ -85,7 +85,7 @@ Built with `cva` for variants and `cn()` (clsx + tailwind-merge) for class mergi
   `Pagination` footer component. (AG Grid stays for heavy grids; these style the
   hand-rolled tables.)
 - `Skeleton` (line/block/table-row) for loading states.
-- `Icon` convention — re-export curated lucide icons from `@erp/ui` so apps import from
+- `Icon` convention — re-export curated lucide icons from `@masaar/ui` so apps import from
   one place; **remove all emoji**.
 - Refined shell: `AppShell` (theme-aware, RTL-aware), `Sidebar` (branded header, grouped
   nav, lucide icons, clear active state, collapse with tooltips), `TopBar` (breadcrumb
@@ -121,7 +121,7 @@ Built with `cva` for variants and `cn()` (clsx + tailwind-merge) for class mergi
 
 ## App-by-app migration
 
-1. **Foundation** — tokens, theme/dir providers, all `@erp/ui` components above; export
+1. **Foundation** — tokens, theme/dir providers, all `@masaar/ui` components above; export
    from `packages/ui/src/index.ts`. Update each app's `index.css` to the token system.
 2. **Staff** — rebuild `DashboardPage` (KPI/overview + quick actions, no emoji); migrate
    `AppLayout`/sidebar to lucide + theme/dir/profile; migrate all `sales/*` list & create

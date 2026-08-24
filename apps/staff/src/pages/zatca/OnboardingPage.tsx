@@ -1,6 +1,6 @@
-import { useZatcaOnboardingStatus, useRequestCcsid, useComplianceCheck, useUpgradeToPcsid } from '@erp/api-client'
-import type { RequestCcsidPayload } from '@erp/api-client'
-import { ZatcaOnboardingWizard, LoadingSpinner, PageHeader } from '@erp/ui'
+import { useZatcaOnboardingStatus, useRequestCcsid, useComplianceCheck, useUpgradeToPcsid } from '@masaar/api-client'
+import type { RequestCcsidPayload } from '@masaar/api-client'
+import { ZatcaOnboardingWizard, LoadingSpinner, PageHeader } from '@masaar/ui'
 import { useAuthStore } from '../../store/auth'
 
 export function OnboardingPage() {

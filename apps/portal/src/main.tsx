@@ -4,7 +4,7 @@ import type { AxiosError } from 'axios'
 import './index.css'
 import { fetchVendorInvoice } from './api.ts'
 import { InvoiceViewer } from './InvoiceViewer.tsx'
-import type { VendorInvoice } from '@erp/types'
+import type { VendorInvoice } from '@masaar/types'
 
 type State =
   | { phase: 'invalid' }

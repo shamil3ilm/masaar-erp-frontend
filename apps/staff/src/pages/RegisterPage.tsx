@@ -2,10 +2,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useRegister } from '@erp/api-client'
+import { useRegister } from '@masaar/api-client'
 import { useAuthStore } from '../store/auth'
 import { AuthLayout } from '../components/AuthLayout'
-import { Input, PasswordInput, FormField, Button, Alert } from '@erp/ui'
+import { Input, PasswordInput, FormField, Button, Alert } from '@masaar/ui'
 
 const schema = z
   .object({

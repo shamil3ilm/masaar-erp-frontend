@@ -3,7 +3,7 @@ import {
   Table, THead, TBody, TR, TH, TD, Pagination,
   Users, FileText, Clock, CheckCircle2, AlertTriangle, RotateCcw, Info,
   Plus, Filter, Download, ArrowRight,
-} from '@erp/ui'
+} from '@masaar/ui'
 import type { ComponentType } from 'react'
 
 type IconType = ComponentType<{ size?: number | string; className?: string }>
