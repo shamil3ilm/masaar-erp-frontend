@@ -6,7 +6,7 @@ import {
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Receipt, CreditCard, AlertCircle, CheckCircle2,
 } from '@erp/ui'
-import { fmtCurrency, fmtDate } from './fmt'
+import { formatCurrency, formatDate } from '../../lib/format'
 
 export function InvoicesPage() {
   const navigate = useNavigate()
@@ -37,12 +37,12 @@ export function InvoicesPage() {
 
       {summary && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard label="Total Invoiced" value={fmtCurrency(summary.total_invoiced)} icon={Receipt} />
-          <StatCard label="Total Paid" value={fmtCurrency(summary.total_paid)} icon={CheckCircle2} />
-          <StatCard label="Outstanding" value={fmtCurrency(summary.total_outstanding)} icon={CreditCard} />
+          <StatCard label="Total Invoiced" value={formatCurrency(summary.total_invoiced)} icon={Receipt} />
+          <StatCard label="Total Paid" value={formatCurrency(summary.total_paid)} icon={CheckCircle2} />
+          <StatCard label="Outstanding" value={formatCurrency(summary.total_outstanding)} icon={CreditCard} />
           <StatCard
             label="Overdue"
-            value={fmtCurrency(summary.overdue_amount)}
+            value={formatCurrency(summary.overdue_amount)}
             subtitle={`${summary.overdue_count} invoice${summary.overdue_count === 1 ? '' : 's'}`}
             icon={AlertCircle}
           />
@@ -145,10 +145,10 @@ function InvoiceRow({
     <TR>
       <TD className="font-mono font-medium">{invoice.invoice_number}</TD>
       <TD>{invoice.customer_name}</TD>
-      <TD muted>{fmtDate(invoice.invoice_date)}</TD>
-      <TD muted>{invoice.due_date ? fmtDate(invoice.due_date) : '—'}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(invoice.total, invoice.currency_code)}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(invoice.amount_due, invoice.currency_code)}</TD>
+      <TD muted>{formatDate(invoice.invoice_date)}</TD>
+      <TD muted>{invoice.due_date ? formatDate(invoice.due_date) : '—'}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(invoice.total, invoice.currency_code)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(invoice.amount_due, invoice.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={invoice.status} /></TD>
       <TD align="center">
         {invoice.compliance_status !== 'not_applicable' && (

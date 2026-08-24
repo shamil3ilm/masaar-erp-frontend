@@ -6,7 +6,7 @@ import {
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, CreditCard, CheckCircle2, AlertCircle,
 } from '@erp/ui'
-import { fmtCurrency, fmtDate } from './fmt'
+import { formatCurrency, formatDate } from '../../lib/format'
 
 export function PaymentsPage() {
   const navigate = useNavigate()
@@ -37,9 +37,9 @@ export function PaymentsPage() {
 
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <StatCard label="Total Received" value={fmtCurrency(summary.total_received)} icon={CreditCard} />
-          <StatCard label="Allocated" value={fmtCurrency(summary.total_allocated)} icon={CheckCircle2} />
-          <StatCard label="Unallocated" value={fmtCurrency(summary.total_unallocated)} icon={AlertCircle} />
+          <StatCard label="Total Received" value={formatCurrency(summary.total_received)} icon={CreditCard} />
+          <StatCard label="Allocated" value={formatCurrency(summary.total_allocated)} icon={CheckCircle2} />
+          <StatCard label="Unallocated" value={formatCurrency(summary.total_unallocated)} icon={AlertCircle} />
         </div>
       )}
 
@@ -135,10 +135,10 @@ function PaymentRow({
     <TR>
       <TD className="font-mono font-medium">{payment.payment_number}</TD>
       <TD>{payment.customer_name}</TD>
-      <TD muted>{fmtDate(payment.payment_date)}</TD>
+      <TD muted>{formatDate(payment.payment_date)}</TD>
       <TD muted className="capitalize">{payment.payment_method.replace('_', ' ')}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(payment.amount, payment.currency_code)}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(payment.unallocated_amount, payment.currency_code)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(payment.amount, payment.currency_code)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(payment.unallocated_amount, payment.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={payment.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">

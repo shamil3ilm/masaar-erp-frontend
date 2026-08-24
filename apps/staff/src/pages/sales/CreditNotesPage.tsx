@@ -6,7 +6,7 @@ import {
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, RotateCcw,
 } from '@erp/ui'
-import { fmtCurrency, fmtDate } from './fmt'
+import { formatCurrency, formatDate } from '../../lib/format'
 
 export function CreditNotesPage() {
   const navigate = useNavigate()
@@ -126,10 +126,10 @@ function CreditNoteRow({
     <TR>
       <TD className="font-mono font-medium">{note.credit_note_number}</TD>
       <TD>{note.contact_name}</TD>
-      <TD muted>{fmtDate(note.credit_note_date)}</TD>
+      <TD muted>{formatDate(note.credit_note_date)}</TD>
       <TD muted className="max-w-xs truncate">{note.reason}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(note.total)}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(note.available_amount)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(note.total)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(note.available_amount)}</TD>
       <TD align="center"><SalesStatusBadge status={note.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">

@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
-import { ThemeProvider } from '@erp/ui'
+import { ErrorBoundary, ThemeProvider } from '@erp/ui'
 import { router } from './router'
 import { initApiClient } from '@erp/api-client'
 import { useAuthStore } from './store/auth'
@@ -19,7 +19,9 @@ useAuthStore.getState().hydrateFromStorage()
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
     </ThemeProvider>
   </React.StrictMode>,
 )

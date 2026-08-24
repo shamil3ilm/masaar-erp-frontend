@@ -6,7 +6,7 @@ import {
   Select, Table, THead, TBody, TR, TH, TD, Pagination, Button,
   ShoppingCart,
 } from '@erp/ui'
-import { fmtCurrency, fmtDate } from './fmt'
+import { formatCurrency, formatDate } from '../../lib/format'
 
 export function SalesOrdersPage() {
   const navigate = useNavigate()
@@ -120,9 +120,9 @@ function SalesOrderRow({
     <TR>
       <TD className="font-mono font-medium">{order.order_number}</TD>
       <TD>{order.customer_name}</TD>
-      <TD muted>{fmtDate(order.order_date)}</TD>
-      <TD muted>{fmtDate(order.expected_delivery_date)}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(order.total, order.currency_code)}</TD>
+      <TD muted>{formatDate(order.order_date)}</TD>
+      <TD muted>{formatDate(order.expected_delivery_date)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(order.total, order.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={order.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">

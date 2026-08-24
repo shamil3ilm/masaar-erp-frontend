@@ -6,7 +6,7 @@ import {
   Button, Input, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Users,
 } from '@erp/ui'
-import { fmtCurrency } from './fmt'
+import { formatCurrency } from '../../lib/format'
 
 export function ContactsPage() {
   const navigate = useNavigate()
@@ -92,7 +92,7 @@ export function ContactsPage() {
                     <TD><SalesStatusBadge status={c.contact_type} /></TD>
                     <TD muted>{c.contact_name ?? '—'}</TD>
                     <TD muted>{c.email ?? '—'}</TD>
-                    <TD align="end" className="font-mono">{fmtCurrency(c.outstanding_balance, c.currency_code)}</TD>
+                    <TD align="end" className="font-mono">{formatCurrency(c.outstanding_balance, c.currency_code)}</TD>
                     <TD align="center">
                       {c.payment_block
                         ? <Badge variant="danger" dot>Blocked</Badge>

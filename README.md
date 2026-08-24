@@ -61,6 +61,7 @@ pnpm dev
 | `pnpm build` | Build all apps |
 | `pnpm build --force` | Build bypassing Turborepo cache |
 | `pnpm typecheck` | TypeScript check across all packages |
+| `pnpm test` | Run unit tests across all packages |
 | `pnpm lint` | Lint all packages |
 
 ### Per-App
@@ -97,5 +98,4 @@ Each app reads from its own `.env.local`:
 
 ## Known Issues
 
-- `pnpm typecheck` fails in `packages/api-client/src/mocks/zatca.ts` — some ZATCA mock types are not exported from `@erp/types`. Not caused by design system work; fix separately.
 - Staff JS bundle is ~610 KB (minified) — above Vite's 500 KB warning. Code splitting via dynamic imports is a future improvement.

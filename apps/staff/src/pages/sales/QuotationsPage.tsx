@@ -6,7 +6,7 @@ import {
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, FileText,
 } from '@erp/ui'
-import { fmtCurrency, fmtDate } from './fmt'
+import { formatCurrency, formatDate } from '../../lib/format'
 
 export function QuotationsPage() {
   const navigate = useNavigate()
@@ -127,9 +127,9 @@ function QuotationRow({
     <TR>
       <TD className="font-mono font-medium">{quotation.quotation_number}</TD>
       <TD>{quotation.customer_name}</TD>
-      <TD muted>{fmtDate(quotation.quotation_date)}</TD>
-      <TD muted>{fmtDate(quotation.valid_until)}</TD>
-      <TD align="end" className="font-mono">{fmtCurrency(quotation.total, quotation.currency_code)}</TD>
+      <TD muted>{formatDate(quotation.quotation_date)}</TD>
+      <TD muted>{formatDate(quotation.valid_until)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(quotation.total, quotation.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={quotation.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
