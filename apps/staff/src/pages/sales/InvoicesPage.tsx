@@ -1,24 +1,27 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useInvoices, useInvoiceSummary, useSendInvoice, useVoidInvoice } from '@masaar/api-client'
 import type { Invoice } from '@masaar/types'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard, Alert,
-  Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
+  Button, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Receipt, CreditCard, AlertCircle, CheckCircle2,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 import { canSendInvoice, canVoidInvoice } from '../../lib/sales-rules'
 import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { useCan } from '../../lib/use-can'
+import { useListFilter } from '../../lib/use-list-filter'
+import { INVOICE_STATUSES } from '../../lib/status-filters'
 import { ConfirmButton } from '../../components/ConfirmButton'
+import { StatusFilter } from '../../components/StatusFilter'
 import { useAuthStore } from '../../store/auth'
 
 export function InvoicesPage() {
   const navigate = useNavigate()
+  const can = useCan()
   const { organization } = useAuthStore()
   const currency = organization?.base_currency
-  const [page, setPage] = useState(1)
-  const [status, setStatus] = useState('')
+  const { page, setPage, filter: status, setFilter: setStatus } = useListFilter()
   const action = useActionError()
 
   const { data, isLoading, isError } = useInvoices({
@@ -31,16 +34,18 @@ export function InvoicesPage() {
   const invoices = data?.data ?? []
   const meta = data?.meta
 
+  const newInvoice = can('sales.invoices.create') ? (
+    <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/invoices/new' })}>
+      New Invoice
+    </Button>
+  ) : null
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Invoices"
         breadcrumbs={[{ label: 'Sales' }, { label: 'Invoices' }]}
-        actions={
-          <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/invoices/new' })}>
-            New Invoice
-          </Button>
-        }
+        actions={newInvoice}
       />
 
       {summary && (
@@ -63,19 +68,7 @@ export function InvoicesPage() {
       )}
 
       <div className="flex gap-3 mb-4">
-        <Select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1) }}
-          className="max-w-[180px]"
-        >
-          <option value="">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="sent">Sent</option>
-          <option value="partial">Partial</option>
-          <option value="paid">Paid</option>
-          <option value="overdue">Overdue</option>
-          <option value="voided">Voided</option>
-        </Select>
+        <StatusFilter value={status} onChange={setStatus} options={INVOICE_STATUSES} />
       </div>
 
       {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
@@ -89,11 +82,7 @@ export function InvoicesPage() {
           icon={Receipt}
           title="No invoices found"
           description="Create your first invoice or convert a sales order."
-          action={
-            <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/invoices/new' })}>
-              New Invoice
-            </Button>
-          }
+          action={newInvoice}
         />
       ) : (
         <>
@@ -136,6 +125,7 @@ export function InvoicesPage() {
 }
 
 function InvoiceRow({ invoice, ...handlers }: { invoice: Invoice } & RowActionHandlers) {
+  const can = useCan()
   const send = useSendInvoice(invoice.id)
   const voidInv = useVoidInvoice(invoice.id)
   const compliance = invoice.compliance?.status
@@ -154,7 +144,7 @@ function InvoiceRow({ invoice, ...handlers }: { invoice: Invoice } & RowActionHa
       </TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {canSendInvoice(invoice.status) && (
+          {can('sales.invoices.send') && canSendInvoice(invoice.status) && (
             <Button
               variant="ghost"
               size="sm"
@@ -164,7 +154,7 @@ function InvoiceRow({ invoice, ...handlers }: { invoice: Invoice } & RowActionHa
               Send
             </Button>
           )}
-          {canVoidInvoice(invoice.status) && (
+          {can('sales.invoices.void') && canVoidInvoice(invoice.status) && (
             <ConfirmButton
               label="Void"
               title={`Void invoice ${invoice.invoice_number}?`}

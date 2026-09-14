@@ -1,20 +1,22 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useSalesOrders, useConfirmSalesOrder, useCancelSalesOrder, useConvertOrderToInvoice } from '@masaar/api-client'
 import type { SalesOrder } from '@masaar/types'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Alert,
-  Select, Table, THead, TBody, TR, TH, TD, Pagination, Button,
+  Table, THead, TBody, TR, TH, TD, Pagination, Button,
   ShoppingCart,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 import { canCancelOrder, canConfirmOrder, canInvoiceOrder } from '../../lib/sales-rules'
 import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { useCan } from '../../lib/use-can'
+import { useListFilter } from '../../lib/use-list-filter'
+import { ORDER_STATUSES } from '../../lib/status-filters'
 import { ConfirmButton } from '../../components/ConfirmButton'
+import { StatusFilter } from '../../components/StatusFilter'
 
 export function SalesOrdersPage() {
-  const [page, setPage] = useState(1)
-  const [status, setStatus] = useState('')
+  const { page, setPage, filter: status, setFilter: setStatus } = useListFilter()
   const action = useActionError()
 
   const { data, isLoading, isError } = useSalesOrders({
@@ -34,20 +36,7 @@ export function SalesOrdersPage() {
       />
 
       <div className="flex gap-3 mb-4">
-        <Select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1) }}
-          className="max-w-[200px]"
-        >
-          <option value="">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="processing">Processing</option>
-          <option value="partially_delivered">Partially Delivered</option>
-          <option value="delivered">Delivered</option>
-          <option value="invoiced">Invoiced</option>
-          <option value="cancelled">Cancelled</option>
-        </Select>
+        <StatusFilter value={status} onChange={setStatus} options={ORDER_STATUSES} className="max-w-[200px]" />
       </div>
 
       {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
@@ -102,6 +91,7 @@ export function SalesOrdersPage() {
 
 function SalesOrderRow({ order, onSuccess, onError }: { order: SalesOrder } & RowActionHandlers) {
   const navigate = useNavigate()
+  const can = useCan()
   const confirm = useConfirmSalesOrder(order.id)
   const cancel = useCancelSalesOrder(order.id)
   const toInvoice = useConvertOrderToInvoice(order.id)
@@ -116,7 +106,7 @@ function SalesOrderRow({ order, onSuccess, onError }: { order: SalesOrder } & Ro
       <TD align="center"><SalesStatusBadge status={order.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {canConfirmOrder(order.status) && (
+          {can('sales.orders.confirm') && canConfirmOrder(order.status) && (
             <Button
               variant="ghost"
               size="sm"
@@ -126,7 +116,7 @@ function SalesOrderRow({ order, onSuccess, onError }: { order: SalesOrder } & Ro
               Confirm
             </Button>
           )}
-          {canInvoiceOrder(order.status) && (
+          {can('sales.orders.convert') && canInvoiceOrder(order.status) && (
             <Button
               variant="ghost"
               size="sm"
@@ -144,7 +134,7 @@ function SalesOrderRow({ order, onSuccess, onError }: { order: SalesOrder } & Ro
               Invoice
             </Button>
           )}
-          {canCancelOrder(order.status) && (
+          {can('sales.orders.cancel') && canCancelOrder(order.status) && (
             <ConfirmButton
               label="Cancel"
               title={`Cancel order ${order.order_number}?`}

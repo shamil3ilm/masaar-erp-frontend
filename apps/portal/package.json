@@ -9,8 +9,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@masaar/api-client": "workspace:*",
     "@masaar/types": "workspace:*",
-    "axios": "^1.15.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

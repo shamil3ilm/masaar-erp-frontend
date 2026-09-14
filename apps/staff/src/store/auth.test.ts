@@ -29,6 +29,17 @@ describe('useAuthStore', () => {
     expect(localStorage.getItem('erp_token')).toBe('tok-123')
   })
 
+  it('setAuth drops the previous user cache and permissions', () => {
+    const acme = org(1, 'Acme', 'SA', 'SAR')
+    queryClient.setQueryData(['auth', 'me'], { permissions: ['sales.invoices.void'] })
+    useAuthStore.setState({ permissions: ['sales.invoices.void'] })
+
+    useAuthStore.getState().setAuth('tok-456', { id: 2, name: 'Jane', email: 'jane@test.com' }, [acme], acme)
+
+    expect(queryClient.getQueryData(['auth', 'me'])).toBeUndefined()
+    expect(useAuthStore.getState().permissions).toBeNull()
+  })
+
   it('setToken persists a refreshed token', () => {
     useAuthStore.setState({ token: 'old' })
     useAuthStore.getState().setToken('new')

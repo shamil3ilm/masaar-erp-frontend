@@ -5,25 +5,36 @@ import {
   LayoutDashboard, Plus, ArrowRight,
 } from '@masaar/ui'
 import { useAuthStore } from '../store/auth'
+// permitted() only accepts entries whose `permission` is a known Permission slug.
+import { permitted } from '../lib/permissions'
+import { useCan } from '../lib/use-can'
 
 const MODULE_CARDS = [
-  { label: 'Contacts',     href: '/app/sales/contacts',                   icon: Users,      desc: 'Manage customers and suppliers.' },
-  { label: 'Quotations',   href: '/app/sales/quotations',                  icon: FileText,   desc: 'Create and send price quotations.' },
-  { label: 'Sales Orders', href: '/app/sales/sales-orders',                icon: ShoppingCart, desc: 'Track confirmed orders.' },
-  { label: 'Invoices',     href: '/app/sales/invoices',                    icon: Receipt,    desc: 'Issue invoices, track payments.' },
-  { label: 'Payments',     href: '/app/sales/payments',                    icon: CreditCard, desc: 'Record and allocate receipts.' },
-  { label: 'Credit Notes', href: '/app/sales/credit-notes',                icon: RotateCcw,  desc: 'Issue credit notes against invoices.' },
-  { label: 'ZATCA',        href: '/app/compliance/zatca/onboarding',       icon: Shield,     desc: 'Register with ZATCA e-invoicing.' },
+  { label: 'Contacts',     href: '/app/sales/contacts',              icon: Users,        desc: 'Manage customers and suppliers.',      permission: 'sales.contacts.view' },
+  { label: 'Quotations',   href: '/app/sales/quotations',            icon: FileText,     desc: 'Create and send price quotations.',     permission: 'sales.quotations.view' },
+  { label: 'Sales Orders', href: '/app/sales/sales-orders',          icon: ShoppingCart, desc: 'Track confirmed orders.',               permission: 'sales.orders.view' },
+  { label: 'Invoices',     href: '/app/sales/invoices',              icon: Receipt,      desc: 'Issue invoices, track payments.',       permission: 'sales.invoices.view' },
+  { label: 'Payments',     href: '/app/sales/payments',              icon: CreditCard,   desc: 'Record and allocate receipts.',         permission: 'sales.payments.view' },
+  { label: 'Credit Notes', href: '/app/sales/credit-notes',          icon: RotateCcw,    desc: 'Issue credit notes against invoices.',  permission: 'sales.credit-notes.view' },
+  { label: 'ZATCA',        href: '/app/compliance/zatca/onboarding', icon: Shield,       desc: 'Register with ZATCA e-invoicing.',      permission: 'compliance.onboarding.view' },
 ] as const
 
 const QUICK_ACTIONS = [
-  { label: 'New invoice',   href: '/app/sales/invoices/new' },
-  { label: 'New quotation', href: '/app/sales/quotations/new' },
-  { label: 'New contact',   href: '/app/sales/contacts/new' },
+  { label: 'New invoice',   href: '/app/sales/invoices/new',   permission: 'sales.invoices.create' },
+  { label: 'New quotation', href: '/app/sales/quotations/new', permission: 'sales.quotations.create' },
+  { label: 'New contact',   href: '/app/sales/contacts/new',   permission: 'sales.contacts.create' },
+] as const
+
+const STEPS = [
+  { label: 'Add first customer', href: '/app/sales/contacts/new',           done: false, permission: 'sales.contacts.create' },
+  { label: 'Create a quotation', href: '/app/sales/quotations/new',         done: false, permission: 'sales.quotations.create' },
+  { label: 'Issue an invoice',   href: '/app/sales/invoices/new',           done: false, permission: 'sales.invoices.create' },
+  { label: 'ZATCA onboarding',   href: '/app/compliance/zatca/onboarding',  done: false, permission: 'compliance.onboarding.view' },
 ] as const
 
 export function DashboardPage() {
   const { organization } = useAuthStore()
+  const can = useCan()
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
@@ -33,11 +44,11 @@ export function DashboardPage() {
           { label: 'Home', href: '/app/dashboard' },
           { label: 'Overview' },
         ]}
-        actions={
+        actions={can('sales.invoices.create') ? (
           <Link to="/app/sales/invoices/new">
             <Button size="sm" iconLeft={<Plus size={14} />}>New invoice</Button>
           </Link>
-        }
+        ) : null}
       />
 
       {/* KPI row */}
@@ -78,7 +89,7 @@ export function DashboardPage() {
             Modules
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {MODULE_CARDS.map(({ label, href, icon: Icon, desc }) => (
+            {permitted(MODULE_CARDS, can).map(({ label, href, icon: Icon, desc }) => (
               <Link
                 key={href}
                 to={href}
@@ -104,7 +115,7 @@ export function DashboardPage() {
             <CardHeader title="Quick actions" />
             <CardBody>
               <div className="flex flex-col gap-2">
-                {QUICK_ACTIONS.map(({ label, href }) => (
+                {permitted(QUICK_ACTIONS, can).map(({ label, href }) => (
                   <Link key={href} to={href}>
                     <Button variant="outline" size="sm" fullWidth className="justify-start">
                       <Plus size={13} />
@@ -121,12 +132,7 @@ export function DashboardPage() {
             <CardHeader title="Getting started" />
             <CardBody>
               <div className="space-y-2 text-sm">
-                {[
-                  { label: 'Add first customer', href: '/app/sales/contacts/new', done: false },
-                  { label: 'Create a quotation', href: '/app/sales/quotations/new', done: false },
-                  { label: 'Issue an invoice', href: '/app/sales/invoices/new', done: false },
-                  { label: 'ZATCA onboarding', href: '/app/compliance/zatca/onboarding', done: false },
-                ].map((step) => (
+                {permitted(STEPS, can).map((step) => (
                   <Link
                     key={step.href}
                     to={step.href}

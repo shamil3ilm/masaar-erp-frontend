@@ -2,28 +2,33 @@ import { Outlet, Link, useLocation, useNavigate } from '@tanstack/react-router'
 import {
   AppShell, Sidebar, TopBar, Logo, ThemeToggle, DirectionToggle,
   sidebarLinkClass, SidebarItemContent,
-  type NavSection,
+  type NavItem,
   Users, FileText, ShoppingCart, Receipt, CreditCard, RotateCcw,
   Shield, User, LifeBuoy,
 } from '@masaar/ui'
 import { useAuthStore } from '../store/auth'
+import type { Permission } from '../lib/permissions'
+import { usePermissionSync } from '../lib/use-can'
 
-const NAV_SECTIONS: NavSection[] = [
+type GuardedNavItem = NavItem & { permission?: Permission }
+
+// The Sidebar hides an item whose `permission` the user lacks, and a section left empty.
+const NAV_SECTIONS: { label: string; items: GuardedNavItem[] }[] = [
   {
     label: 'Sales',
     items: [
-      { label: 'Contacts',     href: '/app/sales/contacts',     icon: <Users size={15} /> },
-      { label: 'Quotations',   href: '/app/sales/quotations',   icon: <FileText size={15} /> },
-      { label: 'Sales Orders', href: '/app/sales/sales-orders', icon: <ShoppingCart size={15} /> },
-      { label: 'Invoices',     href: '/app/sales/invoices',     icon: <Receipt size={15} /> },
-      { label: 'Payments',     href: '/app/sales/payments',     icon: <CreditCard size={15} /> },
-      { label: 'Credit Notes', href: '/app/sales/credit-notes', icon: <RotateCcw size={15} /> },
+      { label: 'Contacts',     href: '/app/sales/contacts',     icon: <Users size={15} />,        permission: 'sales.contacts.view' },
+      { label: 'Quotations',   href: '/app/sales/quotations',   icon: <FileText size={15} />,     permission: 'sales.quotations.view' },
+      { label: 'Sales Orders', href: '/app/sales/sales-orders', icon: <ShoppingCart size={15} />, permission: 'sales.orders.view' },
+      { label: 'Invoices',     href: '/app/sales/invoices',     icon: <Receipt size={15} />,      permission: 'sales.invoices.view' },
+      { label: 'Payments',     href: '/app/sales/payments',     icon: <CreditCard size={15} />,   permission: 'sales.payments.view' },
+      { label: 'Credit Notes', href: '/app/sales/credit-notes', icon: <RotateCcw size={15} />,    permission: 'sales.credit-notes.view' },
     ],
   },
   {
     label: 'Compliance',
     items: [
-      { label: 'ZATCA', href: '/app/compliance/zatca/onboarding', icon: <Shield size={15} /> },
+      { label: 'ZATCA', href: '/app/compliance/zatca/onboarding', icon: <Shield size={15} />, permission: 'compliance.onboarding.view' },
     ],
   },
   {
@@ -38,7 +43,8 @@ const NAV_SECTIONS: NavSection[] = [
 export function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, organization, organizations, switchOrg, logout } = useAuthStore()
+  const { user, organization, organizations, permissions, switchOrg, logout } = useAuthStore()
+  usePermissionSync()
 
   function handleSwitchOrg(orgId: string) {
     const org = organizations.find((o) => String(o.id) === orgId)
@@ -56,6 +62,7 @@ export function AppLayout() {
       sidebar={
         <Sidebar
           sections={NAV_SECTIONS}
+          permissions={[...(permissions ?? [])]}
           currentPath={location.pathname}
           header={<Logo size={28} showName nameClassName="font-semibold text-white tracking-tight" />}
           renderLink={(item, active, collapsed) => (

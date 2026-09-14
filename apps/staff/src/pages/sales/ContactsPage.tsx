@@ -3,16 +3,20 @@ import { useNavigate } from '@tanstack/react-router'
 import { useContacts } from '@masaar/api-client'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Badge,
-  Button, Input, Select, Table, THead, TBody, TR, TH, TD, Pagination,
+  Button, Input, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Users,
 } from '@masaar/ui'
 import { formatCurrency } from '../../lib/format'
+import { useCan } from '../../lib/use-can'
+import { useListFilter } from '../../lib/use-list-filter'
+import { CONTACT_TYPES } from '../../lib/status-filters'
+import { StatusFilter } from '../../components/StatusFilter'
 
 export function ContactsPage() {
   const navigate = useNavigate()
-  const [page, setPage] = useState(1)
+  const can = useCan()
+  const { page, setPage, filter: contactType, setFilter: setContactType } = useListFilter()
   const [search, setSearch] = useState('')
-  const [contactType, setContactType] = useState('')
 
   const { data, isLoading, isError } = useContacts({
     page,
@@ -24,16 +28,18 @@ export function ContactsPage() {
   const contacts = data?.data ?? []
   const meta = data?.meta
 
+  const newContact = can('sales.contacts.create') ? (
+    <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/contacts/new' })}>
+      New Contact
+    </Button>
+  ) : null
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Contacts"
         breadcrumbs={[{ label: 'Sales' }, { label: 'Contacts' }]}
-        actions={
-          <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/contacts/new' })}>
-            New Contact
-          </Button>
-        }
+        actions={newContact}
       />
 
       <div className="flex flex-wrap gap-3 mb-4">
@@ -44,16 +50,13 @@ export function ContactsPage() {
           onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           className="w-64"
         />
-        <Select
+        <StatusFilter
           value={contactType}
-          onChange={(e) => { setContactType(e.target.value); setPage(1) }}
+          onChange={setContactType}
+          options={CONTACT_TYPES}
+          allLabel="All Types"
           className="max-w-[160px]"
-        >
-          <option value="">All Types</option>
-          <option value="customer">Customer</option>
-          <option value="supplier">Supplier</option>
-          <option value="both">Both</option>
-        </Select>
+        />
       </div>
 
       {isLoading ? (
@@ -65,11 +68,7 @@ export function ContactsPage() {
           icon={Users}
           title="No contacts found"
           description="Create your first contact to start building your customer list."
-          action={
-            <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/contacts/new' })}>
-              New Contact
-            </Button>
-          }
+          action={newContact}
         />
       ) : (
         <>

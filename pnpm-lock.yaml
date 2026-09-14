@@ -81,12 +81,12 @@ importers:
 
   apps/portal:
     dependencies:
+      '@masaar/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@masaar/types':
         specifier: workspace:*
         version: link:../../packages/types
-      axios:
-        specifier: ^1.15.2
-        version: 1.15.2
       react:
         specifier: ^19.0.0
         version: 19.2.5

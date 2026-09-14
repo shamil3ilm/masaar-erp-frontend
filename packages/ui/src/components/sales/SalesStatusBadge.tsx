@@ -1,4 +1,5 @@
-import { cn } from '../../lib/utils'
+import { statusLabel } from '../../lib/status-label'
+import { StatusPill } from '../StatusPill'
 
 const STATUS_COLORS: Record<string, string> = {
   // Contact type
@@ -41,10 +42,6 @@ const STATUS_COLORS: Record<string, string> = {
   refunded: 'bg-purple-100 text-purple-700',
 }
 
-function toLabel(status: string): string {
-  return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
 interface SalesStatusBadgeProps {
   /** Missing when the payload omits it, e.g. an unset compliance status. */
   status: string | null | undefined
@@ -53,16 +50,9 @@ interface SalesStatusBadgeProps {
 
 export function SalesStatusBadge({ status, className }: SalesStatusBadgeProps) {
   if (!status) return null
-  const colorClass = STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-700'
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
-        colorClass,
-        className,
-      )}
-    >
-      {toLabel(status)}
-    </span>
+    <StatusPill tone={STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-700'} className={className}>
+      {statusLabel(status)}
+    </StatusPill>
   )
 }

@@ -7,8 +7,11 @@ interface AuthState {
   user: User | null
   organization: Organization | null
   organizations: Organization[]
+  /** Slugs from `/auth/me`; `null` until loaded. Kept in memory only, so a reload refetches them. */
+  permissions: readonly string[] | null
   setAuth: (token: string, user: User, orgs: Organization[], selectedOrg: Organization | null) => void
   setToken: (token: string) => void
+  setPermissions: (permissions: readonly string[]) => void
   switchOrg: (org: Organization) => void
   logout: () => void
   hydrateFromStorage: () => void
@@ -19,8 +22,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   organization: null,
   organizations: [],
+  permissions: null,
 
+  // A new sign-in may be a different user: drop the previous user's cached
+  // queries, `/auth/me` included, so their permissions and lists never show.
   setAuth: (token, user, orgs, selectedOrg) => {
+    queryClient.clear()
     localStorage.setItem('erp_token', token)
     localStorage.setItem('erp_user', JSON.stringify(user))
     localStorage.setItem('erp_orgs', JSON.stringify(orgs))
@@ -29,7 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } else {
       localStorage.removeItem('erp_org_id')
     }
-    set({ token, user, organizations: orgs, organization: selectedOrg })
+    set({ token, user, organizations: orgs, organization: selectedOrg, permissions: null })
   },
 
   // A refreshed token replaces the old one, which the backend has blacklisted.
@@ -37,6 +44,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.setItem('erp_token', token)
     set({ token })
   },
+
+  setPermissions: (permissions) => set({ permissions: [...permissions] }),
 
   // Only the local selection changes: the backend takes the tenant from the
   // signed-in user and has no endpoint to switch it. Cached queries belong to
@@ -53,7 +62,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('erp_orgs')
     localStorage.removeItem('erp_org_id')
     queryClient.clear()
-    set({ token: null, user: null, organization: null, organizations: [] })
+    set({ token: null, user: null, organization: null, organizations: [], permissions: null })
   },
 
   hydrateFromStorage: () => {

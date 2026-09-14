@@ -1,24 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useAuthStore } from '../store/auth'
-import { getApiClient, useVerify2fa } from '@masaar/api-client'
+import { isTwoFactorChallenge, useLogin, useVerify2fa, type AuthTokenResponse } from '@masaar/api-client'
 import { AuthLayout } from '../components/AuthLayout'
 import { Input, PasswordInput, Alert, FormField, Button, Lock } from '@masaar/ui'
-import type { ApiResponse, User } from '@masaar/types'
-
-interface LoginSuccessData {
-  token: string
-  token_type: string
-  expires_in: number
-  user: User
-}
-
-interface LoginChallengeData {
-  requires_2fa: true
-  challenge_token: string
-}
-
-type LoginResponseData = LoginSuccessData | LoginChallengeData
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -29,13 +14,13 @@ export function LoginPage() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
 
   const [challengeToken, setChallengeToken] = useState<string | null>(null)
   const [otpCode, setOtpCode] = useState('')
+  const login = useLogin()
   const verify2fa = useVerify2fa()
 
-  function handleAuthSuccess(data: LoginSuccessData) {
+  function handleAuthSuccess(data: AuthTokenResponse) {
     const org = data.user.organization ?? null
     setAuth(data.token, data.user, org ? [org] : [], org)
     void navigate({ to: '/app/dashboard' })
@@ -44,20 +29,16 @@ export function LoginPage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     if (!email || !password) { setError('Please enter your email and password.'); return }
-    setLoading(true)
     setError('')
     try {
-      const { data } = await getApiClient().post<ApiResponse<LoginResponseData>>('/auth/login', { email, password })
-      const result = data.data
-      if ('requires_2fa' in result && result.requires_2fa) {
+      const result = await login.mutateAsync({ email, password })
+      if (isTwoFactorChallenge(result)) {
         setChallengeToken(result.challenge_token)
       } else {
-        handleAuthSuccess(result as LoginSuccessData)
+        handleAuthSuccess(result)
       }
     } catch {
       setError('Invalid email or password. Please try again.')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -169,7 +150,7 @@ export function LoginPage() {
           />
         </FormField>
 
-        <Button type="submit" fullWidth size="lg" loading={loading}>
+        <Button type="submit" fullWidth size="lg" loading={login.isPending}>
           Sign in
         </Button>
       </form>

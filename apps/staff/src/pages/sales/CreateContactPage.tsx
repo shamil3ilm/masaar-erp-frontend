@@ -6,7 +6,8 @@ import { useCreateContact } from '@masaar/api-client'
 import { PageHeader, Card, CardHeader, FormField, Input, Select, Button, Alert } from '@masaar/ui'
 import { useAuthStore } from '../../store/auth'
 import { applyApiErrors } from '../../lib/form-errors'
-import { CURRENCIES, DEFAULT_CURRENCY, moneyInputProps } from '../../lib/money'
+import { CURRENCIES, DEFAULT_CURRENCY } from '../../lib/money'
+import { MoneyInput } from '../../components/MoneyInput'
 
 const schema = z.object({
   company_name: z.string().min(1, 'Required'),
@@ -112,7 +113,7 @@ export function CreateContactPage() {
               <Input type="number" {...register('payment_terms', { valueAsNumber: true })} error={!!errors.payment_terms} />
             </FormField>
             <FormField label="Credit Limit" error={errors.credit_limit?.message}>
-              <Input {...moneyInputProps(currency)} {...register('credit_limit', { valueAsNumber: true })} error={!!errors.credit_limit} />
+              <MoneyInput currency={currency} {...register('credit_limit', { valueAsNumber: true })} error={!!errors.credit_limit} />
             </FormField>
           </div>
         </Card>
