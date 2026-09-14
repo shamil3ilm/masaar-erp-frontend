@@ -88,15 +88,18 @@ export function ContactsPage() {
               <TBody>
                 {contacts.map((c) => (
                   <TR key={c.id}>
-                    <TD className="font-medium">{c.company_name}</TD>
+                    <TD className="font-medium">{c.display_name || '—'}</TD>
                     <TD><SalesStatusBadge status={c.contact_type} /></TD>
                     <TD muted>{c.contact_name ?? '—'}</TD>
                     <TD muted>{c.email ?? '—'}</TD>
-                    <TD align="end" className="font-mono">{formatCurrency(c.outstanding_balance, c.currency_code)}</TD>
+                    <TD align="end" className="font-mono">
+                      {c.outstanding_balance === undefined ? '—' : formatCurrency(c.outstanding_balance, c.currency_code)}
+                    </TD>
                     <TD align="center">
-                      {c.payment_block
-                        ? <Badge variant="danger" dot>Blocked</Badge>
-                        : <Badge variant="success" dot>Active</Badge>}
+                      {/* ContactResource sends is_active; the payment block is not part of it. */}
+                      {c.is_active
+                        ? <Badge variant="success" dot>Active</Badge>
+                        : <Badge variant="muted" dot>Inactive</Badge>}
                     </TD>
                   </TR>
                 ))}

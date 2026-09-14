@@ -53,7 +53,7 @@ export function DashboardPage() {
           value="—"
           icon={CreditCard}
           iconColor="bg-success-subtle"
-          subtitle={organization?.currency ?? 'SAR'}
+          subtitle={organization?.base_currency}
         />
         <StatCard
           label="Active contacts"

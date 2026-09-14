@@ -41,7 +41,7 @@ export function AppLayout() {
   const { user, organization, organizations, switchOrg, logout } = useAuthStore()
 
   function handleSwitchOrg(orgId: string) {
-    const org = organizations.find((o) => o.id === orgId)
+    const org = organizations.find((o) => String(o.id) === orgId)
     if (org) switchOrg(org)
   }
 
@@ -73,6 +73,7 @@ export function AppLayout() {
       topbar={
         <TopBar
           user={{ name: user?.name ?? '', email: user?.email }}
+          organizationId={organization?.id}
           organizationName={organization?.name}
           organizations={organizations}
           onSwitchOrg={handleSwitchOrg}

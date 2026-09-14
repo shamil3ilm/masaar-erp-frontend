@@ -6,21 +6,24 @@ import { useRegister } from '@masaar/api-client'
 import { useAuthStore } from '../store/auth'
 import { AuthLayout } from '../components/AuthLayout'
 import { Input, PasswordInput, FormField, Button, Alert } from '@masaar/ui'
+import { applyApiErrors } from '../lib/form-errors'
 
-const schema = z
-  .object({
-    name: z.string().min(2, 'Full name is required'),
-    email: z.string().email('Enter a valid email'),
-    organization_name: z.string().min(2, 'Organization name is required'),
-    password: z.string().min(8, 'Minimum 8 characters'),
-    password_confirmation: z.string(),
-  })
-  .refine((d) => d.password === d.password_confirmation, {
-    message: 'Passwords do not match',
-    path: ['password_confirmation'],
-  })
+const shape = z.object({
+  name: z.string().min(2, 'Full name is required'),
+  email: z.string().email('Enter a valid email'),
+  organization_name: z.string().min(2, 'Organization name is required'),
+  password: z.string().min(8, 'Minimum 8 characters'),
+  password_confirmation: z.string(),
+})
+
+const schema = shape.refine((d) => d.password === d.password_confirmation, {
+  message: 'Passwords do not match',
+  path: ['password_confirmation'],
+})
 
 type FormValues = z.infer<typeof schema>
+
+const FIELDS = Object.keys(shape.shape)
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -41,14 +44,7 @@ export function RegisterPage() {
       setAuth(result.token, result.user, org ? [org] : [], org)
       void navigate({ to: '/app/dashboard' })
     } catch (err: unknown) {
-      const e = err as { validationErrors?: Record<string, string> }
-      if (e.validationErrors) {
-        for (const [f, msg] of Object.entries(e.validationErrors)) {
-          setError(f as keyof FormValues, { message: msg })
-        }
-      } else {
-        setError('root', { message: 'Registration failed. Please try again.' })
-      }
+      applyApiErrors(err, setError, FIELDS)
     }
   }
 
@@ -60,8 +56,8 @@ export function RegisterPage() {
         <Link to="/login" className="auth-link auth-link-sm">Sign in</Link>
       </p>
 
-      {errors.root && (
-        <Alert variant="danger" className="mb-4">{errors.root.message}</Alert>
+      {errors.root?.server && (
+        <Alert variant="danger" className="mb-4">{errors.root.server.message}</Alert>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">

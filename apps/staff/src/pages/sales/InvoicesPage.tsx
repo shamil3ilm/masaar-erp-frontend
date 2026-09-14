@@ -1,19 +1,27 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useInvoices, useInvoiceSummary, useSendInvoice, useVoidInvoice } from '@masaar/api-client'
+import type { Invoice } from '@masaar/types'
 import {
-  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard,
+  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard, Alert,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, Receipt, CreditCard, AlertCircle, CheckCircle2,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
+import { canSendInvoice, canVoidInvoice } from '../../lib/sales-rules'
+import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { ConfirmButton } from '../../components/ConfirmButton'
+import { useAuthStore } from '../../store/auth'
 
 export function InvoicesPage() {
   const navigate = useNavigate()
+  const { organization } = useAuthStore()
+  const currency = organization?.base_currency
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
+  const action = useActionError()
 
-  const { data, isLoading, isError, refetch } = useInvoices({
+  const { data, isLoading, isError } = useInvoices({
     page,
     per_page: 20,
     status: status || undefined,
@@ -37,12 +45,17 @@ export function InvoicesPage() {
 
       {summary && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard label="Total Invoiced" value={formatCurrency(summary.total_invoiced)} icon={Receipt} />
-          <StatCard label="Total Paid" value={formatCurrency(summary.total_paid)} icon={CheckCircle2} />
-          <StatCard label="Outstanding" value={formatCurrency(summary.total_outstanding)} icon={CreditCard} />
+          <StatCard
+            label="Total Invoiced"
+            value={formatCurrency(summary.total_amount, currency)}
+            subtitle={`${summary.total_invoices} invoice${summary.total_invoices === 1 ? '' : 's'}`}
+            icon={Receipt}
+          />
+          <StatCard label="Total Paid" value={formatCurrency(summary.total_paid, currency)} icon={CheckCircle2} />
+          <StatCard label="Outstanding" value={formatCurrency(summary.total_outstanding, currency)} icon={CreditCard} />
           <StatCard
             label="Overdue"
-            value={formatCurrency(summary.overdue_amount)}
+            value={formatCurrency(summary.overdue_amount, currency)}
             subtitle={`${summary.overdue_count} invoice${summary.overdue_count === 1 ? '' : 's'}`}
             icon={AlertCircle}
           />
@@ -64,6 +77,8 @@ export function InvoicesPage() {
           <option value="voided">Voided</option>
         </Select>
       </div>
+
+      {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
 
       {isLoading ? (
         <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
@@ -99,7 +114,7 @@ export function InvoicesPage() {
               </THead>
               <TBody>
                 {invoices.map((inv) => (
-                  <InvoiceRow key={inv.id} invoice={inv} onRefetch={() => void refetch()} />
+                  <InvoiceRow key={inv.id} invoice={inv} onSuccess={action.clear} onError={action.report} />
                 ))}
               </TBody>
             </Table>
@@ -120,62 +135,43 @@ export function InvoicesPage() {
   )
 }
 
-function InvoiceRow({
-  invoice,
-  onRefetch,
-}: {
-  invoice: {
-    id: string
-    invoice_number: string
-    customer_name: string
-    invoice_date: string
-    due_date: string | null
-    total: number
-    amount_due: number
-    currency_code: string
-    status: string
-    compliance_status: string
-  }
-  onRefetch: () => void
-}) {
+function InvoiceRow({ invoice, ...handlers }: { invoice: Invoice } & RowActionHandlers) {
   const send = useSendInvoice(invoice.id)
   const voidInv = useVoidInvoice(invoice.id)
+  const compliance = invoice.compliance?.status
 
   return (
     <TR>
       <TD className="font-mono font-medium">{invoice.invoice_number}</TD>
-      <TD>{invoice.customer_name}</TD>
+      <TD>{invoice.customer?.name ?? invoice.customer_name ?? '—'}</TD>
       <TD muted>{formatDate(invoice.invoice_date)}</TD>
-      <TD muted>{invoice.due_date ? formatDate(invoice.due_date) : '—'}</TD>
+      <TD muted>{formatDate(invoice.due_date)}</TD>
       <TD align="end" className="font-mono">{formatCurrency(invoice.total, invoice.currency_code)}</TD>
       <TD align="end" className="font-mono">{formatCurrency(invoice.amount_due, invoice.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={invoice.status} /></TD>
       <TD align="center">
-        {invoice.compliance_status !== 'not_applicable' && (
-          <SalesStatusBadge status={invoice.compliance_status} />
-        )}
+        {compliance && compliance !== 'not_applicable' && <SalesStatusBadge status={compliance} />}
       </TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {invoice.status === 'draft' && (
+          {canSendInvoice(invoice.status) && (
             <Button
               variant="ghost"
               size="sm"
               loading={send.isPending}
-              onClick={() => send.mutate(undefined, { onSuccess: onRefetch })}
+              onClick={() => send.mutate(undefined, handlers)}
             >
               Send
             </Button>
           )}
-          {(invoice.status === 'draft' || invoice.status === 'sent') && (
-            <Button
-              variant="danger-outline"
-              size="sm"
+          {canVoidInvoice(invoice.status) && (
+            <ConfirmButton
+              label="Void"
+              title={`Void invoice ${invoice.invoice_number}?`}
+              description="Voiding reverses the invoice's postings and cannot be undone."
               loading={voidInv.isPending}
-              onClick={() => voidInv.mutate(undefined, { onSuccess: onRefetch })}
-            >
-              Void
-            </Button>
+              onConfirm={() => voidInv.mutate(undefined, handlers)}
+            />
           )}
         </div>
       </TD>

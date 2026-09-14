@@ -11,7 +11,7 @@ const queryClient = createQueryClient()
 initApiClient(
   '/api/v1',
   () => localStorage.getItem('admin_token'),
-  () => null,
+  (token) => localStorage.setItem('admin_token', token),
   () => { localStorage.removeItem('admin_token'); window.location.reload() },
 )
 

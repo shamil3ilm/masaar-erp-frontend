@@ -2,31 +2,31 @@ import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { AxiosError } from 'axios'
 import './index.css'
-import { fetchVendorInvoice } from './api.ts'
+import { fetchPortalInvoice } from './api.ts'
 import { InvoiceViewer } from './InvoiceViewer.tsx'
-import type { VendorInvoice } from '@masaar/types'
+import type { PortalInvoice } from '@masaar/types'
 
 type State =
   | { phase: 'invalid' }
   | { phase: 'loading' }
   | { phase: 'error'; message: string }
-  | { phase: 'ready'; invoice: VendorInvoice }
+  | { phase: 'ready'; invoice: PortalInvoice }
 
 function App() {
   const params = new URLSearchParams(window.location.search)
+  // The backend route takes a numeric invoice id.
   const invoiceId = params.get('invoice')
   const token = params.get('token')
+  const valid = !!token && !!invoiceId && /^\d+$/.test(invoiceId)
 
-  const [state, setState] = useState<State>(
-    invoiceId && token ? { phase: 'loading' } : { phase: 'invalid' },
-  )
+  const [state, setState] = useState<State>(valid ? { phase: 'loading' } : { phase: 'invalid' })
 
   useEffect(() => {
-    if (!invoiceId || !token) return
+    if (!valid || !invoiceId || !token) return
 
     let cancelled = false
 
-    fetchVendorInvoice(invoiceId, token)
+    fetchPortalInvoice(invoiceId, token)
       .then((invoice) => {
         if (!cancelled) setState({ phase: 'ready', invoice })
       })
@@ -42,7 +42,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [invoiceId, token])
+  }, [valid, invoiceId, token])
 
   if (state.phase === 'invalid') {
     return (

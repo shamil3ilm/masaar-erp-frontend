@@ -19,9 +19,9 @@ export function ProfilePage() {
         organization
           ? {
               name: organization.name,
-              country: organization.country,
-              currency: organization.currency,
-              taxNumber: organization.tax_number,
+              country: organization.country_code,
+              currency: organization.base_currency,
+              taxNumber: organization.tax_number ?? undefined,
             }
           : null
       }

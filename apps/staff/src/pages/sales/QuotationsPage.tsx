@@ -1,19 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQuotations, useSendQuotation, useConvertQuotation } from '@masaar/api-client'
+import type { Quotation } from '@masaar/types'
 import {
-  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge,
+  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Alert,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, FileText,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
+import { canConvertQuotation, canSendQuotation } from '../../lib/sales-rules'
+import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
 
 export function QuotationsPage() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
+  const action = useActionError()
 
-  const { data, isLoading, isError, refetch } = useQuotations({
+  const { data, isLoading, isError } = useQuotations({
     page,
     per_page: 20,
     status: status || undefined,
@@ -50,6 +54,8 @@ export function QuotationsPage() {
         </Select>
       </div>
 
+      {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
+
       {isLoading ? (
         <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
       ) : isError ? (
@@ -82,7 +88,7 @@ export function QuotationsPage() {
               </THead>
               <TBody>
                 {quotations.map((q) => (
-                  <QuotationRow key={q.id} quotation={q} onRefetch={() => void refetch()} />
+                  <QuotationRow key={q.id} quotation={q} onSuccess={action.clear} onError={action.report} />
                 ))}
               </TBody>
             </Table>
@@ -103,22 +109,7 @@ export function QuotationsPage() {
   )
 }
 
-function QuotationRow({
-  quotation,
-  onRefetch,
-}: {
-  quotation: {
-    id: string
-    quotation_number: string
-    customer_name: string
-    quotation_date: string
-    valid_until: string
-    total: number
-    currency_code: string
-    status: string
-  }
-  onRefetch: () => void
-}) {
+function QuotationRow({ quotation, onSuccess, onError }: { quotation: Quotation } & RowActionHandlers) {
   const navigate = useNavigate()
   const send = useSendQuotation(quotation.id)
   const convert = useConvertQuotation(quotation.id)
@@ -126,29 +117,37 @@ function QuotationRow({
   return (
     <TR>
       <TD className="font-mono font-medium">{quotation.quotation_number}</TD>
-      <TD>{quotation.customer_name}</TD>
+      <TD>{quotation.customer?.name ?? quotation.customer_name ?? '—'}</TD>
       <TD muted>{formatDate(quotation.quotation_date)}</TD>
       <TD muted>{formatDate(quotation.valid_until)}</TD>
       <TD align="end" className="font-mono">{formatCurrency(quotation.total, quotation.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={quotation.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {quotation.status === 'draft' && (
+          {canSendQuotation(quotation.status) && (
             <Button
               variant="ghost"
               size="sm"
               loading={send.isPending}
-              onClick={() => send.mutate(undefined, { onSuccess: onRefetch })}
+              onClick={() => send.mutate(undefined, { onSuccess, onError })}
             >
               Send
             </Button>
           )}
-          {(quotation.status === 'sent' || quotation.status === 'accepted') && (
+          {canConvertQuotation(quotation.status) && (
             <Button
               variant="ghost"
               size="sm"
               loading={convert.isPending}
-              onClick={() => void convert.mutateAsync().then(() => void navigate({ to: '/app/sales/sales-orders' }))}
+              onClick={() =>
+                convert.mutate('sales_order', {
+                  onSuccess: () => {
+                    onSuccess()
+                    void navigate({ to: '/app/sales/sales-orders' })
+                  },
+                  onError,
+                })
+              }
             >
               Convert
             </Button>

@@ -1,19 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useSalesOrders, useConfirmSalesOrder, useCancelSalesOrder, useConvertOrderToInvoice } from '@masaar/api-client'
+import type { SalesOrder } from '@masaar/types'
 import {
-  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge,
+  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Alert,
   Select, Table, THead, TBody, TR, TH, TD, Pagination, Button,
   ShoppingCart,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
+import { canCancelOrder, canConfirmOrder, canInvoiceOrder } from '../../lib/sales-rules'
+import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { ConfirmButton } from '../../components/ConfirmButton'
 
 export function SalesOrdersPage() {
-  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
+  const action = useActionError()
 
-  const { data, isLoading, isError, refetch } = useSalesOrders({
+  const { data, isLoading, isError } = useSalesOrders({
     page,
     per_page: 20,
     status: status || undefined,
@@ -46,6 +50,8 @@ export function SalesOrdersPage() {
         </Select>
       </div>
 
+      {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
+
       {isLoading ? (
         <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
       ) : isError ? (
@@ -73,7 +79,7 @@ export function SalesOrdersPage() {
               </THead>
               <TBody>
                 {orders.map((o) => (
-                  <SalesOrderRow key={o.id} order={o} onRefetch={() => void refetch()} navigate={navigate} />
+                  <SalesOrderRow key={o.id} order={o} onSuccess={action.clear} onError={action.report} />
                 ))}
               </TBody>
             </Table>
@@ -94,24 +100,8 @@ export function SalesOrdersPage() {
   )
 }
 
-function SalesOrderRow({
-  order,
-  onRefetch,
-  navigate,
-}: {
-  order: {
-    id: string
-    order_number: string
-    customer_name: string
-    order_date: string
-    expected_delivery_date: string | null
-    total: number
-    currency_code: string
-    status: string
-  }
-  onRefetch: () => void
-  navigate: ReturnType<typeof useNavigate>
-}) {
+function SalesOrderRow({ order, onSuccess, onError }: { order: SalesOrder } & RowActionHandlers) {
+  const navigate = useNavigate()
   const confirm = useConfirmSalesOrder(order.id)
   const cancel = useCancelSalesOrder(order.id)
   const toInvoice = useConvertOrderToInvoice(order.id)
@@ -119,42 +109,49 @@ function SalesOrderRow({
   return (
     <TR>
       <TD className="font-mono font-medium">{order.order_number}</TD>
-      <TD>{order.customer_name}</TD>
+      <TD>{order.customer_name ?? '—'}</TD>
       <TD muted>{formatDate(order.order_date)}</TD>
       <TD muted>{formatDate(order.expected_delivery_date)}</TD>
       <TD align="end" className="font-mono">{formatCurrency(order.total, order.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={order.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {order.status === 'draft' && (
+          {canConfirmOrder(order.status) && (
             <Button
               variant="ghost"
               size="sm"
               loading={confirm.isPending}
-              onClick={() => confirm.mutate(undefined, { onSuccess: onRefetch })}
+              onClick={() => confirm.mutate(undefined, { onSuccess, onError })}
             >
               Confirm
             </Button>
           )}
-          {(order.status === 'confirmed' || order.status === 'delivered') && (
+          {canInvoiceOrder(order.status) && (
             <Button
               variant="ghost"
               size="sm"
               loading={toInvoice.isPending}
-              onClick={() => void toInvoice.mutateAsync().then(() => void navigate({ to: '/app/sales/invoices' }))}
+              onClick={() =>
+                toInvoice.mutate(undefined, {
+                  onSuccess: () => {
+                    onSuccess()
+                    void navigate({ to: '/app/sales/invoices' })
+                  },
+                  onError,
+                })
+              }
             >
               Invoice
             </Button>
           )}
-          {(order.status === 'draft' || order.status === 'confirmed') && (
-            <Button
-              variant="danger-outline"
-              size="sm"
+          {canCancelOrder(order.status) && (
+            <ConfirmButton
+              label="Cancel"
+              title={`Cancel order ${order.order_number}?`}
+              description="A cancelled sales order cannot be reopened."
               loading={cancel.isPending}
-              onClick={() => cancel.mutate(undefined, { onSuccess: onRefetch })}
-            >
-              Cancel
-            </Button>
+              onConfirm={() => cancel.mutate(undefined, { onSuccess, onError })}
+            />
           )}
         </div>
       </TD>

@@ -46,11 +46,13 @@ function toLabel(status: string): string {
 }
 
 interface SalesStatusBadgeProps {
-  status: string
+  /** Missing when the payload omits it, e.g. an unset compliance status. */
+  status: string | null | undefined
   className?: string
 }
 
 export function SalesStatusBadge({ status, className }: SalesStatusBadgeProps) {
+  if (!status) return null
   const colorClass = STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-700'
   return (
     <span

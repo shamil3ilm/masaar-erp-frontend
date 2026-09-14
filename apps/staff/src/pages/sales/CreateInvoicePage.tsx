@@ -1,12 +1,15 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useCreateInvoice, useContacts } from '@masaar/api-client'
 import {
-  PageHeader, Card, CardHeader, FormField, Input, Select, Button,
+  PageHeader, Card, CardHeader, FormField, Input, Select, Button, Alert,
   Plus, Trash2,
 } from '@masaar/ui'
+import { useAuthStore } from '../../store/auth'
+import { applyApiErrors } from '../../lib/form-errors'
+import { CURRENCIES, DEFAULT_CURRENCY, moneyInputProps, quantityInputProps } from '../../lib/money'
 
 const lineSchema = z.object({
   description: z.string().min(1, 'Required'),
@@ -20,38 +23,46 @@ const schema = z.object({
   invoice_type: z.enum(['standard', 'simplified', 'credit_note', 'debit_note']),
   invoice_date: z.string().min(1, 'Required'),
   due_date: z.string().optional(),
-  currency_code: z.string().min(1),
+  currency_code: z.string().length(3),
   lines: z.array(lineSchema).min(1, 'At least one line item required'),
 })
 
 type FormValues = z.infer<typeof schema>
 
+const FIELDS = Object.keys(schema.shape)
+
 const today = new Date().toISOString().slice(0, 10)
 
 export function CreateInvoicePage() {
   const navigate = useNavigate()
+  const { organization } = useAuthStore()
   const createInvoice = useCreateInvoice()
   const { data: contactsData } = useContacts({ contact_type: 'customer', per_page: 100 })
   const customers = contactsData?.data ?? []
 
-  const { register, control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, control, handleSubmit, setError, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       invoice_type: 'standard',
       invoice_date: today,
-      currency_code: 'SAR',
+      currency_code: organization?.base_currency ?? DEFAULT_CURRENCY,
       lines: [{ description: '', quantity: 1, unit_price: 0, tax_rate: 15 }],
     },
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'lines' })
+  const currency = useWatch({ control, name: 'currency_code' })
 
   async function onSubmit(values: FormValues) {
     try {
-      await createInvoice.mutateAsync(values as never)
+      await createInvoice.mutateAsync({
+        ...values,
+        customer_id: Number(values.customer_id),
+        due_date: values.due_date || undefined,
+      })
       void navigate({ to: '/app/sales/invoices' })
-    } catch {
-      // validation errors handled by interceptor
+    } catch (err) {
+      applyApiErrors(err, setError, FIELDS)
     }
   }
 
@@ -67,6 +78,8 @@ export function CreateInvoicePage() {
         ]}
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {errors.root?.server && <Alert variant="danger">{errors.root.server.message}</Alert>}
+
         <Card>
           <CardHeader title="Invoice Details" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -74,11 +87,11 @@ export function CreateInvoicePage() {
               <Select {...register('customer_id')} error={!!errors.customer_id}>
                 <option value="">Select customer…</option>
                 {customers.map((c) => (
-                  <option key={c.id} value={c.id}>{c.company_name}</option>
+                  <option key={c.id} value={c.id}>{c.display_name}</option>
                 ))}
               </Select>
             </FormField>
-            <FormField label="Invoice Type" required>
+            <FormField label="Invoice Type" required error={errors.invoice_type?.message}>
               <Select {...register('invoice_type')}>
                 <option value="standard">Standard (B2B)</option>
                 <option value="simplified">Simplified (B2C)</option>
@@ -86,19 +99,18 @@ export function CreateInvoicePage() {
                 <option value="debit_note">Debit Note</option>
               </Select>
             </FormField>
-            <FormField label="Currency">
+            <FormField label="Currency" error={errors.currency_code?.message}>
               <Select {...register('currency_code')}>
-                <option value="SAR">SAR</option>
-                <option value="AED">AED</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
+                {CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.code}</option>
+                ))}
               </Select>
             </FormField>
-            <FormField label="Invoice Date" required>
-              <Input type="date" {...register('invoice_date')} />
+            <FormField label="Invoice Date" required error={errors.invoice_date?.message}>
+              <Input type="date" {...register('invoice_date')} error={!!errors.invoice_date} />
             </FormField>
-            <FormField label="Due Date">
-              <Input type="date" {...register('due_date')} />
+            <FormField label="Due Date" error={errors.due_date?.message}>
+              <Input type="date" {...register('due_date')} error={!!errors.due_date} />
             </FormField>
           </div>
         </Card>
@@ -119,42 +131,48 @@ export function CreateInvoicePage() {
             }
           />
           <div className="space-y-3">
-            {fields.map((field, index) => (
-              <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
-                <div className="col-span-12 sm:col-span-5">
-                  {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Description</label>}
-                  <Input {...register(`lines.${index}.description`)} placeholder="Description" />
+            {fields.map((field, index) => {
+              const lineErrors = errors.lines?.[index]
+              const lineMessage = lineErrors?.description?.message ?? lineErrors?.quantity?.message
+                ?? lineErrors?.unit_price?.message ?? lineErrors?.tax_rate?.message
+              return (
+                <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
+                  <div className="col-span-12 sm:col-span-5">
+                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Description</label>}
+                    <Input {...register(`lines.${index}.description`)} placeholder="Description" error={!!lineErrors?.description} />
+                  </div>
+                  <div className="col-span-4 sm:col-span-2">
+                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Qty</label>}
+                    <Input {...quantityInputProps} {...register(`lines.${index}.quantity`, { valueAsNumber: true })} error={!!lineErrors?.quantity} />
+                  </div>
+                  <div className="col-span-4 sm:col-span-2">
+                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Unit Price</label>}
+                    <Input {...moneyInputProps(currency)} {...register(`lines.${index}.unit_price`, { valueAsNumber: true })} error={!!lineErrors?.unit_price} />
+                  </div>
+                  <div className="col-span-3 sm:col-span-2">
+                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">VAT %</label>}
+                    <Input {...quantityInputProps} {...register(`lines.${index}.tax_rate`, { valueAsNumber: true })} error={!!lineErrors?.tax_rate} />
+                  </div>
+                  <div className="col-span-1 flex items-start">
+                    {fields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="Remove line"
+                        className={index === 0 ? 'mt-6' : ''}
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 size={14} className="text-danger" />
+                      </Button>
+                    )}
+                  </div>
+                  {lineMessage && <p className="col-span-12 text-xs text-danger">{lineMessage}</p>}
                 </div>
-                <div className="col-span-4 sm:col-span-2">
-                  {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Qty</label>}
-                  <Input type="number" {...register(`lines.${index}.quantity`, { valueAsNumber: true })} />
-                </div>
-                <div className="col-span-4 sm:col-span-2">
-                  {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Unit Price</label>}
-                  <Input type="number" step="0.01" {...register(`lines.${index}.unit_price`, { valueAsNumber: true })} />
-                </div>
-                <div className="col-span-3 sm:col-span-2">
-                  {index === 0 && <label className="block text-xs font-medium text-muted mb-1">VAT %</label>}
-                  <Input type="number" {...register(`lines.${index}.tax_rate`, { valueAsNumber: true })} />
-                </div>
-                <div className="col-span-1 flex items-start">
-                  {fields.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Remove line"
-                      className={index === 0 ? 'mt-6' : ''}
-                      onClick={() => remove(index)}
-                    >
-                      <Trash2 size={14} className="text-danger" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
-          {errors.lines && <p className="text-xs text-danger mt-2">{String(errors.lines.message)}</p>}
+          {errors.lines?.message && <p className="text-xs text-danger mt-2">{errors.lines.message}</p>}
         </Card>
 
         <div className="flex gap-3">

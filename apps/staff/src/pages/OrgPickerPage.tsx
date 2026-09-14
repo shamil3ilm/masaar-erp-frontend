@@ -5,7 +5,7 @@ export function OrgPickerPage() {
   const { organizations, organization, switchOrg } = useAuthStore()
   const navigate = useNavigate()
 
-  function handleSelect(orgId: string) {
+  function handleSelect(orgId: number) {
     const org = organizations.find((o) => o.id === orgId)
     if (org) {
       switchOrg(org)
@@ -29,7 +29,7 @@ export function OrgPickerPage() {
               }`}
             >
               {org.name}
-              <span className="block text-xs text-muted font-normal">{org.country} · {org.currency}</span>
+              <span className="block text-xs text-muted font-normal">{org.country_code} · {org.base_currency}</span>
             </button>
           ))}
         </div>

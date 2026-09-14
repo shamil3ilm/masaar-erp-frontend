@@ -1,15 +1,12 @@
-import type { VendorInvoice, VendorLineItem } from '@masaar/types'
+import type { InvoiceStatus, PortalInvoice, PortalInvoiceLine } from '@masaar/types'
 
 interface Props {
-  invoice: VendorInvoice
+  invoice: PortalInvoice
 }
 
-function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount)
+// Amounts arrive as decimal strings; Intl picks the currency's own decimals.
+function formatCurrency(amount: string | number, currency: string): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(amount) || 0)
 }
 
 function formatDate(dateStr: string): string {
@@ -20,61 +17,47 @@ function formatDate(dateStr: string): string {
   }).format(new Date(dateStr))
 }
 
-function StatusBadge({ status }: { status: VendorInvoice['status'] }) {
-  const labelMap: Record<VendorInvoice['status'], string> = {
-    pending: 'Pending',
-    submitted: 'Submitted',
-    cleared: 'Cleared',
-    rejected: 'Rejected',
-  }
-  return (
-    <span className={`badge badge-${status}`}>
-      {labelMap[status]}
-    </span>
-  )
+// Invoice statuses mapped onto the badge styles index.css defines.
+const STATUS: Record<InvoiceStatus, { label: string; tone: string }> = {
+  draft: { label: 'Draft', tone: 'pending' },
+  sent: { label: 'Issued', tone: 'submitted' },
+  partial: { label: 'Partially paid', tone: 'submitted' },
+  paid: { label: 'Paid', tone: 'cleared' },
+  overdue: { label: 'Overdue', tone: 'rejected' },
+  voided: { label: 'Voided', tone: 'rejected' },
 }
 
-function LineItemRow({ item, currency }: { item: VendorLineItem; currency: string }) {
+function StatusBadge({ status }: { status: InvoiceStatus }) {
+  const { label, tone } = STATUS[status] ?? { label: status, tone: 'pending' }
+  return <span className={`badge badge-${tone}`}>{label}</span>
+}
+
+function LineItemRow({ item, currency }: { item: PortalInvoiceLine; currency: string }) {
   return (
     <tr>
       <td className="col-desc">{item.description}</td>
-      <td className="col-num text-right">{item.quantity}</td>
+      <td className="col-num text-right">{Number(item.quantity)}</td>
       <td className="col-num text-right">{formatCurrency(item.unit_price, currency)}</td>
-      <td className="col-num text-right">{item.vat_rate}%</td>
-      <td className="col-num text-right">{formatCurrency(item.vat_amount, currency)}</td>
+      <td className="col-num text-right">{Number(item.tax_rate)}%</td>
+      <td className="col-num text-right">{formatCurrency(item.tax_amount, currency)}</td>
       <td className="col-num text-right">{formatCurrency(item.total, currency)}</td>
     </tr>
   )
 }
 
 export function InvoiceViewer({ invoice }: Props) {
+  const currency = invoice.currency_code
+
   return (
     <div className="portal-wrap">
       {/* Sticky header */}
       <header className="portal-header no-print">
         <div className="portal-header-inner">
           <div>
-            {invoice.seller.logo_url ? (
-              <img
-                src={invoice.seller.logo_url}
-                alt={invoice.seller.name}
-                className="seller-logo"
-              />
-            ) : (
-              <span className="seller-name-header">{invoice.seller.name}</span>
-            )}
+            <span className="seller-name-header">Invoice {invoice.invoice_number}</span>
           </div>
           <div className="header-actions">
             <StatusBadge status={invoice.status} />
-            {invoice.pdf_url && (
-              <a
-                href={invoice.pdf_url}
-                download
-                className="btn-download"
-              >
-                ↓ Download PDF
-              </a>
-            )}
             <button
               type="button"
               className="btn-print"
@@ -89,25 +72,7 @@ export function InvoiceViewer({ invoice }: Props) {
       {/* Invoice document */}
       <main>
         <div className="invoice-doc">
-          {/* Top: seller info + invoice meta */}
           <div className="invoice-top">
-            <div className="seller-block">
-              {invoice.seller.logo_url && (
-                <img
-                  src={invoice.seller.logo_url}
-                  alt={invoice.seller.name}
-                  className="seller-logo-print"
-                />
-              )}
-              <div className="seller-name">{invoice.seller.name}</div>
-              {invoice.seller.vat_number && (
-                <div className="meta-text">VAT: {invoice.seller.vat_number}</div>
-              )}
-              {invoice.seller.address && (
-                <div className="meta-text">{invoice.seller.address}</div>
-              )}
-            </div>
-
             <div className="invoice-meta">
               <div className="invoice-title">INVOICE</div>
               <table className="meta-table">
@@ -122,7 +87,7 @@ export function InvoiceViewer({ invoice }: Props) {
                   </tr>
                   <tr>
                     <th>Issued</th>
-                    <td>{formatDate(invoice.issued_at)}</td>
+                    <td>{formatDate(invoice.invoice_date)}</td>
                   </tr>
                   {invoice.due_date && (
                     <tr>
@@ -138,12 +103,12 @@ export function InvoiceViewer({ invoice }: Props) {
           {/* Bill to */}
           <div className="bill-to">
             <h3>Bill To</h3>
-            <div className="buyer-name">{invoice.buyer_name}</div>
-            {invoice.buyer_vat && (
-              <div className="meta-text">VAT: {invoice.buyer_vat}</div>
+            <div className="buyer-name">{invoice.customer_name ?? '—'}</div>
+            {invoice.customer_tax_number && (
+              <div className="meta-text">VAT: {invoice.customer_tax_number}</div>
             )}
-            {invoice.buyer_email && (
-              <div className="meta-text">{invoice.buyer_email}</div>
+            {invoice.customer_email && (
+              <div className="meta-text">{invoice.customer_email}</div>
             )}
           </div>
 
@@ -160,12 +125,8 @@ export function InvoiceViewer({ invoice }: Props) {
               </tr>
             </thead>
             <tbody>
-              {invoice.line_items.map((item, index) => (
-                <LineItemRow
-                  key={index}
-                  item={item}
-                  currency={invoice.currency}
-                />
+              {invoice.lines.map((item) => (
+                <LineItemRow key={item.id} item={item} currency={currency} />
               ))}
             </tbody>
           </table>
@@ -176,33 +137,30 @@ export function InvoiceViewer({ invoice }: Props) {
               <tbody>
                 <tr>
                   <th>Subtotal</th>
-                  <td>{formatCurrency(invoice.subtotal, invoice.currency)}</td>
+                  <td>{formatCurrency(invoice.subtotal, currency)}</td>
                 </tr>
                 <tr>
                   <th>VAT</th>
-                  <td>{formatCurrency(invoice.vat_amount, invoice.currency)}</td>
+                  <td>{formatCurrency(invoice.tax_amount, currency)}</td>
                 </tr>
                 <tr className="total-row">
                   <th>Total</th>
-                  <td>{formatCurrency(invoice.total_amount, invoice.currency)}</td>
+                  <td>{formatCurrency(invoice.total, currency)}</td>
+                </tr>
+                <tr>
+                  <th>Amount due</th>
+                  <td>{formatCurrency(invoice.amount_due, currency)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           {/* Footer */}
-          <div className="invoice-footer">
-            {invoice.zatca_uuid && (
-              <p className="mono">ZATCA UUID: {invoice.zatca_uuid}</p>
-            )}
-            {invoice.pdf_url && (
-              <p>
-                <a href={invoice.pdf_url} download className="mono">
-                  Download PDF
-                </a>
-              </p>
-            )}
-          </div>
+          {invoice.compliance_uuid && (
+            <div className="invoice-footer">
+              <p className="mono">ZATCA UUID: {invoice.compliance_uuid}</p>
+            </div>
+          )}
         </div>
       </main>
     </div>

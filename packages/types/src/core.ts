@@ -1,36 +1,53 @@
+/** A decimal column serialised by Laravel's `decimal:N` cast — it arrives as a string. */
+export type Decimal = string
+
+export type CountryCode = 'SA' | 'AE' | 'BH' | 'OM' | 'QA' | 'KW' | 'IN'
+
 export interface Organization {
-  id: string
+  id: number
+  uuid: string
   name: string
-  tax_number: string
-  country: 'SA' | 'AE' | 'BH' | 'OM' | 'QA' | 'KW' | 'IN'
-  currency: string
+  legal_name: string | null
+  tax_number: string | null
+  country_code: CountryCode
+  base_currency: string
   is_active: boolean
 }
 
 export interface Branch {
-  id: string
-  organization_id: string
+  id: number
+  uuid: string
   name: string
   code: string
+  is_default: boolean
   is_active: boolean
 }
 
+/** The slim branch summary `/auth/me` returns as `default_branch`. */
+export interface BranchSummary {
+  id: number
+  uuid: string
+  name: string
+  code: string
+}
+
 export interface User {
-  id: string
+  id: number
   uuid?: string
   name: string
   email: string
   is_super_admin?: boolean
-  // Backend returns the user's organization (null for super-admins with no org)
-  // via UserResource when the relation is loaded — not a plural array.
+  two_factor_enabled?: boolean
+  // UserResource emits the user's single organization (null for super-admins
+  // with none) when the relation is loaded.
   organization?: Organization | null
-  organization_id?: string | null
+  branches?: Branch[]
+  default_branch?: BranchSummary | null
   roles?: Role[]
-  permissions?: string[]
 }
 
 export interface Role {
-  id: string
+  id: number
   name: string
   slug: string
 }
@@ -66,9 +83,14 @@ export interface PaginatedResponse<T> {
 
 export interface ApiError {
   success: false
+  message?: string
+  // Present when a ValidationException is thrown (bootstrap/app.php).
+  errors?: Record<string, string[]>
   error: {
     code: string
     message: string
+    // Field errors from ApiResponse::validationError, or extra context otherwise.
+    details?: Record<string, string[] | string>
   }
   meta: {
     request_id: string
