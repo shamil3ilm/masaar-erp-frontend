@@ -24,7 +24,7 @@
 
 ## 1. Overview
 
-The ERP frontend is a separate project from the Laravel backend. It lives at `c:\laragon\www\erp-frontend` and connects to the backend exclusively through the REST API at `/api/v1`.
+The ERP frontend is a separate project from the Laravel backend. It lives at `c:\laragon\www\masaar-erp-frontend` and connects to the backend exclusively through the REST API at `/api/v1`.
 
 ### Why separate from the backend?
 
@@ -63,10 +63,8 @@ The system serves three distinct groups of users, each with different needs:
 | **React Hook Form** | Handles form state and submission | Performant, works well with Zod |
 | **Zod** | Schema validation for forms and API responses | Type-safe validation, mirrors Laravel validation rules |
 | **Axios** | HTTP client for API calls | Interceptors for JWT auth, error handling |
-| **MSW** | Mocks API responses during development and testing | Test without a running backend |
 | **Vitest** | Unit and integration test runner | Fast, built for Vite projects |
 | **Playwright** | End-to-end browser tests | Reliable, cross-browser |
-| **Storybook** | Component documentation and visual testing | See components in isolation |
 | **Turborepo** | Manages multiple apps in one repository | Shared code, fast builds, run all apps at once |
 | **pnpm** | Package manager (required by Turborepo) | Faster than npm, efficient disk usage |
 
@@ -77,7 +75,7 @@ The system serves three distinct groups of users, each with different needs:
 The frontend uses a **monorepo** — one repository containing multiple apps and shared packages.
 
 ```
-erp-frontend/
+masaar-erp-frontend/
 │
 ├── apps/                          # The three user-facing applications
 │   ├── staff/                     # Main ERP app (largest)
@@ -86,7 +84,7 @@ erp-frontend/
 │
 ├── packages/                      # Shared code used by all apps
 │   ├── ui/                        # Shared UI components (shadcn/ui + custom)
-│   ├── api-client/                # API hooks, Axios instance, MSW mocks
+│   ├── api-client/                # API hooks, Axios instance, auth helpers
 │   └── types/                     # TypeScript types matching backend models
 │
 ├── turbo.json                     # Turborepo configuration
@@ -482,7 +480,7 @@ Zod schemas live in `packages/types` and match the Laravel Form Request validati
 - All `packages/ui` components (does the button render? does the badge show the right color?)
 - Zustand store logic (does `switchOrg` clear the right state?)
 - Zod schemas (does the invoice form reject missing fields?)
-- API client hook logic (with MSW mocking the backend)
+- API client hook logic (with the transport stubbed per test)
 
 **Integration tests (Vitest + Testing Library)** — test full pages with mocked API:
 - ZATCA onboarding wizard: can the user complete all 3 steps?
@@ -495,32 +493,33 @@ Zod schemas live in `packages/types` and match the Laravel Form Request validati
 - Submit an invoice → see it become "Cleared"
 - Open vendor portal link → view invoice → download PDF
 
-### MSW (Mock Service Worker)
+### Mocking
 
-MSW intercepts actual HTTP requests in the browser or test environment and returns fake responses. This means:
-- You can develop the frontend without the backend running
-- Tests run fast (no real network calls)
-- All three test layers use the same mock data
-
-Mock handlers live in `packages/api-client/src/mocks/` and mirror the real API response shapes exactly.
+There is no MSW. It was planned, and the shared mock handlers under
+`packages/api-client/src/mocks/` were removed along with it — a shared mock
+set drifts from the real API and then passes tests that production fails.
+Tests stub what they need at the boundary they are testing.
 
 ### Storybook
 
-Every shared component in `packages/ui` has a Storybook story. This serves as:
-- **Documentation** — see all component variants in one place
-- **Development sandbox** — build components without running the full app
-- **Visual baseline** — catch unintended visual regressions
+There is no Storybook either — no dependency, no `.storybook`, no stories.
+Component behaviour is covered by the Vitest tests in `packages/ui`, and
+appearance by the screenshot set in `docs/superpowers/_shots/`.
 
 ### CI pipeline
 
-Every pull request runs:
+Every push and pull request runs, per `.github/workflows/ci.yml`:
 ```
-1. pnpm install          — install dependencies
-2. turbo typecheck       — TypeScript type checking across all packages
-3. turbo test            — Vitest unit + integration tests
-4. turbo build           — production build (catches build-time errors)
-5. playwright e2e        — end-to-end tests against built apps
+1. pnpm install --frozen-lockfile   — install, failing if the lockfile drifted
+2. pnpm turbo typecheck             — TypeScript across all six packages
+3. pnpm turbo test                  — Vitest in @masaar/staff and @masaar/ui
+4. pnpm turbo build                 — production build of the three apps
 ```
+
+Playwright is not in CI. `pnpm e2e` runs it locally, where its config starts a
+dev server for itself; running it on a build agent needs browsers installed
+(`pnpm --filter staff exec playwright install --with-deps`) and is a separate
+decision from this pipeline.
 
 ---
 
@@ -535,7 +534,7 @@ Every pull request runs:
 
 **Start all three apps at once:**
 ```bash
-cd c:\laragon\www\erp-frontend
+cd c:\laragon\www\masaar-erp-frontend
 pnpm install
 pnpm dev
 ```
@@ -552,21 +551,22 @@ pnpm --filter staff dev
 
 ### Environment variables
 
-Each app has its own `.env.local` file (not committed to git):
+`VITE_API_URL` is the only variable read anywhere, and only two apps read it.
+Set it in that app's `.env.local`, which is not committed:
 
 ```bash
-# apps/staff/.env.local
+# apps/staff/.env.local — default is http://localhost:8000/api/v1
 VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=ERP
 
-# apps/admin/.env.local
+# apps/portal/.env.local — default is /api/v1, the same origin
 VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=ERP Admin
-
-# apps/portal/.env.local
-VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=ERP Portal
 ```
+
+The admin app does not read it: `/api/v1` is fixed in `apps/admin/src/main.tsx`,
+so it expects to be served from the same origin as the backend. Pointing it
+elsewhere is a code change, not configuration.
+
+`VITE_APP_NAME` was described here and is read by nothing.
 
 In production, replace `localhost:8000` with the live backend URL.
 
@@ -596,7 +596,7 @@ Serve the built files alongside the backend. No separate hosting needed.
 server {
     listen 80;
     server_name erp.yourdomain.com;
-    root /laragon/www/erp-frontend/apps/staff/dist;
+    root /laragon/www/masaar-erp-frontend/apps/staff/dist;
     index index.html;
 
     # All routes go to index.html (React handles routing)
@@ -616,7 +616,7 @@ Repeat for admin and portal with different `server_name` and `root` values.
 
 **Option 2: Vercel or Netlify (recommended for quick cloud deploy)**
 
-- Connect the `erp-frontend` repo to Vercel
+- Connect the `masaar-erp-frontend` repo to Vercel
 - Set `apps/staff` as the root directory
 - Set `VITE_API_URL` as an environment variable in the Vercel dashboard
 - Deploy — Vercel handles CDN, HTTPS, and automatic deploys on push
@@ -650,15 +650,15 @@ npm install -g pnpm
 
 # Verify
 node --version   # should be 20+
-pnpm --version   # should be 8+
+pnpm --version   # should be 9+ (package.json pins pnpm@9.15.4)
 ```
 
 ### Step 2: Create the monorepo
 
 ```bash
 cd c:\laragon\www
-mkdir erp-frontend
-cd erp-frontend
+mkdir masaar-erp-frontend
+cd masaar-erp-frontend
 
 # Initialize Turborepo
 pnpm dlx create-turbo@latest . --package-manager pnpm
@@ -667,7 +667,7 @@ pnpm dlx create-turbo@latest . --package-manager pnpm
 ### Step 3: Create the three apps
 
 ```bash
-# Inside erp-frontend/
+# Inside masaar-erp-frontend/
 pnpm dlx create-vite apps/staff --template react-ts
 pnpm dlx create-vite apps/admin --template react-ts
 pnpm dlx create-vite apps/portal --template react-ts
@@ -690,13 +690,16 @@ Each package needs a `package.json` with a name like `@masaar/ui`, `@masaar/api-
 pnpm add -D turbo -w
 
 # In each app
-pnpm --filter staff add @tanstack/react-router @tanstack/react-query zustand axios react-hook-form zod ag-grid-react ag-grid-community
+pnpm --filter staff add @tanstack/react-router @tanstack/react-query zustand axios react-hook-form @hookform/resolvers zod ag-grid-react ag-grid-community
 
-# shadcn/ui (run inside apps/staff)
-pnpm dlx shadcn@latest init
+# Styling. Tailwind v4 is a Vite plugin, not a PostCSS step — there is no
+# tailwind.config.js and no shadcn/ui. Components come from @masaar/ui.
+pnpm --filter staff add -D tailwindcss @tailwindcss/vite
 
-# Dev dependencies
-pnpm --filter staff add -D vitest @testing-library/react msw playwright
+# Dev dependencies. @playwright/test is the package; "playwright" alone
+# installs the driver without the test runner. msw was removed when the
+# api-client mocks went.
+pnpm --filter staff add -D vitest jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event @playwright/test
 ```
 
 ### Step 6: Configure Turborepo

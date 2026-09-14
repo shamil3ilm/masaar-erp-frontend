@@ -1,23 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-
-type Theme = 'light' | 'dark' | 'system'
-type Dir = 'ltr' | 'rtl'
-
-interface ThemeContextValue {
-  theme: Theme
-  resolvedTheme: 'light' | 'dark'
-  setTheme: (t: Theme) => void
-  dir: Dir
-  setDir: (d: Dir) => void
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null)
-
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) throw new Error('useTheme must be used inside ThemeProvider')
-  return ctx
-}
+import { useEffect, useState, type ReactNode } from 'react'
+import { ThemeContext, type Dir, type Theme } from './theme-context'
 
 interface ThemeProviderProps {
   children: ReactNode

@@ -14,8 +14,10 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Lint cache
-.eslintcache
+# Playwright output. `pnpm e2e` writes both; the config's reporter is 'html'.
+playwright-report/
+test-results/
+.playwright/
 
 # TypeScript build info
 *.tsbuildinfo

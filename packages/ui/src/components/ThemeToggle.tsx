@@ -1,5 +1,5 @@
 import { Sun, Moon, Monitor } from 'lucide-react'
-import { useTheme } from './ThemeProvider'
+import { useTheme } from './theme-context'
 import { cn } from '../lib/utils'
 
 interface ThemeToggleProps {

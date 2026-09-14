@@ -46,4 +46,3 @@ export function Alert({ variant = 'info', title, children, icon = true, classNam
   )
 }
 
-export { alertVariants }

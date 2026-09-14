@@ -1,5 +1,6 @@
 // Theme system
-export { ThemeProvider, useTheme } from './components/ThemeProvider'
+export { ThemeProvider } from './components/ThemeProvider'
+export { useTheme } from './components/theme-context'
 export { ThemeToggle } from './components/ThemeToggle'
 export { DirectionToggle } from './components/DirectionToggle'
 
@@ -8,7 +9,8 @@ export { AuthLayout } from './components/AuthLayout'
 
 // Layout shell
 export { AppShell } from './components/AppShell'
-export { Sidebar, sidebarLinkClass, SidebarItemContent } from './components/Sidebar'
+export { Sidebar, SidebarItemContent } from './components/Sidebar'
+export { sidebarLinkClass } from './components/sidebar-link-class'
 export type { NavItem, NavSection } from './components/Sidebar'
 export { TopBar } from './components/TopBar'
 export { PageHeader } from './components/PageHeader'
@@ -28,7 +30,8 @@ export { ConfirmDialog } from './components/ConfirmDialog'
 export { PasswordInput } from './components/PasswordInput'
 
 // Actions
-export { Button, buttonVariants } from './components/Button'
+export { Button } from './components/Button'
+export { buttonVariants } from './components/button-variants'
 export type { ButtonProps } from './components/Button'
 
 // Form controls
@@ -39,9 +42,9 @@ export { Label } from './components/Label'
 export { FormField } from './components/FormField'
 
 // Data display
-export { Badge, StatusBadge, badgeVariants } from './components/Badge'
+export { Badge, StatusBadge } from './components/Badge'
 export type { BadgeProps } from './components/Badge'
-export { Alert, alertVariants } from './components/Alert'
+export { Alert } from './components/Alert'
 export type { AlertProps } from './components/Alert'
 export { Card, CardHeader, CardBody, StatCard } from './components/Card'
 export { DataCard } from './components/DataCard'

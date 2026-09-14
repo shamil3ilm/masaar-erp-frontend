@@ -10,7 +10,7 @@ Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing th
 |-----|---------|------|-------------|
 | `apps/staff` | `@masaar/staff` | 5173 | Internal staff portal (ZATCA, invoicing, accounting, HR, sales, etc.) |
 | `apps/admin` | `@masaar/admin` | 5174 | Super-admin console (tenant management, org oversight) |
-| `apps/portal` | `@masaar/portal` | 5181 | Vendor self-service portal (tokenized invoice viewer) |
+| `apps/portal` | `@masaar/portal` | 5175 | Vendor self-service portal (tokenized invoice viewer) |
 
 ### Shared Packages
 
@@ -41,15 +41,13 @@ All three apps share a single design system defined in `@masaar/ui`:
 # Install all dependencies
 pnpm install
 
-# Set up environment variables for each app
-cp apps/staff/.env.example apps/staff/.env.local
-cp apps/admin/.env.example apps/admin/.env.local
-cp apps/portal/.env.example apps/portal/.env.local
-# Edit each .env.local with your values
-
 # Start all apps in development mode
 pnpm dev
 ```
+
+Every app runs without configuration. Only the staff app needs anything set,
+and only to point it somewhere other than its default — see Environment
+Variables below.
 
 ## Available Commands
 
@@ -61,26 +59,49 @@ pnpm dev
 | `pnpm build` | Build all apps |
 | `pnpm build --force` | Build bypassing Turborepo cache |
 | `pnpm typecheck` | TypeScript check across all packages |
-| `pnpm test` | Run unit tests across all packages |
-| `pnpm lint` | Lint all packages |
+| `pnpm test` | Run unit tests (`@masaar/staff`, `@masaar/ui`) |
+| `pnpm e2e` | Run Playwright end-to-end tests (`@masaar/staff`) |
+| `pnpm lint` | ESLint across every app and package |
+
+Lint runs from a single `eslint.config.js` at the root rather than one per
+package. Each package used to declare `lint: eslint .` with eslint installed
+nowhere, so the command failed on invocation in all six; and with
+`shamefully-hoist=false` a package cannot see a root devDependency, so
+per-package configs would mean installing the toolchain six times.
 
 ### Per-App
+
+The filter accepts either the package name or its directory, so
+`--filter staff` and `--filter @masaar/staff` are the same thing.
 
 ```bash
 pnpm --filter @masaar/staff dev        # Staff app only (port 5173)
 pnpm --filter @masaar/admin dev        # Admin app only (port 5174)
-pnpm --filter @masaar/portal dev       # Portal app only (port 5181)
+pnpm --filter @masaar/portal dev       # Portal app only (port 5175)
 pnpm --filter @masaar/staff build      # Build staff only
 pnpm --filter @masaar/staff typecheck  # Type-check staff only
+pnpm --filter @masaar/staff test       # Unit tests, once
+pnpm --filter @masaar/staff test:watch # Unit tests, watching
+pnpm --filter @masaar/staff e2e        # Playwright; starts its own dev server
+pnpm --filter @masaar/staff preview    # Serve the built staff bundle
+pnpm --filter @masaar/ui test          # Design-system component tests
 ```
 
 ## Environment Variables
 
-Each app reads from its own `.env.local`:
+`VITE_API_URL` is the only variable any app reads, and only two of the three
+read it. Set it in that app's `.env.local`, which is not committed.
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_API_URL` | Backend API base URL | `http://erp-backend.test/api/v1` |
+| App | Reads `VITE_API_URL` | Falls back to |
+|-----|----------------------|---------------|
+| `@masaar/staff` | yes | `http://localhost:8000/api/v1` |
+| `@masaar/portal` | yes | `/api/v1` (same origin) |
+| `@masaar/admin` | no — `/api/v1` is fixed in `src/main.tsx` | — |
+
+```bash
+# apps/staff/.env.local
+VITE_API_URL=http://localhost:8000/api/v1
+```
 
 ## Tech Stack
 

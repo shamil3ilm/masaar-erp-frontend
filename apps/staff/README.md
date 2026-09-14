@@ -51,16 +51,25 @@ pnpm --filter @masaar/staff build
 # Type check
 pnpm --filter @masaar/staff typecheck
 
-# E2E tests (Playwright)
+# Unit tests (Vitest) — once, or watching
+pnpm --filter @masaar/staff test
+pnpm --filter @masaar/staff test:watch
+
+# E2E tests (Playwright). The config starts its own dev server on 5173 and
+# reuses one already running.
 pnpm --filter @masaar/staff e2e
+
+# Serve the production build locally
+pnpm --filter @masaar/staff preview
 ```
 
 ## Environment Variables
 
-Create `apps/staff/.env.local`:
+`VITE_API_URL` defaults to `http://localhost:8000/api/v1`. Override it by
+creating `apps/staff/.env.local`:
 
 ```env
-VITE_API_URL=http://erp-backend.test/api/v1
+VITE_API_URL=http://localhost:8000/api/v1
 ```
 
 ## CSS Architecture
