@@ -1,22 +1,24 @@
+import type { Decimal } from './core'
+
 // Contacts
 export type ContactType = 'customer' | 'supplier' | 'both'
 
 export interface Contact {
-  id: string
+  id: number
+  uuid: string
   contact_type: ContactType
-  company_name: string
+  company_name: string | null
   contact_name: string | null
+  display_name: string
   email: string | null
   phone: string | null
   tax_number: string | null
-  payment_terms: number
-  credit_limit: number
-  currency_code: string
+  payment_terms: number | null
+  credit_limit: Decimal | null
+  currency_code: string | null
   is_active: boolean
-  payment_block: boolean
-  payment_block_reason: string | null
-  outstanding_balance: number
-  available_credit: number
+  // Only sent for customers (ContactResource).
+  outstanding_balance?: number
 }
 
 export interface ContactStatement {
@@ -34,40 +36,47 @@ export interface ContactTransaction {
   balance: number
 }
 
+/** The customer summary resources nest when the relation is loaded. */
+export interface CustomerRef {
+  id: number
+  name: string
+  email: string | null
+}
+
 // Quotations
 export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'declined' | 'expired' | 'converted'
 
 export interface QuotationLine {
-  id: string
-  product_id: string | null
+  id: number
+  product_id: number | null
   description: string
-  quantity: number
-  unit_price: number
-  tax_rate: number
-  subtotal: number
-  tax_amount: number
-  total: number
+  quantity: Decimal
+  unit_price: Decimal
+  tax_rate: Decimal
+  subtotal: Decimal
+  tax_amount: Decimal
+  total: Decimal
 }
 
 export interface Quotation {
-  id: string
+  id: number
   quotation_number: string
-  customer_id: string
-  customer_name: string
+  customer_id: number
+  customer?: CustomerRef
+  customer_name: string | null
   quotation_date: string
   valid_until: string
   currency_code: string
-  exchange_rate: number
-  subtotal: number
+  exchange_rate: Decimal
+  subtotal: Decimal
   discount_type: 'percentage' | 'fixed' | null
-  discount_value: number
-  discount_amount: number
-  tax_amount: number
-  total: number
+  discount_value: Decimal | null
+  discount_amount: Decimal | null
+  tax_amount: Decimal
+  total: Decimal
   status: QuotationStatus
-  salesperson_id: string | null
   notes: string | null
-  lines: QuotationLine[]
+  lines?: QuotationLine[]
 }
 
 // Sales Orders
@@ -80,27 +89,19 @@ export type SalesOrderStatus =
   | 'invoiced'
   | 'cancelled'
 
-export interface SalesOrderFulfillment {
-  total_quantity: number
-  delivered_quantity: number
-  invoiced_quantity: number
-  delivery_percentage: number
-  invoice_percentage: number
-}
-
+/** SalesOrderController returns the raw model, so dates are full ISO timestamps. */
 export interface SalesOrder {
-  id: string
+  id: number
   order_number: string
-  quotation_id: string | null
-  customer_id: string
-  customer_name: string
+  quotation_id: number | null
+  customer_id: number
+  customer_name: string | null
   order_date: string
   expected_delivery_date: string | null
   currency_code: string
-  total: number
+  total: Decimal
   status: SalesOrderStatus
-  warehouse_id: string | null
-  fulfillment: SalesOrderFulfillment
+  warehouse_id: number | null
 }
 
 export interface CreditCheckResult {
@@ -122,48 +123,67 @@ export type InvoiceComplianceStatus =
 export type InvoiceType = 'standard' | 'simplified' | 'credit_note' | 'debit_note'
 
 export interface InvoiceLine {
-  id: string
-  product_id: string | null
+  id: number
+  product_id: number | null
   description: string
-  quantity: number
-  unit_price: number
-  tax_rate: number
-  subtotal: number
-  tax_amount: number
-  total: number
+  quantity: Decimal
+  unit_price: Decimal
+  tax: {
+    rate: Decimal
+    amount: Decimal
+  }
+  subtotal: Decimal
+  total: Decimal
+}
+
+export interface InvoiceCompliance {
+  status: InvoiceComplianceStatus | null
+  uuid: string | null
+  hash: string | null
+  qr_code: string | null
+  submitted_at: string | null
 }
 
 export interface Invoice {
-  id: string
+  id: number
+  uuid: string
   invoice_number: string
   invoice_type: InvoiceType
-  customer_id: string
-  customer_name: string
+  customer_id: number
+  customer?: CustomerRef
+  customer_name: string | null
   customer_tax_number: string | null
   invoice_date: string
   due_date: string | null
   currency_code: string
-  exchange_rate: number
-  subtotal: number
-  tax_amount: number
-  total: number
-  amount_paid: number
-  amount_due: number
+  exchange_rate: Decimal
+  subtotal: Decimal
+  tax_amount: Decimal
+  total: Decimal
+  amount_paid: Decimal
+  amount_due: Decimal
   status: InvoiceStatus
-  compliance_status: InvoiceComplianceStatus
-  compliance_uuid: string | null
-  compliance_qr_code: string | null
-  sales_order_id: string | null
-  quotation_id: string | null
-  lines: InvoiceLine[]
+  compliance: InvoiceCompliance
+  sales_order_id: number | null
+  quotation_id: number | null
+  lines?: InvoiceLine[]
 }
 
+export interface InvoiceStatusTotal {
+  status: InvoiceStatus
+  count: number
+  total: Decimal
+}
+
+// Aggregates come back as whatever the database driver returns for SUM.
 export interface InvoiceSummary {
-  total_invoiced: number
-  total_paid: number
-  total_outstanding: number
+  total_invoices: number
+  total_amount: Decimal | number
+  total_paid: Decimal | number
+  total_outstanding: Decimal | number
+  by_status: Record<string, InvoiceStatusTotal>
   overdue_count: number
-  overdue_amount: number
+  overdue_amount: Decimal | number
 }
 
 // Payments Received
@@ -171,54 +191,76 @@ export type PaymentMethod = 'cash' | 'bank_transfer' | 'cheque' | 'credit_card' 
 export type PaymentStatus = 'pending' | 'completed' | 'bounced' | 'voided'
 
 export interface PaymentAllocation {
-  invoice_id: string
+  invoice_id: number
   amount: number
 }
 
 export interface PaymentReceived {
-  id: string
+  id: number
+  uuid: string
   payment_number: string
   payment_date: string
-  customer_id: string
-  customer_name: string
-  amount: number
+  customer_id: number
+  customer?: CustomerRef
+  amount: Decimal
   currency_code: string
   payment_method: PaymentMethod
+  payment_method_label: string
   status: PaymentStatus
   allocated_amount: number
   unallocated_amount: number
   reference: string | null
-  bank_account_id: string | null
+}
+
+export interface PaymentMethodTotal {
+  payment_method: PaymentMethod
+  count: number
+  total: Decimal
 }
 
 export interface PaymentSummary {
-  total_received: number
-  total_allocated: number
-  total_unallocated: number
+  total_payments: number
+  total_amount: Decimal | number
+  by_method: Record<string, PaymentMethodTotal>
 }
 
+/** An unpaid invoice as `/payments-received/open-items` selects it. */
 export interface OpenItem {
-  invoice_id: string
+  id: number
+  uuid: string
   invoice_number: string
-  customer_name: string
-  due_date: string
-  amount_due: number
+  invoice_date: string
+  due_date: string | null
+  total: Decimal
+  amount_paid: Decimal
+  amount_due: Decimal
+  status: InvoiceStatus
   currency_code: string
 }
 
 // Credit Notes
+export type CreditNoteType = 'sales' | 'purchase'
 export type CreditNoteStatus = 'draft' | 'approved' | 'applied' | 'refunded' | 'voided'
 
+/** The contact relation CreditNoteController loads on the raw model. */
+export interface CreditNoteContact {
+  id: number
+  company_name: string | null
+  contact_name: string | null
+}
+
 export interface CreditNote {
-  id: string
+  id: number
   credit_note_number: string
-  invoice_id: string | null
-  contact_id: string
-  contact_name: string
+  credit_note_type: CreditNoteType
+  invoice_id: number | null
+  contact_id: number
+  contact?: CreditNoteContact | null
   credit_note_date: string
-  total: number
-  applied_amount: number
-  available_amount: number
-  reason: string
+  currency_code: string
+  total: Decimal
+  applied_amount: Decimal
+  available_amount: Decimal
+  reason: string | null
   status: CreditNoteStatus
 }

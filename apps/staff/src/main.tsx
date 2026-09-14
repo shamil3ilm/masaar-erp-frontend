@@ -10,7 +10,7 @@ import './index.css'
 initApiClient(
   (import.meta.env.VITE_API_URL as string) ?? 'http://localhost:8000/api/v1',
   () => useAuthStore.getState().token,
-  () => useAuthStore.getState().organization?.id ?? null,
+  (token) => useAuthStore.getState().setToken(token),
   () => useAuthStore.getState().logout(),
 )
 

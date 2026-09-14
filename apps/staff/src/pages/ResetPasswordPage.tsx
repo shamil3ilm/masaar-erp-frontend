@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useResetPassword } from '@masaar/api-client'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordInput, FormField, Button, Alert } from '@masaar/ui'
+import { applyApiErrors } from '../lib/form-errors'
 
 const schema = z
   .object({
@@ -40,14 +41,8 @@ export function ResetPasswordPage() {
       setDone(true)
       setTimeout(() => void navigate({ to: '/login' }), 2000)
     } catch (err: unknown) {
-      const e = err as { validationErrors?: Record<string, string> }
-      if (e.validationErrors) {
-        for (const [f, msg] of Object.entries(e.validationErrors)) {
-          setError(f as keyof FormValues, { message: msg })
-        }
-      } else {
-        setError('root', { message: 'Reset failed. The link may have expired.' })
-      }
+      // token and email come from the link, so their errors land on root.
+      applyApiErrors(err, setError, ['password', 'password_confirmation'])
     }
   }
 
@@ -66,7 +61,7 @@ export function ResetPasswordPage() {
       <h1 className="text-2xl font-semibold text-text mb-1">Set new password</h1>
       <p className="text-sm text-muted mb-8">Choose a strong password for your account.</p>
 
-      {errors.root && <Alert variant="danger" className="mb-4">{errors.root.message}</Alert>}
+      {errors.root?.server && <Alert variant="danger" className="mb-4">{errors.root.server.message}</Alert>}
 
       {!token && (
         <Alert variant="warning" className="mb-4">

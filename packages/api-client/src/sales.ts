@@ -2,16 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type {
   Contact,
   ContactStatement,
+  ContactType,
   Quotation,
   SalesOrder,
   CreditCheckResult,
   Invoice,
   InvoiceSummary,
+  InvoiceType,
   PaymentReceived,
   PaymentAllocation,
+  PaymentMethod,
   PaymentSummary,
   OpenItem,
   CreditNote,
+  CreditNoteType,
   ApiResponse,
   PaginatedResponse,
 } from '@masaar/types'
@@ -23,39 +27,116 @@ export const salesKeys = {
   contacts: {
     all: ['sales', 'contacts'] as const,
     list: (p: Record<string, unknown>) => ['sales', 'contacts', 'list', p] as const,
-    detail: (id: string) => ['sales', 'contacts', id] as const,
-    statement: (id: string) => ['sales', 'contacts', id, 'statement'] as const,
-    balance: (id: string) => ['sales', 'contacts', id, 'balance'] as const,
+    detail: (id: number) => ['sales', 'contacts', id] as const,
+    statement: (id: number) => ['sales', 'contacts', id, 'statement'] as const,
+    balance: (id: number) => ['sales', 'contacts', id, 'balance'] as const,
   },
   quotations: {
     all: ['sales', 'quotations'] as const,
     list: (p: Record<string, unknown>) => ['sales', 'quotations', 'list', p] as const,
-    detail: (id: string) => ['sales', 'quotations', id] as const,
+    detail: (id: number) => ['sales', 'quotations', id] as const,
   },
   orders: {
     all: ['sales', 'orders'] as const,
     list: (p: Record<string, unknown>) => ['sales', 'orders', 'list', p] as const,
-    detail: (id: string) => ['sales', 'orders', id] as const,
-    creditCheck: (id: string) => ['sales', 'orders', id, 'credit-check'] as const,
+    detail: (id: number) => ['sales', 'orders', id] as const,
+    creditCheck: (id: number) => ['sales', 'orders', id, 'credit-check'] as const,
   },
   invoices: {
     all: ['sales', 'invoices'] as const,
     list: (p: Record<string, unknown>) => ['sales', 'invoices', 'list', p] as const,
-    detail: (id: string) => ['sales', 'invoices', id] as const,
+    detail: (id: number) => ['sales', 'invoices', id] as const,
     summary: ['sales', 'invoices', 'summary'] as const,
   },
   payments: {
     all: ['sales', 'payments'] as const,
     list: (p: Record<string, unknown>) => ['sales', 'payments', 'list', p] as const,
-    detail: (id: string) => ['sales', 'payments', id] as const,
+    detail: (id: number) => ['sales', 'payments', id] as const,
     summary: ['sales', 'payments', 'summary'] as const,
-    openItems: ['sales', 'payments', 'open-items'] as const,
+    openItems: (customerId: number) => ['sales', 'payments', 'open-items', customerId] as const,
   },
   creditNotes: {
     all: ['sales', 'credit-notes'] as const,
     list: (p: Record<string, unknown>) => ['sales', 'credit-notes', 'list', p] as const,
-    detail: (id: string) => ['sales', 'credit-notes', id] as const,
+    detail: (id: number) => ['sales', 'credit-notes', id] as const,
   },
+}
+
+// ─── Payloads ─────────────────────────────────────────────────────────────────
+
+export interface LineInput {
+  description: string
+  quantity: number
+  unit_price: number
+  tax_rate: number
+}
+
+export interface ContactInput {
+  contact_type: ContactType
+  company_name?: string
+  contact_name?: string
+  email?: string
+  phone?: string
+  tax_number?: string
+  payment_terms?: number
+  credit_limit?: number
+  currency_code?: string
+}
+
+export interface QuotationInput {
+  customer_id: number
+  quotation_date: string
+  valid_until: string
+  currency_code?: string
+  discount_type?: 'percentage' | 'fixed' | null
+  discount_value?: number
+  notes?: string
+  lines: LineInput[]
+}
+
+export interface InvoiceInput {
+  customer_id: number
+  invoice_type?: InvoiceType
+  invoice_date: string
+  due_date?: string
+  currency_code?: string
+  lines: LineInput[]
+}
+
+export interface PaymentInput {
+  customer_id: number
+  payment_date: string
+  amount: number
+  currency_code?: string
+  payment_method: PaymentMethod
+  reference?: string
+  allocations?: PaymentAllocation[]
+}
+
+export interface CreditNoteInput {
+  credit_note_type: CreditNoteType
+  contact_id: number
+  invoice_id?: number
+  credit_note_date: string
+  currency_code: string
+  reason?: string
+  lines: LineInput[]
+}
+
+export interface ClearOpenItemsInput {
+  customer_id: number
+  invoice_ids: number[]
+  clearing_date?: string
+}
+
+/** Date filters use `from_date` / `to_date` on every sales list endpoint. */
+interface ListFilters {
+  page?: number
+  per_page?: number
+  status?: string
+  customer_id?: number
+  from_date?: string
+  to_date?: string
 }
 
 // ─── Contacts ─────────────────────────────────────────────────────────────────
@@ -81,7 +162,7 @@ export function useContacts(filters: ContactFilters = {}) {
   })
 }
 
-export function useContact(id: string) {
+export function useContact(id: number) {
   return useQuery({
     queryKey: salesKeys.contacts.detail(id),
     queryFn: async () => {
@@ -92,7 +173,7 @@ export function useContact(id: string) {
   })
 }
 
-export function useContactStatement(id: string) {
+export function useContactStatement(id: number) {
   return useQuery({
     queryKey: salesKeys.contacts.statement(id),
     queryFn: async () => {
@@ -108,7 +189,7 @@ export function useContactStatement(id: string) {
 export function useCreateContact() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<Contact>) => {
+    mutationFn: async (payload: ContactInput) => {
       const { data } = await getApiClient().post<ApiResponse<Contact>>('/sales/contacts', payload)
       return data.data
     },
@@ -116,24 +197,21 @@ export function useCreateContact() {
   })
 }
 
-export function useUpdateContact(id: string) {
+export function useUpdateContact(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<Contact>) => {
+    mutationFn: async (payload: Partial<ContactInput>) => {
       const { data } = await getApiClient().put<ApiResponse<Contact>>(
         `/sales/contacts/${id}`,
         payload,
       )
       return data.data
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.contacts.all })
-      qc.invalidateQueries({ queryKey: salesKeys.contacts.detail(id) })
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.contacts.all }),
   })
 }
 
-export function useDeleteContact(id: string) {
+export function useDeleteContact(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -148,7 +226,7 @@ export interface PaymentBlockPayload {
   payment_block_reason?: string | null
 }
 
-export function useSetPaymentBlock(id: string) {
+export function useSetPaymentBlock(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (payload: PaymentBlockPayload) => {
@@ -158,20 +236,13 @@ export function useSetPaymentBlock(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.contacts.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.contacts.all }),
   })
 }
 
 // ─── Quotations ───────────────────────────────────────────────────────────────
 
-export interface QuotationFilters {
-  page?: number
-  per_page?: number
-  status?: string
-  customer_id?: string
-  date_from?: string
-  date_to?: string
-}
+export type QuotationFilters = ListFilters
 
 export function useQuotations(filters: QuotationFilters = {}) {
   return useQuery({
@@ -186,7 +257,7 @@ export function useQuotations(filters: QuotationFilters = {}) {
   })
 }
 
-export function useQuotation(id: string) {
+export function useQuotation(id: number) {
   return useQuery({
     queryKey: salesKeys.quotations.detail(id),
     queryFn: async () => {
@@ -200,7 +271,7 @@ export function useQuotation(id: string) {
 export function useCreateQuotation() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<Quotation>) => {
+    mutationFn: async (payload: QuotationInput) => {
       const { data } = await getApiClient().post<ApiResponse<Quotation>>('/sales/quotations', payload)
       return data.data
     },
@@ -208,24 +279,21 @@ export function useCreateQuotation() {
   })
 }
 
-export function useUpdateQuotation(id: string) {
+export function useUpdateQuotation(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<Quotation>) => {
+    mutationFn: async (payload: Partial<QuotationInput>) => {
       const { data } = await getApiClient().put<ApiResponse<Quotation>>(
         `/sales/quotations/${id}`,
         payload,
       )
       return data.data
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.quotations.all })
-      qc.invalidateQueries({ queryKey: salesKeys.quotations.detail(id) })
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.quotations.all }),
   })
 }
 
-export function useSendQuotation(id: string) {
+export function useSendQuotation(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -234,36 +302,38 @@ export function useSendQuotation(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.quotations.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.quotations.all }),
   })
 }
 
-export function useConvertQuotation(id: string) {
+export interface QuotationConversion {
+  type: 'invoice' | 'sales_order'
+  id: number
+  number: string
+}
+
+/** The backend requires `convert_to`; the row action converts to a sales order. */
+export function useConvertQuotation(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async () => {
-      const { data } = await getApiClient().post<ApiResponse<SalesOrder>>(
+    mutationFn: async (convertTo: 'invoice' | 'sales_order' = 'sales_order') => {
+      const { data } = await getApiClient().post<ApiResponse<QuotationConversion>>(
         `/sales/quotations/${id}/convert`,
+        { convert_to: convertTo },
       )
       return data.data
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.quotations.detail(id) })
+      qc.invalidateQueries({ queryKey: salesKeys.quotations.all })
       qc.invalidateQueries({ queryKey: salesKeys.orders.all })
+      qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
     },
   })
 }
 
 // ─── Sales Orders ─────────────────────────────────────────────────────────────
 
-export interface SalesOrderFilters {
-  page?: number
-  per_page?: number
-  status?: string
-  customer_id?: string
-  date_from?: string
-  date_to?: string
-}
+export type SalesOrderFilters = ListFilters
 
 export function useSalesOrders(filters: SalesOrderFilters = {}) {
   return useQuery({
@@ -278,7 +348,7 @@ export function useSalesOrders(filters: SalesOrderFilters = {}) {
   })
 }
 
-export function useSalesOrder(id: string) {
+export function useSalesOrder(id: number) {
   return useQuery({
     queryKey: salesKeys.orders.detail(id),
     queryFn: async () => {
@@ -291,7 +361,7 @@ export function useSalesOrder(id: string) {
   })
 }
 
-export function useSalesOrderCreditCheck(id: string) {
+export function useSalesOrderCreditCheck(id: number) {
   return useQuery({
     queryKey: salesKeys.orders.creditCheck(id),
     queryFn: async () => {
@@ -307,7 +377,7 @@ export function useSalesOrderCreditCheck(id: string) {
 export function useCreateSalesOrder() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<SalesOrder>) => {
+    mutationFn: async (payload: Record<string, unknown>) => {
       const { data } = await getApiClient().post<ApiResponse<SalesOrder>>(
         '/sales/sales-orders',
         payload,
@@ -318,7 +388,7 @@ export function useCreateSalesOrder() {
   })
 }
 
-export function useConfirmSalesOrder(id: string) {
+export function useConfirmSalesOrder(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -327,11 +397,11 @@ export function useConfirmSalesOrder(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.orders.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.orders.all }),
   })
 }
 
-export function useCancelSalesOrder(id: string) {
+export function useCancelSalesOrder(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -340,21 +410,28 @@ export function useCancelSalesOrder(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.orders.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.orders.all }),
   })
 }
 
-export function useConvertOrderToInvoice(id: string) {
+export interface OrderInvoiceConversion {
+  invoice_id: number
+  invoice_number: string
+  sales_order_id: number
+  order_number: string
+}
+
+export function useConvertOrderToInvoice(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
-      const { data } = await getApiClient().post<ApiResponse<Invoice>>(
+      const { data } = await getApiClient().post<ApiResponse<OrderInvoiceConversion>>(
         `/sales/sales-orders/${id}/convert-to-invoice`,
       )
       return data.data
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.orders.detail(id) })
+      qc.invalidateQueries({ queryKey: salesKeys.orders.all })
       qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
     },
   })
@@ -362,14 +439,7 @@ export function useConvertOrderToInvoice(id: string) {
 
 // ─── Invoices ─────────────────────────────────────────────────────────────────
 
-export interface InvoiceFilters {
-  page?: number
-  per_page?: number
-  status?: string
-  customer_id?: string
-  date_from?: string
-  date_to?: string
-}
+export type InvoiceFilters = ListFilters
 
 export function useInvoices(filters: InvoiceFilters = {}) {
   return useQuery({
@@ -384,7 +454,7 @@ export function useInvoices(filters: InvoiceFilters = {}) {
   })
 }
 
-export function useInvoice(id: string) {
+export function useInvoice(id: number) {
   return useQuery({
     queryKey: salesKeys.invoices.detail(id),
     queryFn: async () => {
@@ -410,7 +480,7 @@ export function useInvoiceSummary() {
 export function useCreateInvoice() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<Invoice>) => {
+    mutationFn: async (payload: InvoiceInput) => {
       const { data } = await getApiClient().post<ApiResponse<Invoice>>('/sales/invoices', payload)
       return data.data
     },
@@ -418,24 +488,21 @@ export function useCreateInvoice() {
   })
 }
 
-export function useUpdateInvoice(id: string) {
+export function useUpdateInvoice(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<Invoice>) => {
+    mutationFn: async (payload: Partial<InvoiceInput>) => {
       const { data } = await getApiClient().put<ApiResponse<Invoice>>(
         `/sales/invoices/${id}`,
         payload,
       )
       return data.data
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
-      qc.invalidateQueries({ queryKey: salesKeys.invoices.detail(id) })
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.invoices.all }),
   })
 }
 
-export function useSendInvoice(id: string) {
+export function useSendInvoice(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -444,11 +511,11 @@ export function useSendInvoice(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.invoices.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.invoices.all }),
   })
 }
 
-export function useVoidInvoice(id: string) {
+export function useVoidInvoice(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -457,19 +524,14 @@ export function useVoidInvoice(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.invoices.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.invoices.all }),
   })
 }
 
 // ─── Payments Received ────────────────────────────────────────────────────────
 
-export interface PaymentFilters {
-  page?: number
-  per_page?: number
-  status?: string
-  customer_id?: string
-  date_from?: string
-  date_to?: string
+export interface PaymentFilters extends ListFilters {
+  payment_method?: PaymentMethod
 }
 
 export function usePaymentsReceived(filters: PaymentFilters = {}) {
@@ -485,7 +547,7 @@ export function usePaymentsReceived(filters: PaymentFilters = {}) {
   })
 }
 
-export function usePaymentReceived(id: string) {
+export function usePaymentReceived(id: number) {
   return useQuery({
     queryKey: salesKeys.payments.detail(id),
     queryFn: async () => {
@@ -510,22 +572,25 @@ export function usePaymentSummary() {
   })
 }
 
-export function useOpenItems() {
+/** Open invoices for one customer; the backend requires `customer_id`. */
+export function useOpenItems(customerId: number | null | undefined) {
   return useQuery({
-    queryKey: salesKeys.payments.openItems,
+    queryKey: salesKeys.payments.openItems(customerId ?? 0),
     queryFn: async () => {
       const { data } = await getApiClient().get<ApiResponse<OpenItem[]>>(
         '/sales/payments-received/open-items',
+        { params: { customer_id: customerId } },
       )
       return data.data
     },
+    enabled: !!customerId,
   })
 }
 
 export function useCreatePayment() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<PaymentReceived>) => {
+    mutationFn: async (payload: PaymentInput) => {
       const { data } = await getApiClient().post<ApiResponse<PaymentReceived>>(
         '/sales/payments-received',
         payload,
@@ -536,7 +601,7 @@ export function useCreatePayment() {
   })
 }
 
-export function useCompletePayment(id: string) {
+export function useCompletePayment(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -545,11 +610,11 @@ export function useCompletePayment(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.payments.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.payments.all }),
   })
 }
 
-export function useVoidPayment(id: string) {
+export function useVoidPayment(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -558,22 +623,30 @@ export function useVoidPayment(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.payments.detail(id) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: salesKeys.payments.all })
+      qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
+    },
   })
 }
 
-export function useAllocatePayment(id: string) {
+export interface AllocationResult {
+  allocations: unknown[]
+  unallocated_amount: number
+}
+
+export function useAllocatePayment(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (allocations: PaymentAllocation[]) => {
-      const { data } = await getApiClient().post<ApiResponse<PaymentReceived>>(
+      const { data } = await getApiClient().post<ApiResponse<AllocationResult>>(
         `/sales/payments-received/${id}/allocate`,
         { allocations },
       )
       return data.data
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.payments.detail(id) })
+      qc.invalidateQueries({ queryKey: salesKeys.payments.all })
       qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
     },
   })
@@ -582,15 +655,15 @@ export function useAllocatePayment(id: string) {
 export function useClearOpenItems() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (allocations: PaymentAllocation[]) => {
-      const { data } = await getApiClient().post<ApiResponse<{ cleared: number }>>(
+    mutationFn: async (payload: ClearOpenItemsInput) => {
+      const { data } = await getApiClient().post<ApiResponse<Record<string, unknown>>>(
         '/sales/payments-received/clear-open-items',
-        { allocations },
+        payload,
       )
       return data.data
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.payments.openItems })
+      qc.invalidateQueries({ queryKey: salesKeys.payments.all })
       qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
     },
   })
@@ -602,7 +675,10 @@ export interface CreditNoteFilters {
   page?: number
   per_page?: number
   status?: string
-  contact_id?: string
+  contact_id?: number
+  type?: CreditNoteType
+  from_date?: string
+  to_date?: string
 }
 
 export function useCreditNotes(filters: CreditNoteFilters = {}) {
@@ -618,7 +694,7 @@ export function useCreditNotes(filters: CreditNoteFilters = {}) {
   })
 }
 
-export function useCreditNote(id: string) {
+export function useCreditNote(id: number) {
   return useQuery({
     queryKey: salesKeys.creditNotes.detail(id),
     queryFn: async () => {
@@ -634,7 +710,7 @@ export function useCreditNote(id: string) {
 export function useCreateCreditNote() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<CreditNote>) => {
+    mutationFn: async (payload: CreditNoteInput) => {
       const { data } = await getApiClient().post<ApiResponse<CreditNote>>(
         '/sales/credit-notes',
         payload,
@@ -645,7 +721,7 @@ export function useCreateCreditNote() {
   })
 }
 
-export function useApproveCreditNote(id: string) {
+export function useApproveCreditNote(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -654,28 +730,28 @@ export function useApproveCreditNote(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.creditNotes.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.creditNotes.all }),
   })
 }
 
-export function useApplyCreditNote(id: string) {
+export function useApplyCreditNote(id: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { invoice_id: string; amount: number }) => {
-      const { data } = await getApiClient().post<ApiResponse<CreditNote>>(
+    mutationFn: async (payload: { invoice_id: number; amount: number }) => {
+      const { data } = await getApiClient().post<ApiResponse<unknown>>(
         `/sales/credit-notes/${id}/apply`,
         payload,
       )
       return data.data
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: salesKeys.creditNotes.detail(id) })
+      qc.invalidateQueries({ queryKey: salesKeys.creditNotes.all })
       qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
     },
   })
 }
 
-export function useVoidCreditNote(id: string) {
+export function useVoidCreditNote(id: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
@@ -684,6 +760,6 @@ export function useVoidCreditNote(id: string) {
       )
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.creditNotes.detail(id) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.creditNotes.all }),
   })
 }

@@ -1,19 +1,24 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useCreditNotes, useApproveCreditNote, useVoidCreditNote } from '@masaar/api-client'
+import type { CreditNote } from '@masaar/types'
 import {
-  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge,
+  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Alert,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, RotateCcw,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
+import { canApproveCreditNote, canVoidCreditNote } from '../../lib/sales-rules'
+import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { ConfirmButton } from '../../components/ConfirmButton'
 
 export function CreditNotesPage() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
+  const action = useActionError()
 
-  const { data, isLoading, isError, refetch } = useCreditNotes({
+  const { data, isLoading, isError } = useCreditNotes({
     page,
     per_page: 20,
     status: status || undefined,
@@ -49,6 +54,8 @@ export function CreditNotesPage() {
         </Select>
       </div>
 
+      {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
+
       {isLoading ? (
         <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
       ) : isError ? (
@@ -82,7 +89,7 @@ export function CreditNotesPage() {
               </THead>
               <TBody>
                 {notes.map((cn) => (
-                  <CreditNoteRow key={cn.id} note={cn} onRefetch={() => void refetch()} />
+                  <CreditNoteRow key={cn.id} note={cn} onSuccess={action.clear} onError={action.report} />
                 ))}
               </TBody>
             </Table>
@@ -103,55 +110,39 @@ export function CreditNotesPage() {
   )
 }
 
-function CreditNoteRow({
-  note,
-  onRefetch,
-}: {
-  note: {
-    id: string
-    credit_note_number: string
-    contact_name: string
-    credit_note_date: string
-    reason: string
-    total: number
-    available_amount: number
-    status: string
-  }
-  onRefetch: () => void
-}) {
+function CreditNoteRow({ note, ...handlers }: { note: CreditNote } & RowActionHandlers) {
   const approve = useApproveCreditNote(note.id)
   const voidNote = useVoidCreditNote(note.id)
 
   return (
     <TR>
       <TD className="font-mono font-medium">{note.credit_note_number}</TD>
-      <TD>{note.contact_name}</TD>
+      <TD>{note.contact?.company_name ?? note.contact?.contact_name ?? '—'}</TD>
       <TD muted>{formatDate(note.credit_note_date)}</TD>
-      <TD muted className="max-w-xs truncate">{note.reason}</TD>
-      <TD align="end" className="font-mono">{formatCurrency(note.total)}</TD>
-      <TD align="end" className="font-mono">{formatCurrency(note.available_amount)}</TD>
+      <TD muted className="max-w-xs truncate">{note.reason ?? '—'}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(note.total, note.currency_code)}</TD>
+      <TD align="end" className="font-mono">{formatCurrency(note.available_amount, note.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={note.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {note.status === 'draft' && (
+          {canApproveCreditNote(note.status) && (
             <Button
               variant="ghost"
               size="sm"
               loading={approve.isPending}
-              onClick={() => approve.mutate(undefined, { onSuccess: onRefetch })}
+              onClick={() => approve.mutate(undefined, handlers)}
             >
               Approve
             </Button>
           )}
-          {(note.status === 'draft' || note.status === 'approved') && (
-            <Button
-              variant="danger-outline"
-              size="sm"
+          {canVoidCreditNote(note) && (
+            <ConfirmButton
+              label="Void"
+              title={`Void credit note ${note.credit_note_number}?`}
+              description="Its available amount drops to zero and it cannot be applied afterwards."
               loading={voidNote.isPending}
-              onClick={() => voidNote.mutate(undefined, { onSuccess: onRefetch })}
-            >
-              Void
-            </Button>
+              onConfirm={() => voidNote.mutate(undefined, handlers)}
+            />
           )}
         </div>
       </TD>

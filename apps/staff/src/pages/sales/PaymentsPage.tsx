@@ -1,19 +1,26 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { usePaymentsReceived, usePaymentSummary, useCompletePayment, useVoidPayment } from '@masaar/api-client'
+import type { PaymentReceived } from '@masaar/types'
 import {
-  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard,
+  PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard, Alert,
   Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
-  Plus, CreditCard, CheckCircle2, AlertCircle,
+  Plus, CreditCard, CheckCircle2,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
+import { canCompletePayment, canVoidPayment } from '../../lib/sales-rules'
+import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { ConfirmButton } from '../../components/ConfirmButton'
+import { useAuthStore } from '../../store/auth'
 
 export function PaymentsPage() {
   const navigate = useNavigate()
+  const { organization } = useAuthStore()
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
+  const action = useActionError()
 
-  const { data, isLoading, isError, refetch } = usePaymentsReceived({
+  const { data, isLoading, isError } = usePaymentsReceived({
     page,
     per_page: 20,
     status: status || undefined,
@@ -36,10 +43,13 @@ export function PaymentsPage() {
       />
 
       {summary && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <StatCard label="Total Received" value={formatCurrency(summary.total_received)} icon={CreditCard} />
-          <StatCard label="Allocated" value={formatCurrency(summary.total_allocated)} icon={CheckCircle2} />
-          <StatCard label="Unallocated" value={formatCurrency(summary.total_unallocated)} icon={AlertCircle} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <StatCard
+            label="Total Received"
+            value={formatCurrency(summary.total_amount, organization?.base_currency)}
+            icon={CreditCard}
+          />
+          <StatCard label="Completed Payments" value={String(summary.total_payments)} icon={CheckCircle2} />
         </div>
       )}
 
@@ -56,6 +66,8 @@ export function PaymentsPage() {
           <option value="voided">Voided</option>
         </Select>
       </div>
+
+      {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
 
       {isLoading ? (
         <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
@@ -90,7 +102,7 @@ export function PaymentsPage() {
               </THead>
               <TBody>
                 {payments.map((p) => (
-                  <PaymentRow key={p.id} payment={p} onRefetch={() => void refetch()} />
+                  <PaymentRow key={p.id} payment={p} onSuccess={action.clear} onError={action.report} />
                 ))}
               </TBody>
             </Table>
@@ -111,56 +123,39 @@ export function PaymentsPage() {
   )
 }
 
-function PaymentRow({
-  payment,
-  onRefetch,
-}: {
-  payment: {
-    id: string
-    payment_number: string
-    customer_name: string
-    payment_date: string
-    payment_method: string
-    amount: number
-    unallocated_amount: number
-    currency_code: string
-    status: string
-  }
-  onRefetch: () => void
-}) {
+function PaymentRow({ payment, ...handlers }: { payment: PaymentReceived } & RowActionHandlers) {
   const complete = useCompletePayment(payment.id)
   const voidPay = useVoidPayment(payment.id)
 
   return (
     <TR>
       <TD className="font-mono font-medium">{payment.payment_number}</TD>
-      <TD>{payment.customer_name}</TD>
+      <TD>{payment.customer?.name ?? '—'}</TD>
       <TD muted>{formatDate(payment.payment_date)}</TD>
-      <TD muted className="capitalize">{payment.payment_method.replace('_', ' ')}</TD>
+      <TD muted>{payment.payment_method_label}</TD>
       <TD align="end" className="font-mono">{formatCurrency(payment.amount, payment.currency_code)}</TD>
       <TD align="end" className="font-mono">{formatCurrency(payment.unallocated_amount, payment.currency_code)}</TD>
       <TD align="center"><SalesStatusBadge status={payment.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {payment.status === 'pending' && (
+          {canCompletePayment(payment.status) && (
             <Button
               variant="ghost"
               size="sm"
               loading={complete.isPending}
-              onClick={() => complete.mutate(undefined, { onSuccess: onRefetch })}
+              onClick={() => complete.mutate(undefined, handlers)}
             >
               Complete
             </Button>
           )}
-          {(payment.status === 'pending' || payment.status === 'completed') && (
-            <Button
-              variant="danger-outline"
-              size="sm"
+          {canVoidPayment(payment.status) && (
+            <ConfirmButton
+              label="Void"
+              title={`Void payment ${payment.payment_number}?`}
+              description="Voiding removes the payment's invoice allocations and cannot be undone."
               loading={voidPay.isPending}
-              onClick={() => voidPay.mutate(undefined, { onSuccess: onRefetch })}
-            >
-              Void
-            </Button>
+              onConfirm={() => voidPay.mutate(undefined, handlers)}
+            />
           )}
         </div>
       </TD>

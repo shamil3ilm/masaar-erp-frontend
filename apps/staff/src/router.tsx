@@ -1,6 +1,6 @@
 import { createRouter, createRoute, createRootRoute, Outlet, redirect } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { createQueryClient } from '@masaar/api-client'
+import { queryClient } from './lib/query-client'
 import { useAuthStore } from './store/auth'
 import { AppLayout } from './components/AppLayout'
 import { LoginPage } from './pages/LoginPage'
@@ -26,8 +26,6 @@ import { PaymentsPage } from './pages/sales/PaymentsPage'
 import { CreatePaymentPage } from './pages/sales/CreatePaymentPage'
 import { CreditNotesPage } from './pages/sales/CreditNotesPage'
 import { CreateCreditNotePage } from './pages/sales/CreateCreditNotePage'
-
-const queryClient = createQueryClient()
 
 const rootRoute = createRootRoute({
   component: () => (

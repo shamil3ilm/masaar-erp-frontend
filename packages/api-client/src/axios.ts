@@ -1,15 +1,15 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig, AxiosError } from 'axios'
-import type { ValidationErrors } from '@masaar/types'
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosError } from 'axios'
+import type { ApiResponse } from '@masaar/types'
 
 export type TokenGetter = () => string | null
-export type OrgIdGetter = () => string | null
+export type TokenSetter = (token: string) => void
 export type LogoutFn = () => void
 
-export function createApiClient(
-  baseURL: string,
-  getToken?: TokenGetter,
-  getOrgId?: OrgIdGetter,
-): AxiosInstance {
+export const REFRESH_URL = '/auth/refresh'
+
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean }
+
+export function createApiClient(baseURL: string, getToken?: TokenGetter): AxiosInstance {
   const instance = axios.create({
     baseURL,
     headers: {
@@ -20,76 +20,85 @@ export function createApiClient(
 
   instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const token = getToken?.()
-    const orgId = getOrgId?.()
     if (token) config.headers.Authorization = `Bearer ${token}`
-    if (orgId) config.headers['X-Organization-Id'] = orgId
     return config
   })
-
-  instance.interceptors.response.use(
-    (response) => response,
-    (error: AxiosError<{ errors?: Record<string, string[]> }>) => {
-      if (error.response?.status === 422 && error.response.data?.errors) {
-        const flat: ValidationErrors = {}
-        for (const [field, messages] of Object.entries(error.response.data.errors)) {
-          flat[field] = messages[0]
-        }
-        return Promise.reject({ ...error, validationErrors: flat })
-      }
-      return Promise.reject(error)
-    },
-  )
 
   return instance
 }
 
 let _client: AxiosInstance | null = null
 
+/**
+ * Create the shared client. On a 401 it refreshes the token once, saves the new
+ * token through `setToken` (the backend blacklists the old one), and retries.
+ * Concurrent 401s share the one refresh; if it fails they all reject and
+ * `onLogout` runs.
+ */
 export function initApiClient(
   baseURL: string,
   getToken: TokenGetter,
-  getOrgId: OrgIdGetter,
+  setToken: TokenSetter,
   onLogout: LogoutFn,
 ): AxiosInstance {
-  _client = createApiClient(baseURL, getToken, getOrgId)
+  const client = createApiClient(baseURL, getToken)
+  _client = client
 
-  let isRefreshing = false
-  let queue: Array<(token: string) => void> = []
+  let refreshing: Promise<string> | null = null
 
-  _client.interceptors.response.use(
+  function refresh(): Promise<string> {
+    refreshing ??= client
+      .post<ApiResponse<{ token: string }>>(REFRESH_URL)
+      .then(({ data }) => {
+        setToken(data.data.token)
+        return data.data.token
+      })
+      .catch((err: unknown) => {
+        onLogout()
+        throw err
+      })
+      .finally(() => {
+        refreshing = null
+      })
+    return refreshing
+  }
+
+  client.interceptors.response.use(
     (r) => r,
     async (error: AxiosError) => {
-      const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
-      if (error.response?.status === 401 && !original._retry) {
-        if (isRefreshing) {
-          return new Promise((resolve) => {
-            queue.push((token) => {
-              original.headers.Authorization = `Bearer ${token}`
-              resolve(_client!.request(original))
-            })
-          })
-        }
-        original._retry = true
-        isRefreshing = true
-        try {
-          const { data } = await _client!.post<{ data: { token: string } }>('/auth/refresh')
-          const newToken = data.data.token
-          queue.forEach((cb) => cb(newToken))
-          queue = []
-          original.headers.Authorization = `Bearer ${newToken}`
-          return _client!.request(original)
-        } catch {
-          onLogout()
-          return Promise.reject(error)
-        } finally {
-          isRefreshing = false
-        }
+      const original = error.config as RetryConfig | undefined
+      const current = getToken()
+
+      // The refresh call's own 401 must fail outright: retrying it would wait on itself.
+      if (
+        error.response?.status !== 401 ||
+        !original ||
+        original._retry ||
+        original.url === REFRESH_URL ||
+        !current
+      ) {
+        return Promise.reject(error)
       }
-      return Promise.reject(error)
+
+      original._retry = true
+
+      // Sent with a token that has since been replaced: retry with the new one.
+      if (original.headers.Authorization !== `Bearer ${current}`) {
+        original.headers.Authorization = `Bearer ${current}`
+        return client.request(original)
+      }
+
+      try {
+        const token = await refresh()
+        original.headers.Authorization = `Bearer ${token}`
+      } catch {
+        return Promise.reject(error)
+      }
+      return client.request(original)
     },
   )
 
-  return _client
+  return client
 }
 
 export function getApiClient(): AxiosInstance {

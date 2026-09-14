@@ -3,7 +3,7 @@ import { Bell, ChevronDown, LogOut, Settings, User } from 'lucide-react'
 import { cn } from '../lib/utils'
 
 interface OrgOption {
-  id: string
+  id: string | number
   name: string
 }
 
@@ -15,8 +15,11 @@ interface UserInfo {
 
 interface TopBarProps {
   user?: UserInfo
+  /** The selected organization; the switcher's value. */
+  organizationId?: string | number
   organizationName?: string
   organizations?: OrgOption[]
+  /** Called with the chosen organization's id as a string. */
   onSwitchOrg?: (id: string) => void
   onLogout?: () => void
   notificationCount?: number
@@ -40,6 +43,7 @@ function initials(name: string) {
 export function TopBar({
   user,
   userName,
+  organizationId,
   organizationName,
   organizations = [],
   onSwitchOrg,
@@ -74,12 +78,13 @@ export function TopBar({
               <div className="flex items-center gap-1.5">
                 <span className="hidden sm:block text-xs text-muted uppercase tracking-wide">Org</span>
                 <select
-                  value={organizationName}
+                  value={organizationId === undefined ? '' : String(organizationId)}
                   onChange={(e) => onSwitchOrg(e.target.value)}
                   className="text-sm font-medium text-text bg-transparent border-0 focus:outline-none cursor-pointer"
                 >
+                  {organizationId === undefined && <option value="" disabled>Select…</option>}
                   {organizations.map((org) => (
-                    <option key={org.id} value={org.id}>{org.name}</option>
+                    <option key={org.id} value={String(org.id)}>{org.name}</option>
                   ))}
                 </select>
               </div>

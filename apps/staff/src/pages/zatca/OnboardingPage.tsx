@@ -1,19 +1,23 @@
-import { useZatcaOnboardingStatus, useRequestCcsid, useComplianceCheck, useUpgradeToPcsid } from '@masaar/api-client'
+import { useMe, useZatcaOnboardingStatus, useRequestCcsid, useComplianceCheck, useUpgradeToPcsid } from '@masaar/api-client'
 import type { RequestCcsidPayload } from '@masaar/api-client'
 import { ZatcaOnboardingWizard, LoadingSpinner, PageHeader } from '@masaar/ui'
-import { useAuthStore } from '../../store/auth'
 
 export function OnboardingPage() {
-  const { organization } = useAuthStore()
-  const branchId = organization?.id ?? ''
+  // The compliance routes look the branch up by uuid; only /auth/me carries the
+  // user's branches, so the login payload's organization id cannot be used.
+  const me = useMe()
+  const branchId = me.data?.default_branch?.uuid ?? ''
 
   const { data: onboarding, isLoading, isError } = useZatcaOnboardingStatus(branchId)
   const requestCcsid = useRequestCcsid(branchId)
   const complianceCheck = useComplianceCheck(branchId)
   const upgradeToPcsid = useUpgradeToPcsid(branchId)
 
-  if (isLoading) return <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
-  if (isError || !onboarding) return <div className="p-6 text-danger">Failed to load onboarding status.</div>
+  if (me.isLoading || isLoading) return <div className="flex justify-center p-12"><LoadingSpinner size="lg" /></div>
+  if (me.isSuccess && !branchId) {
+    return <div className="p-6 text-danger">Your account is not assigned to a branch, so there is nothing to onboard.</div>
+  }
+  if (me.isError || isError || !onboarding) return <div className="p-6 text-danger">Failed to load onboarding status.</div>
 
   function handleRequestCcsid(payload: RequestCcsidPayload) {
     requestCcsid.mutate(payload)

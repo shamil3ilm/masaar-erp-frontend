@@ -1,4 +1,5 @@
 export * from './axios'
+export * from './errors'
 export * from './query-client'
 export * from './auth'
 export * from './zatca'
