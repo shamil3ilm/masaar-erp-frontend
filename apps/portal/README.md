@@ -2,14 +2,14 @@
 
 Public-facing portal for vendors and customers to view invoices shared with them via a tokenized link. No login form — authentication is embedded in the URL.
 
-**Dev server:** `http://localhost:5181`
+**Dev server:** `http://localhost:5175`
 
 ## How It Works
 
 Access is via a URL with two required query parameters:
 
 ```
-http://localhost:5181/?invoice=<invoice-id>&token=<signed-token>
+http://localhost:5175/?invoice=<invoice-id>&token=<signed-token>
 ```
 
 Visiting without these params shows the "Invalid invoice link" error state. This is expected behavior.
@@ -44,7 +44,7 @@ Does **not** use `@masaar/ui` React components — the invoice document is plain
 ## Commands
 
 ```bash
-# Development (port 5181)
+# Development (port 5175)
 pnpm --filter @masaar/portal dev
 
 # Production build
@@ -56,8 +56,10 @@ pnpm --filter @masaar/portal typecheck
 
 ## Environment Variables
 
-Create `apps/portal/.env.local`:
+`VITE_API_URL` defaults to `/api/v1`, so the portal works unconfigured when it
+is served from the same origin as the backend. Point it elsewhere by creating
+`apps/portal/.env.local`:
 
 ```env
-VITE_API_URL=http://erp-backend.test/api/v1
+VITE_API_URL=http://localhost:8000/api/v1
 ```

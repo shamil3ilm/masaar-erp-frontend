@@ -102,4 +102,3 @@ export function StatusBadge({ status, label, dot = true, className }: StatusBadg
   )
 }
 
-export { badgeVariants }

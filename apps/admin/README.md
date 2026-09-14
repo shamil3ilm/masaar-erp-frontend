@@ -42,11 +42,10 @@ pnpm --filter @masaar/admin typecheck
 
 ## Environment Variables
 
-Create `apps/admin/.env.local`:
-
-```env
-VITE_API_URL=http://erp-backend.test/api/v1
-```
+None. The admin app reads no `import.meta.env` value — its API base is the
+literal `/api/v1` in `src/main.tsx`, so it expects to be served from the same
+origin as the backend. A `.env.local` here does nothing; pointing admin at
+another host is a code change.
 
 ## CSS Architecture
 

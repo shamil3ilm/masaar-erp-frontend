@@ -10,8 +10,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "e2e": "playwright test",
-    "lint": "eslint ."
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@masaar/api-client": "workspace:*",

@@ -3,22 +3,21 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".tsbuildinfo"]
+      "outputs": ["dist/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": ["^build"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
-      "outputs": ["*.tsbuildinfo"]
+      "dependsOn": ["^typecheck"]
     },
-    "lint": {
-      "dependsOn": ["^lint"]
+    "e2e": {
+      "cache": false,
+      "dependsOn": ["^build"]
     }
   }
 }

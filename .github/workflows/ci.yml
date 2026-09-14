@@ -29,15 +29,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
+      # No version here on purpose. package.json pins packageManager to
+      # pnpm@9.15.4 and the lockfile is written in that format; naming a
+      # version as well makes action-setup fail on the disagreement, and
+      # pinning it in two places means they can drift apart.
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
@@ -45,8 +47,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Typecheck
         run: pnpm turbo typecheck
+
+      - name: Test
+        run: pnpm turbo test
 
       - name: Build
         run: pnpm turbo build

@@ -2,7 +2,7 @@ import { FileText, Mail, Globe, ExternalLink, ArrowRight, type LucideIcon } from
 import { PageHeader } from './PageHeader'
 import { Card } from './Card'
 import { Alert } from './Alert'
-import { buttonVariants } from './Button'
+import { buttonVariants } from './button-variants'
 
 export interface SupportResource {
   icon: LucideIcon
