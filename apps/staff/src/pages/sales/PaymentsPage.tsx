@@ -1,23 +1,26 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { usePaymentsReceived, usePaymentSummary, useCompletePayment, useVoidPayment } from '@masaar/api-client'
 import type { PaymentReceived } from '@masaar/types'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, StatCard, Alert,
-  Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
+  Button, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, CreditCard, CheckCircle2,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 import { canCompletePayment, canVoidPayment } from '../../lib/sales-rules'
 import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { useCan } from '../../lib/use-can'
+import { useListFilter } from '../../lib/use-list-filter'
+import { PAYMENT_STATUSES } from '../../lib/status-filters'
 import { ConfirmButton } from '../../components/ConfirmButton'
+import { StatusFilter } from '../../components/StatusFilter'
 import { useAuthStore } from '../../store/auth'
 
 export function PaymentsPage() {
   const navigate = useNavigate()
+  const can = useCan()
   const { organization } = useAuthStore()
-  const [page, setPage] = useState(1)
-  const [status, setStatus] = useState('')
+  const { page, setPage, filter: status, setFilter: setStatus } = useListFilter()
   const action = useActionError()
 
   const { data, isLoading, isError } = usePaymentsReceived({
@@ -30,16 +33,18 @@ export function PaymentsPage() {
   const payments = data?.data ?? []
   const meta = data?.meta
 
+  const recordPayment = can('sales.payments.create') ? (
+    <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/payments/new' })}>
+      Record Payment
+    </Button>
+  ) : null
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Payments Received"
         breadcrumbs={[{ label: 'Sales' }, { label: 'Payments' }]}
-        actions={
-          <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/payments/new' })}>
-            Record Payment
-          </Button>
-        }
+        actions={recordPayment}
       />
 
       {summary && (
@@ -54,17 +59,7 @@ export function PaymentsPage() {
       )}
 
       <div className="flex gap-3 mb-4">
-        <Select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1) }}
-          className="max-w-[180px]"
-        >
-          <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="completed">Completed</option>
-          <option value="bounced">Bounced</option>
-          <option value="voided">Voided</option>
-        </Select>
+        <StatusFilter value={status} onChange={setStatus} options={PAYMENT_STATUSES} />
       </div>
 
       {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
@@ -78,11 +73,7 @@ export function PaymentsPage() {
           icon={CreditCard}
           title="No payments found"
           description="Record a customer payment to get started."
-          action={
-            <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/payments/new' })}>
-              Record Payment
-            </Button>
-          }
+          action={recordPayment}
         />
       ) : (
         <>
@@ -124,6 +115,7 @@ export function PaymentsPage() {
 }
 
 function PaymentRow({ payment, ...handlers }: { payment: PaymentReceived } & RowActionHandlers) {
+  const can = useCan()
   const complete = useCompletePayment(payment.id)
   const voidPay = useVoidPayment(payment.id)
 
@@ -138,7 +130,7 @@ function PaymentRow({ payment, ...handlers }: { payment: PaymentReceived } & Row
       <TD align="center"><SalesStatusBadge status={payment.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {canCompletePayment(payment.status) && (
+          {can('sales.payments.complete') && canCompletePayment(payment.status) && (
             <Button
               variant="ghost"
               size="sm"
@@ -148,7 +140,7 @@ function PaymentRow({ payment, ...handlers }: { payment: PaymentReceived } & Row
               Complete
             </Button>
           )}
-          {canVoidPayment(payment.status) && (
+          {can('sales.payments.void') && canVoidPayment(payment.status) && (
             <ConfirmButton
               label="Void"
               title={`Void payment ${payment.payment_number}?`}

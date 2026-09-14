@@ -7,5 +7,11 @@ export interface ZatcaDeviceOnboarding {
   compliance_result?: unknown
 }
 
+/** The body of `POST /compliance/branches/{branch}/onboarding/ccsid`. */
+export interface RequestCcsidPayload {
+  otp: string
+  csr: Record<string, unknown>
+}
+
 // Invoice compliance status — used by ZatcaStatusBadge and Sales invoices
 export type ZatcaComplianceStatus = 'pending' | 'submitted' | 'cleared' | 'reported' | 'rejected'

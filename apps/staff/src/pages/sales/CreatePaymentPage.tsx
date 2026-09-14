@@ -6,7 +6,8 @@ import { useCreatePayment, useContacts } from '@masaar/api-client'
 import { PageHeader, Card, FormField, Input, Select, Button, Alert } from '@masaar/ui'
 import { useAuthStore } from '../../store/auth'
 import { applyApiErrors } from '../../lib/form-errors'
-import { CURRENCIES, DEFAULT_CURRENCY, moneyInputProps } from '../../lib/money'
+import { CURRENCIES, DEFAULT_CURRENCY } from '../../lib/money'
+import { MoneyInput } from '../../components/MoneyInput'
 
 const schema = z.object({
   customer_id: z.string().min(1, 'Customer is required'),
@@ -86,7 +87,7 @@ export function CreatePaymentPage() {
               </Select>
             </FormField>
             <FormField label="Amount" required error={errors.amount?.message}>
-              <Input {...moneyInputProps(currency)} {...register('amount', { valueAsNumber: true })} error={!!errors.amount} />
+              <MoneyInput currency={currency} {...register('amount', { valueAsNumber: true })} error={!!errors.amount} />
             </FormField>
             <FormField label="Payment Method" required error={errors.payment_method?.message}>
               <Select {...register('payment_method')}>

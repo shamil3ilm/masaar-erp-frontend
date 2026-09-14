@@ -1,20 +1,23 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQuotations, useSendQuotation, useConvertQuotation } from '@masaar/api-client'
 import type { Quotation } from '@masaar/types'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Alert,
-  Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
+  Button, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, FileText,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 import { canConvertQuotation, canSendQuotation } from '../../lib/sales-rules'
 import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { useCan } from '../../lib/use-can'
+import { useListFilter } from '../../lib/use-list-filter'
+import { QUOTATION_STATUSES } from '../../lib/status-filters'
+import { StatusFilter } from '../../components/StatusFilter'
 
 export function QuotationsPage() {
   const navigate = useNavigate()
-  const [page, setPage] = useState(1)
-  const [status, setStatus] = useState('')
+  const can = useCan()
+  const { page, setPage, filter: status, setFilter: setStatus } = useListFilter()
   const action = useActionError()
 
   const { data, isLoading, isError } = useQuotations({
@@ -26,32 +29,22 @@ export function QuotationsPage() {
   const quotations = data?.data ?? []
   const meta = data?.meta
 
+  const newQuotation = can('sales.quotations.create') ? (
+    <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/quotations/new' })}>
+      New Quotation
+    </Button>
+  ) : null
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Quotations"
         breadcrumbs={[{ label: 'Sales' }, { label: 'Quotations' }]}
-        actions={
-          <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/quotations/new' })}>
-            New Quotation
-          </Button>
-        }
+        actions={newQuotation}
       />
 
       <div className="flex gap-3 mb-4">
-        <Select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1) }}
-          className="max-w-[180px]"
-        >
-          <option value="">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="sent">Sent</option>
-          <option value="accepted">Accepted</option>
-          <option value="declined">Declined</option>
-          <option value="expired">Expired</option>
-          <option value="converted">Converted</option>
-        </Select>
+        <StatusFilter value={status} onChange={setStatus} options={QUOTATION_STATUSES} />
       </div>
 
       {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
@@ -65,11 +58,7 @@ export function QuotationsPage() {
           icon={FileText}
           title="No quotations found"
           description="Create your first quotation to start sending proposals."
-          action={
-            <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/quotations/new' })}>
-              New Quotation
-            </Button>
-          }
+          action={newQuotation}
         />
       ) : (
         <>
@@ -111,6 +100,7 @@ export function QuotationsPage() {
 
 function QuotationRow({ quotation, onSuccess, onError }: { quotation: Quotation } & RowActionHandlers) {
   const navigate = useNavigate()
+  const can = useCan()
   const send = useSendQuotation(quotation.id)
   const convert = useConvertQuotation(quotation.id)
 
@@ -124,7 +114,7 @@ function QuotationRow({ quotation, onSuccess, onError }: { quotation: Quotation 
       <TD align="center"><SalesStatusBadge status={quotation.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {canSendQuotation(quotation.status) && (
+          {can('sales.quotations.send') && canSendQuotation(quotation.status) && (
             <Button
               variant="ghost"
               size="sm"
@@ -134,7 +124,7 @@ function QuotationRow({ quotation, onSuccess, onError }: { quotation: Quotation 
               Send
             </Button>
           )}
-          {canConvertQuotation(quotation.status) && (
+          {can('sales.quotations.convert') && canConvertQuotation(quotation.status) && (
             <Button
               variant="ghost"
               size="sm"

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { ZatcaDeviceOnboarding, ApiResponse } from '@masaar/types'
+import type { ZatcaDeviceOnboarding, ApiResponse, RequestCcsidPayload } from '@masaar/types'
 import { getApiClient } from './axios'
 
 export const zatcaKeys = {
@@ -17,11 +17,6 @@ export function useZatcaOnboardingStatus(branchId: string) {
     },
     enabled: !!branchId,
   })
-}
-
-export interface RequestCcsidPayload {
-  otp: string
-  csr: Record<string, unknown>
 }
 
 export function useRequestCcsid(branchId: string) {

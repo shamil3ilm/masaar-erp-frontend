@@ -1,5 +1,5 @@
 import { useMe, useZatcaOnboardingStatus, useRequestCcsid, useComplianceCheck, useUpgradeToPcsid } from '@masaar/api-client'
-import type { RequestCcsidPayload } from '@masaar/api-client'
+import type { RequestCcsidPayload } from '@masaar/types'
 import { ZatcaOnboardingWizard, LoadingSpinner, PageHeader } from '@masaar/ui'
 
 export function OnboardingPage() {

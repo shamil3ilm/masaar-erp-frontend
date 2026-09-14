@@ -1,22 +1,15 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useForm, useFieldArray, useWatch } from 'react-hook-form'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useCreateInvoice, useContacts } from '@masaar/api-client'
-import {
-  PageHeader, Card, CardHeader, FormField, Input, Select, Button, Alert,
-  Plus, Trash2,
-} from '@masaar/ui'
+import { PageHeader, Card, CardHeader, FormField, Input, Select, Button, Alert } from '@masaar/ui'
 import { useAuthStore } from '../../store/auth'
 import { applyApiErrors } from '../../lib/form-errors'
-import { CURRENCIES, DEFAULT_CURRENCY, moneyInputProps, quantityInputProps } from '../../lib/money'
-
-const lineSchema = z.object({
-  description: z.string().min(1, 'Required'),
-  quantity: z.number().positive('Must be positive'),
-  unit_price: z.number().min(0),
-  tax_rate: z.number().min(0).max(100),
-})
+import { CURRENCIES, DEFAULT_CURRENCY } from '../../lib/money'
+import { emptyLine, linesSchema } from '../../lib/line-items'
+import { INVOICE_TOTALS } from '../../lib/line-totals'
+import { LineItemsEditor } from '../../components/line-items/LineItemsEditor'
 
 const schema = z.object({
   customer_id: z.string().min(1, 'Customer is required'),
@@ -24,7 +17,7 @@ const schema = z.object({
   invoice_date: z.string().min(1, 'Required'),
   due_date: z.string().optional(),
   currency_code: z.string().length(3),
-  lines: z.array(lineSchema).min(1, 'At least one line item required'),
+  lines: linesSchema,
 })
 
 type FormValues = z.infer<typeof schema>
@@ -40,17 +33,16 @@ export function CreateInvoicePage() {
   const { data: contactsData } = useContacts({ contact_type: 'customer', per_page: 100 })
   const customers = contactsData?.data ?? []
 
-  const { register, control, handleSubmit, setError, formState: { errors } } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       invoice_type: 'standard',
       invoice_date: today,
       currency_code: organization?.base_currency ?? DEFAULT_CURRENCY,
-      lines: [{ description: '', quantity: 1, unit_price: 0, tax_rate: 15 }],
+      lines: [emptyLine()],
     },
   })
-
-  const { fields, append, remove } = useFieldArray({ control, name: 'lines' })
+  const { register, control, handleSubmit, setError, formState: { errors } } = form
   const currency = useWatch({ control, name: 'currency_code' })
 
   async function onSubmit(values: FormValues) {
@@ -77,113 +69,57 @@ export function CreateInvoicePage() {
           { label: 'New' },
         ]}
       />
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {errors.root?.server && <Alert variant="danger">{errors.root.server.message}</Alert>}
+      <FormProvider {...form}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {errors.root?.server && <Alert variant="danger">{errors.root.server.message}</Alert>}
 
-        <Card>
-          <CardHeader title="Invoice Details" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField label="Customer" required error={errors.customer_id?.message} className="sm:col-span-2">
-              <Select {...register('customer_id')} error={!!errors.customer_id}>
-                <option value="">Select customer…</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>{c.display_name}</option>
-                ))}
-              </Select>
-            </FormField>
-            <FormField label="Invoice Type" required error={errors.invoice_type?.message}>
-              <Select {...register('invoice_type')}>
-                <option value="standard">Standard (B2B)</option>
-                <option value="simplified">Simplified (B2C)</option>
-                <option value="credit_note">Credit Note</option>
-                <option value="debit_note">Debit Note</option>
-              </Select>
-            </FormField>
-            <FormField label="Currency" error={errors.currency_code?.message}>
-              <Select {...register('currency_code')}>
-                {CURRENCIES.map((c) => (
-                  <option key={c.code} value={c.code}>{c.code}</option>
-                ))}
-              </Select>
-            </FormField>
-            <FormField label="Invoice Date" required error={errors.invoice_date?.message}>
-              <Input type="date" {...register('invoice_date')} error={!!errors.invoice_date} />
-            </FormField>
-            <FormField label="Due Date" error={errors.due_date?.message}>
-              <Input type="date" {...register('due_date')} error={!!errors.due_date} />
-            </FormField>
+          <Card>
+            <CardHeader title="Invoice Details" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField label="Customer" required error={errors.customer_id?.message} className="sm:col-span-2">
+                <Select {...register('customer_id')} error={!!errors.customer_id}>
+                  <option value="">Select customer…</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={c.id}>{c.display_name}</option>
+                  ))}
+                </Select>
+              </FormField>
+              <FormField label="Invoice Type" required error={errors.invoice_type?.message}>
+                <Select {...register('invoice_type')}>
+                  <option value="standard">Standard (B2B)</option>
+                  <option value="simplified">Simplified (B2C)</option>
+                  <option value="credit_note">Credit Note</option>
+                  <option value="debit_note">Debit Note</option>
+                </Select>
+              </FormField>
+              <FormField label="Currency" error={errors.currency_code?.message}>
+                <Select {...register('currency_code')}>
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.code}</option>
+                  ))}
+                </Select>
+              </FormField>
+              <FormField label="Invoice Date" required error={errors.invoice_date?.message}>
+                <Input type="date" {...register('invoice_date')} error={!!errors.invoice_date} />
+              </FormField>
+              <FormField label="Due Date" error={errors.due_date?.message}>
+                <Input type="date" {...register('due_date')} error={!!errors.due_date} />
+              </FormField>
+            </div>
+          </Card>
+
+          <LineItemsEditor currency={currency} rule={INVOICE_TOTALS} />
+
+          <div className="flex gap-3">
+            <Button type="submit" loading={createInvoice.isPending}>
+              {createInvoice.isPending ? 'Creating…' : 'Create Invoice'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => void navigate({ to: '/app/sales/invoices' })}>
+              Cancel
+            </Button>
           </div>
-        </Card>
-
-        <Card>
-          <CardHeader
-            title="Line Items"
-            actions={
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                iconLeft={<Plus size={14} />}
-                onClick={() => append({ description: '', quantity: 1, unit_price: 0, tax_rate: 15 })}
-              >
-                Add Line
-              </Button>
-            }
-          />
-          <div className="space-y-3">
-            {fields.map((field, index) => {
-              const lineErrors = errors.lines?.[index]
-              const lineMessage = lineErrors?.description?.message ?? lineErrors?.quantity?.message
-                ?? lineErrors?.unit_price?.message ?? lineErrors?.tax_rate?.message
-              return (
-                <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
-                  <div className="col-span-12 sm:col-span-5">
-                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Description</label>}
-                    <Input {...register(`lines.${index}.description`)} placeholder="Description" error={!!lineErrors?.description} />
-                  </div>
-                  <div className="col-span-4 sm:col-span-2">
-                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Qty</label>}
-                    <Input {...quantityInputProps} {...register(`lines.${index}.quantity`, { valueAsNumber: true })} error={!!lineErrors?.quantity} />
-                  </div>
-                  <div className="col-span-4 sm:col-span-2">
-                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">Unit Price</label>}
-                    <Input {...moneyInputProps(currency)} {...register(`lines.${index}.unit_price`, { valueAsNumber: true })} error={!!lineErrors?.unit_price} />
-                  </div>
-                  <div className="col-span-3 sm:col-span-2">
-                    {index === 0 && <label className="block text-xs font-medium text-muted mb-1">VAT %</label>}
-                    <Input {...quantityInputProps} {...register(`lines.${index}.tax_rate`, { valueAsNumber: true })} error={!!lineErrors?.tax_rate} />
-                  </div>
-                  <div className="col-span-1 flex items-start">
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Remove line"
-                        className={index === 0 ? 'mt-6' : ''}
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 size={14} className="text-danger" />
-                      </Button>
-                    )}
-                  </div>
-                  {lineMessage && <p className="col-span-12 text-xs text-danger">{lineMessage}</p>}
-                </div>
-              )
-            })}
-          </div>
-          {errors.lines?.message && <p className="text-xs text-danger mt-2">{errors.lines.message}</p>}
-        </Card>
-
-        <div className="flex gap-3">
-          <Button type="submit" loading={createInvoice.isPending}>
-            {createInvoice.isPending ? 'Creating…' : 'Create Invoice'}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => void navigate({ to: '/app/sales/invoices' })}>
-            Cancel
-          </Button>
-        </div>
-      </form>
+        </form>
+      </FormProvider>
     </div>
   )
 }

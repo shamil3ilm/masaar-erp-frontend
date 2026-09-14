@@ -24,12 +24,28 @@ export function isTwoFactorChallenge(result: LoginResult): result is TwoFactorCh
 
 export interface MeResponse {
   user: User
-  permissions: unknown[]
+  /** Permission slugs from User::getAllPermissions; every slug for a super admin. */
+  permissions: string[]
   default_branch: BranchSummary | null
 }
 
 export const authKeys = {
   me: ['auth', 'me'] as const,
+}
+
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
+/** Sign in; resolves to a token, or to a 2FA challenge when the user has 2FA on. */
+export function useLogin() {
+  return useMutation({
+    mutationFn: (payload: LoginPayload) =>
+      getApiClient()
+        .post<ApiResponse<LoginResult>>('/auth/login', payload)
+        .then((r) => r.data.data),
+  })
 }
 
 /** The signed-in user with branches loaded; the login payload carries no branches. */

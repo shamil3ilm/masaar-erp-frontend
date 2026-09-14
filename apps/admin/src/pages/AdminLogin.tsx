@@ -1,10 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { AuthLayout, Logo, Input, PasswordInput, Button, FormField, Alert } from '@masaar/ui'
-import {
-  getApiClient, isTwoFactorChallenge, parseApiError,
-  type AuthTokenResponse, type LoginResult,
-} from '@masaar/api-client'
-import type { ApiResponse } from '@masaar/types'
+import { isTwoFactorChallenge, parseApiError, useLogin, useVerify2fa } from '@masaar/api-client'
 
 interface AdminLoginProps {
   onLogin: (token: string) => void
@@ -36,6 +32,8 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const login = useLogin()
+  const verify2fa = useVerify2fa()
 
   async function submit(request: () => Promise<void>, fallback: string) {
     setError(null)
@@ -53,8 +51,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     void submit(async () => {
-      const res = await getApiClient().post<ApiResponse<LoginResult>>('/auth/login', { email, password })
-      const result = res.data.data
+      const result = await login.mutateAsync({ email, password })
       // With 2FA on, login returns a challenge instead of a token.
       if (isTwoFactorChallenge(result)) {
         setChallengeToken(result.challenge_token)
@@ -68,11 +65,8 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
     e.preventDefault()
     if (!challengeToken) return
     void submit(async () => {
-      const res = await getApiClient().post<ApiResponse<AuthTokenResponse>>('/auth/2fa/verify', {
-        challenge_token: challengeToken,
-        code,
-      })
-      onLogin(res.data.data.token)
+      const result = await verify2fa.mutateAsync({ challenge_token: challengeToken, code })
+      onLogin(result.token)
     }, 'Verification failed. Please try again.')
   }
 

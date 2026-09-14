@@ -51,13 +51,12 @@ export { DataCard } from './components/DataCard'
 export { Table, THead, TBody, TR, TH, TD, TableEmpty, Pagination } from './components/Table'
 export { Skeleton, SkeletonText, SkeletonCard, SkeletonTableRow } from './components/Skeleton'
 
-// Domain badges (existing, now built on StatusBadge)
+// Domain badges (both built on StatusPill)
 export { ZatcaStatusBadge } from './components/zatca/ZatcaStatusBadge'
 export { SalesStatusBadge } from './components/sales/SalesStatusBadge'
 
 // ZATCA module
 export { ZatcaOnboardingWizard } from './components/zatca/ZatcaOnboardingWizard'
-export type { RequestCcsidPayload } from './components/zatca/ZatcaOnboardingWizard'
 export { ComplianceStatsCard } from './components/zatca/ComplianceStatsCard'
 
 // Icons (curated lucide re-exports)
@@ -75,3 +74,4 @@ export {
 
 // Utilities
 export { cn } from './lib/utils'
+export { statusLabel } from './lib/status-label'

@@ -1,8 +1,8 @@
 import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import type { AxiosError } from 'axios'
+import { parseApiError } from '@masaar/api-client'
 import './index.css'
-import { fetchPortalInvoice } from './api.ts'
+import { loadInvoice } from './api.ts'
 import { InvoiceViewer } from './InvoiceViewer.tsx'
 import type { PortalInvoice } from '@masaar/types'
 
@@ -26,13 +26,13 @@ function App() {
 
     let cancelled = false
 
-    fetchPortalInvoice(invoiceId, token)
+    loadInvoice(invoiceId, token)
       .then((invoice) => {
         if (!cancelled) setState({ phase: 'ready', invoice })
       })
       .catch((err: unknown) => {
         if (cancelled) return
-        const status = (err as AxiosError)?.response?.status
+        const { status } = parseApiError(err)
         let message = 'Unable to load invoice. Please try again later.'
         if (status === 401 || status === 403) message = 'This link has expired or is no longer valid.'
         else if (status === 404) message = 'Invoice not found.'

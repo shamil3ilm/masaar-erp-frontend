@@ -1,21 +1,24 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useCreditNotes, useApproveCreditNote, useVoidCreditNote } from '@masaar/api-client'
 import type { CreditNote } from '@masaar/types'
 import {
   PageHeader, LoadingSpinner, EmptyState, SalesStatusBadge, Alert,
-  Button, Select, Table, THead, TBody, TR, TH, TD, Pagination,
+  Button, Table, THead, TBody, TR, TH, TD, Pagination,
   Plus, RotateCcw,
 } from '@masaar/ui'
 import { formatCurrency, formatDate } from '../../lib/format'
 import { canApproveCreditNote, canVoidCreditNote } from '../../lib/sales-rules'
 import { useActionError, type RowActionHandlers } from '../../lib/use-action-error'
+import { useCan } from '../../lib/use-can'
+import { useListFilter } from '../../lib/use-list-filter'
+import { CREDIT_NOTE_STATUSES } from '../../lib/status-filters'
 import { ConfirmButton } from '../../components/ConfirmButton'
+import { StatusFilter } from '../../components/StatusFilter'
 
 export function CreditNotesPage() {
   const navigate = useNavigate()
-  const [page, setPage] = useState(1)
-  const [status, setStatus] = useState('')
+  const can = useCan()
+  const { page, setPage, filter: status, setFilter: setStatus } = useListFilter()
   const action = useActionError()
 
   const { data, isLoading, isError } = useCreditNotes({
@@ -27,31 +30,22 @@ export function CreditNotesPage() {
   const notes = data?.data ?? []
   const meta = data?.meta
 
+  const newCreditNote = can('sales.credit-notes.create') ? (
+    <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/credit-notes/new' })}>
+      New Credit Note
+    </Button>
+  ) : null
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Credit Notes"
         breadcrumbs={[{ label: 'Sales' }, { label: 'Credit Notes' }]}
-        actions={
-          <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/credit-notes/new' })}>
-            New Credit Note
-          </Button>
-        }
+        actions={newCreditNote}
       />
 
       <div className="flex gap-3 mb-4">
-        <Select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1) }}
-          className="max-w-[180px]"
-        >
-          <option value="">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="approved">Approved</option>
-          <option value="applied">Applied</option>
-          <option value="refunded">Refunded</option>
-          <option value="voided">Voided</option>
-        </Select>
+        <StatusFilter value={status} onChange={setStatus} options={CREDIT_NOTE_STATUSES} />
       </div>
 
       {action.message && <Alert variant="danger" className="mb-4">{action.message}</Alert>}
@@ -65,11 +59,7 @@ export function CreditNotesPage() {
           icon={RotateCcw}
           title="No credit notes found"
           description="Issue a credit note to adjust a customer invoice."
-          action={
-            <Button iconLeft={<Plus size={15} />} onClick={() => void navigate({ to: '/app/sales/credit-notes/new' })}>
-              New Credit Note
-            </Button>
-          }
+          action={newCreditNote}
         />
       ) : (
         <>
@@ -111,6 +101,7 @@ export function CreditNotesPage() {
 }
 
 function CreditNoteRow({ note, ...handlers }: { note: CreditNote } & RowActionHandlers) {
+  const can = useCan()
   const approve = useApproveCreditNote(note.id)
   const voidNote = useVoidCreditNote(note.id)
 
@@ -125,7 +116,7 @@ function CreditNoteRow({ note, ...handlers }: { note: CreditNote } & RowActionHa
       <TD align="center"><SalesStatusBadge status={note.status} /></TD>
       <TD align="end">
         <div className="flex justify-end gap-1">
-          {canApproveCreditNote(note.status) && (
+          {can('sales.credit-notes.approve') && canApproveCreditNote(note.status) && (
             <Button
               variant="ghost"
               size="sm"
@@ -135,7 +126,7 @@ function CreditNoteRow({ note, ...handlers }: { note: CreditNote } & RowActionHa
               Approve
             </Button>
           )}
-          {canVoidCreditNote(note) && (
+          {can('sales.credit-notes.void') && canVoidCreditNote(note) && (
             <ConfirmButton
               label="Void"
               title={`Void credit note ${note.credit_note_number}?`}
