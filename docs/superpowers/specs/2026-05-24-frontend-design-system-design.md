@@ -1,13 +1,14 @@
 # Frontend Design System & UI Overhaul — Design
 
 **Date:** 2026-05-24
-**Branch:** `feat/design-system`
-**Status:** Approved direction, pending spec review
+**Branch:** `feat/design-system` — merged
+**Status:** Implemented. The design system described below is what
+`@masaar/ui` is today; the Problem section records the state it replaced.
 
 ## Problem
 
-The ERP frontend (`erp-frontend` monorepo: `staff`, `admin`, `portal` apps) looks
-"plain, poor, and empty." Concrete causes:
+The ERP frontend (`masaar-erp-frontend` monorepo: `staff`, `admin`, `portal`
+apps) looked "plain, poor, and empty." Concrete causes:
 
 - **Emoji icons** (👥 📋 🛒) used everywhere instead of the `lucide-react` library
   already shipped in `@masaar/ui`.
@@ -134,7 +135,8 @@ Built with `cva` for variants and `cn()` (clsx + tailwind-merge) for class mergi
 - Component unit tests (Vitest + Testing Library) for `Button`, `StatusBadge`,
   `ThemeProvider` (toggle persists, sets class/dir), `FormField` (error rendering).
   Keep/extend existing `LoadingSpinner`/`Sidebar`/zatca tests.
-- `pnpm typecheck` and `pnpm lint` green across the workspace.
+- `pnpm typecheck`, `pnpm test` and `pnpm build` green across the workspace.
+  `pnpm lint` runs ESLint from the root config across every package.
 - **Live visual verification**: run the staff dev server and screenshot real pages
   (light + dark, LTR + RTL) at each milestone via the existing `_shot.mjs`; share for review.
 

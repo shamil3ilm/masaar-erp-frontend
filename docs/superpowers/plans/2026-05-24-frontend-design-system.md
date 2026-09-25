@@ -52,13 +52,13 @@ Expected: Vite serving on `http://localhost:5173`.
 
 - [ ] **Step 2: Capture before-state of dashboard + one list page + login**
 
-Run: `cd apps/staff; node _shot.mjs` (adjust target URLs inside if needed) and save to `docs/superpowers/_before/`.
+Run: `cd apps/staff; node _shot.mjs` (adjust target URLs inside if needed) and save to `docs/superpowers/_shots/` named `before-<page>-<width>.png`.
 Expected: PNGs written; keep for before/after comparison.
 
 - [ ] **Step 3: Commit the baseline shots**
 
 ```bash
-git add docs/superpowers/_before
+git add docs/superpowers/_shots
 git commit -m "chore: baseline screenshots before design system"
 ```
 
@@ -760,8 +760,9 @@ git commit -m "feat(staff): migrate create/edit + ZATCA pages to design system"
 
 - [ ] **Step 2: Run unit tests + typecheck + lint for staff**
 
-Run: `cd apps/staff; pnpm test; pnpm typecheck; pnpm lint`
-Expected: green.
+Run: `pnpm --filter @masaar/staff test; pnpm --filter @masaar/staff typecheck; pnpm lint`
+Expected: green. Lint runs from the root config for the whole workspace, so
+there is no per-package variant of it.
 
 - [ ] **Step 3: Full staff screenshot set (login, dashboard, invoices, create-invoice) in light/dark + LTR/RTL + mobile/desktop; share for review.**
 
@@ -828,15 +829,15 @@ git commit -m "feat(portal): polish public invoice + error pages"
 
 - [ ] **Step 1: Run the full workspace gates**
 
-Run: `pnpm -w typecheck; pnpm -w lint; pnpm -w test`
+Run: `pnpm typecheck; pnpm test; pnpm build`
 Expected: all green. Fix any fallout.
 
-- [ ] **Step 2: Capture the final screenshot set** for all three apps (light/dark, LTR/RTL, mobile ~375 / tablet ~768 / laptop ~1280 / wide ~1680) into `docs/superpowers/_after/`; compare against `_before/`.
+- [ ] **Step 2: Capture the final screenshot set** for all three apps (light/dark, LTR/RTL, mobile ~375 / tablet ~768 / laptop ~1280 / wide ~1680) into `docs/superpowers/_shots/` named `after-<page>-<width>.png`; compare against the `before-` shots beside them.
 
 - [ ] **Step 3: Commit screenshots + update README if UI docs reference the old look**
 
 ```bash
-git add docs/superpowers/_after
+git add docs/superpowers/_shots
 git commit -m "chore: final design-system screenshots"
 ```
 
