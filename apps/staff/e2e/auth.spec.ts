@@ -1,137 +1,69 @@
-import { test, expect } from '@playwright/test'
-import { mockLoginResponse } from './helpers/auth'
+import { expect, test } from '@playwright/test'
+import { failUnmockedApi, failure, mockApi, ok } from './helpers/api'
+import { LOGIN, ORGANIZATION, PASSWORD, TOKEN, USER, me } from './helpers/fixtures'
+import { signIn } from './helpers/auth'
 
-test.describe('Authentication', () => {
-  test('redirects unauthenticated users from /app/dashboard to /login', async ({ page }) => {
+test.describe('Signing in', () => {
+  test('sends a visitor with no session to the sign-in page', async ({ page }) => {
+    await failUnmockedApi(page)
+
     await page.goto('/app/dashboard')
-    await page.waitForURL('**/login')
-    await expect(page).toHaveURL(/\/login/)
-  })
 
-  test('shows login form with email and password fields', async ({ page }) => {
-    await page.goto('/login')
-    await expect(page.getByLabel('Email')).toBeVisible()
-    await expect(page.getByLabel('Password')).toBeVisible()
+    await expect(page).toHaveURL(/\/login$/)
     await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible()
   })
 
-  test('shows error on invalid credentials', async ({ page }) => {
-    await page.route('**/api/v1/auth/login', (route) => {
-      void route.fulfill({
-        status: 401,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }),
-      })
-    })
+  test('reports bad credentials and keeps the visitor signed out', async ({ page }) => {
+    await failUnmockedApi(page)
+    await mockApi(page, '/auth/login', failure('UNAUTHORIZED', 'These credentials do not match our records.'), 401)
 
     await page.goto('/login')
-    await page.getByLabel('Email').fill('wrong@example.com')
-    await page.getByLabel('Password').fill('wrongpassword')
+    await page.getByLabel('Email address').fill(USER.email)
+    await page.getByLabel('Password', { exact: true }).fill('not-the-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
 
-    await expect(page.getByText('Invalid email or password')).toBeVisible()
+    await expect(page.getByText('Invalid email or password. Please try again.')).toBeVisible()
+    await expect(page).toHaveURL(/\/login$/)
+    expect(await page.evaluate(() => localStorage.getItem('erp_token'))).toBeNull()
   })
 
-  test('successful login with single org navigates to dashboard', async ({ page }) => {
-    await page.route('**/api/v1/auth/login', (route) => {
-      void route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockLoginResponse),
-      })
+  test('stores the session from the login payload and opens the dashboard', async ({ page }) => {
+    await signIn(page)
+
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+
+    // The payload carries one organization on the user; there is no organizations[].
+    const session = await page.evaluate(() => ({
+      token: localStorage.getItem('erp_token'),
+      orgId: localStorage.getItem('erp_org_id'),
+    }))
+    expect(session.token).toBe(TOKEN)
+    expect(session.orgId).toBe(String(ORGANIZATION.id))
+  })
+
+  test('asks for the one-time code when the account has two-factor enabled', async ({ page }) => {
+    await failUnmockedApi(page)
+    await mockApi(page, '/auth/login', ok({ requires_2fa: true, challenge_token: 'challenge-abc' }))
+    await mockApi(page, '/auth/me', ok(me()))
+
+    let challenge: unknown = null
+    await mockApi(page, '/auth/2fa/verify', (request) => {
+      challenge = request.postDataJSON()
+      return ok(LOGIN)
     })
 
     await page.goto('/login')
-    await page.getByLabel('Email').fill('test@example.com')
-    await page.getByLabel('Password').fill('password123')
+    await page.getByLabel('Email address').fill(USER.email)
+    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
     await page.getByRole('button', { name: 'Sign in' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Two-step verification' })).toBeVisible()
+
+    // The code field is the only text box on this step.
+    await page.getByRole('textbox').fill('123456')
+    await page.getByRole('button', { name: 'Verify code' }).click()
 
     await page.waitForURL('**/app/dashboard')
-    await expect(page).toHaveURL(/\/app\/dashboard/)
-  })
-
-  test('successful login with multiple orgs shows org picker', async ({ page }) => {
-    const multiOrgResponse = {
-      ...mockLoginResponse,
-      data: {
-        ...mockLoginResponse.data,
-        organizations: [
-          { id: 'org-1', name: 'Test Corp', country: 'SA', currency: 'SAR' },
-          { id: 'org-2', name: 'Second Corp', country: 'AE', currency: 'AED' },
-        ],
-      },
-    }
-
-    await page.route('**/api/v1/auth/login', (route) => {
-      void route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(multiOrgResponse),
-      })
-    })
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill('test@example.com')
-    await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Sign in' }).click()
-
-    await page.waitForURL('**/org-picker')
-    await expect(page.getByText('Select Organization')).toBeVisible()
-    await expect(page.getByText('Test Corp')).toBeVisible()
-    await expect(page.getByText('Second Corp')).toBeVisible()
-  })
-
-  test('org picker selection navigates to dashboard', async ({ page }) => {
-    const multiOrgResponse = {
-      ...mockLoginResponse,
-      data: {
-        ...mockLoginResponse.data,
-        organizations: [
-          { id: 'org-1', name: 'Test Corp', country: 'SA', currency: 'SAR' },
-          { id: 'org-2', name: 'Second Corp', country: 'AE', currency: 'AED' },
-        ],
-      },
-    }
-
-    await page.route('**/api/v1/auth/login', (route) => {
-      void route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(multiOrgResponse),
-      })
-    })
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill('test@example.com')
-    await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Sign in' }).click()
-
-    await page.waitForURL('**/org-picker')
-    await page.getByRole('button', { name: /Second Corp/ }).click()
-
-    await page.waitForURL('**/app/dashboard')
-    await expect(page).toHaveURL(/\/app\/dashboard/)
-  })
-
-  test('sets erp_token and erp_org_id in localStorage after login', async ({ page }) => {
-    await page.route('**/api/v1/auth/login', (route) => {
-      void route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockLoginResponse),
-      })
-    })
-
-    await page.goto('/login')
-    await page.getByLabel('Email').fill('test@example.com')
-    await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Sign in' }).click()
-
-    await page.waitForURL('**/app/dashboard')
-
-    const token = await page.evaluate(() => localStorage.getItem('erp_token'))
-    const orgId = await page.evaluate(() => localStorage.getItem('erp_org_id'))
-    expect(token).toBe('test-jwt-token')
-    expect(orgId).toBe('org-1')
+    expect(challenge).toEqual({ challenge_token: 'challenge-abc', code: '123456' })
   })
 })
