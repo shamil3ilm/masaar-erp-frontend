@@ -2,18 +2,23 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
-**Goal:** Build a Turborepo monorepo at `c:\laragon\www\erp-frontend` with three React + TypeScript apps (staff, admin, portal) and the full ZATCA compliance module as the first feature.
+**Goal:** Build a Turborepo monorepo at `c:\laragon\www\masaar-erp-frontend` with three React + TypeScript apps (staff, admin, portal) and the full ZATCA compliance module as the first feature.
 
-**Architecture:** Turborepo monorepo with pnpm workspaces. Three Vite apps share code through three packages: `@masaar/types` (TypeScript interfaces), `@masaar/api-client` (Axios + TanStack Query hooks), and `@masaar/ui` (shadcn/ui components). Staff app uses TanStack Router for routing and Zustand for auth state.
+**Architecture:** Turborepo monorepo with pnpm workspaces. Three Vite apps share code through three packages: `@masaar/types` (TypeScript interfaces), `@masaar/api-client` (Axios + TanStack Query hooks), and `@masaar/ui` (the Masaar design system — tokens, cva-variant components, app shell). Staff app uses TanStack Router for routing and Zustand for auth state.
 
-**Tech Stack:** React 19, TypeScript, Vite, Turborepo, pnpm, TanStack Router, TanStack Query, Zustand, shadcn/ui, Tailwind v4, AG Grid Community, React Hook Form, Zod, Axios, MSW, Vitest, Playwright
+**Tech Stack:** React 19, TypeScript, Vite, Turborepo, pnpm, TanStack Router, TanStack Query, Zustand, Tailwind v4, class-variance-authority, AG Grid Community, React Hook Form, Zod, Axios, Vitest, Playwright
+
+`@masaar/ui` is not shadcn/ui. It uses the same underlying toolchain — cva,
+clsx, tailwind-merge, lucide-react — but no shadcn CLI, no `components.json`
+and no Radix; every component is written here. MSW was planned and later
+dropped along with the api-client mocks.
 
 ---
 
 ## File Map
 
 ```
-erp-frontend/
+masaar-erp-frontend/
 ├── apps/
 │   ├── staff/
 │   │   ├── src/
@@ -42,9 +47,7 @@ erp-frontend/
 │   │   │   ├── store/
 │   │   │   │   └── auth.ts              # Zustand auth store
 │   │   │   └── test/
-│   │   │       ├── setup.ts
-│   │   │       └── mocks/
-│   │   │           └── handlers.ts      # MSW handlers for staff app
+│   │   │       └── setup.ts
 │   │   ├── vite.config.ts
 │   │   ├── tsconfig.json
 │   │   └── package.json
@@ -66,9 +69,7 @@ erp-frontend/
 │   │   │   ├── axios.ts                 # Axios instance + interceptors
 │   │   │   ├── query-client.ts          # TanStack QueryClient config
 │   │   │   ├── zatca.ts                 # ZATCA TanStack Query hooks
-│   │   │   └── mocks/
-│   │   │       ├── index.ts
-│   │   │       └── zatca.ts             # MSW handlers for ZATCA
+│   │   │   └── sales.ts                 # Sales TanStack Query hooks
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   └── ui/
@@ -102,17 +103,17 @@ erp-frontend/
 ### Task 1: Initialize the monorepo
 
 **Files:**
-- Create: `c:\laragon\www\erp-frontend\package.json`
-- Create: `c:\laragon\www\erp-frontend\pnpm-workspace.yaml`
-- Create: `c:\laragon\www\erp-frontend\turbo.json`
-- Create: `c:\laragon\www\erp-frontend\.gitignore`
+- Create: `c:\laragon\www\masaar-erp-frontend\package.json`
+- Create: `c:\laragon\www\masaar-erp-frontend\pnpm-workspace.yaml`
+- Create: `c:\laragon\www\masaar-erp-frontend\turbo.json`
+- Create: `c:\laragon\www\masaar-erp-frontend\.gitignore`
 
 - [x] **Step 1: Create the root directory and initialize git**
 
 ```bash
 cd c:\laragon\www
-mkdir erp-frontend
-cd erp-frontend
+mkdir masaar-erp-frontend
+cd masaar-erp-frontend
 git init
 ```
 
@@ -120,14 +121,14 @@ git init
 
 ```json
 {
-  "name": "erp-frontend",
+  "name": "masaar-erp-frontend",
   "private": true,
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
     "test": "turbo test",
     "typecheck": "turbo typecheck",
-    "lint": "turbo lint"
+    "e2e": "turbo e2e"
   },
   "devDependencies": {
     "turbo": "^2.0.0",
@@ -136,7 +137,8 @@ git init
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
-  }
+  },
+  "packageManager": "pnpm@9.15.4"
 }
 ```
 
@@ -261,7 +263,6 @@ Replace the generated `package.json` with:
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.0",
     "jsdom": "^24.0.0",
-    "msw": "^2.3.0",
     "typescript": "^5.4.0",
     "vite": "^5.3.0",
     "vitest": "^2.0.0"
@@ -415,7 +416,6 @@ export * from './zatca'
     "axios": "^1.7.0"
   },
   "devDependencies": {
-    "msw": "^2.3.0",
     "typescript": "^5.4.0"
   }
 }
@@ -1062,104 +1062,7 @@ export function useComplianceReport(dateRange: { start: string; end: string }) {
 }
 ```
 
-- [x] **Step 2: Create MSW mock handlers `packages/api-client/src/mocks/zatca.ts`**
-
-```ts
-import { http, HttpResponse } from 'msw'
-import type { ZatcaDeviceOnboarding, ZatcaInvoice, ZatcaComplianceReport } from '@masaar/types'
-
-const BASE = '/api/v1'
-
-export const zatcaMockHandlers = [
-  http.get(`${BASE}/compliance/branches/:branchId/onboarding`, ({ params }) => {
-    const onboarding: ZatcaDeviceOnboarding = {
-      branch_id: params.branchId as string,
-      branch_name: 'Main Branch',
-      status: 'not_started',
-      ccsid_expires_at: null,
-      pcsid_issued_at: null,
-      last_error: null,
-    }
-    return HttpResponse.json({ success: true, data: onboarding, meta: {} })
-  }),
-
-  http.post(`${BASE}/compliance/branches/:branchId/ccsid`, ({ params }) => {
-    const onboarding: ZatcaDeviceOnboarding = {
-      branch_id: params.branchId as string,
-      branch_name: 'Main Branch',
-      status: 'ccsid_requested',
-      ccsid_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      pcsid_issued_at: null,
-      last_error: null,
-    }
-    return HttpResponse.json({ success: true, data: onboarding, meta: {} })
-  }),
-
-  http.post(`${BASE}/compliance/branches/:branchId/pcsid`, ({ params }) => {
-    const onboarding: ZatcaDeviceOnboarding = {
-      branch_id: params.branchId as string,
-      branch_name: 'Main Branch',
-      status: 'pcsid_active',
-      ccsid_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      pcsid_issued_at: new Date().toISOString(),
-      last_error: null,
-    }
-    return HttpResponse.json({ success: true, data: onboarding, meta: {} })
-  }),
-
-  http.get(`${BASE}/compliance/zatca/invoices`, () => {
-    const invoices: ZatcaInvoice[] = [
-      {
-        id: '1',
-        invoice_number: 'INV-001',
-        invoice_type: 'standard',
-        buyer_name: 'Acme Corp',
-        buyer_vat: '300000000000003',
-        total_amount: 1150,
-        vat_amount: 150,
-        currency: 'SAR',
-        status: 'cleared',
-        zatca_uuid: 'abc-uuid',
-        zatca_hash: 'abc-hash',
-        rejection_reason: null,
-        submitted_at: new Date().toISOString(),
-        cleared_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      },
-    ]
-    return HttpResponse.json({
-      success: true,
-      data: invoices,
-      meta: { current_page: 1, per_page: 20, total: 1, last_page: 1 },
-    })
-  }),
-
-  http.get(`${BASE}/compliance/zatca/report`, () => {
-    const report: ZatcaComplianceReport = {
-      period_start: '2026-05-01',
-      period_end: '2026-05-31',
-      total_submitted: 42,
-      total_cleared: 38,
-      total_rejected: 2,
-      total_pending: 2,
-      clearance_rate: 90.5,
-      rejection_rate: 4.8,
-      last_submission_at: new Date().toISOString(),
-    }
-    return HttpResponse.json({ success: true, data: report, meta: {} })
-  }),
-]
-```
-
-- [x] **Step 3: Create `packages/api-client/src/mocks/index.ts`**
-
-```ts
-export { zatcaMockHandlers } from './zatca'
-
-export const allMockHandlers = [...zatcaMockHandlers]
-```
-
-- [x] **Step 4: Typecheck**
+- [x] **Step 2: Typecheck**
 
 ```bash
 pnpm --filter @masaar/api-client typecheck
@@ -1167,11 +1070,11 @@ pnpm --filter @masaar/api-client typecheck
 
 Expected: No errors.
 
-- [x] **Step 5: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add packages/api-client/
-git commit -m "feat(api-client): add ZATCA TanStack Query hooks and MSW mock handlers"
+git commit -m "feat(api-client): add ZATCA TanStack Query hooks"
 ```
 
 ---
@@ -1330,14 +1233,18 @@ git commit -m "feat(staff): add Zustand auth store with tests"
 
 ## Phase 5: Staff App Shell
 
-### Task 8: Tailwind + shadcn/ui setup in packages/ui
+### Task 8: Tailwind + component toolchain in packages/ui
 
 **Files:**
-- Modify: `packages/ui/package.json` (add shadcn deps)
+- Modify: `packages/ui/package.json` (add the variant/class-merge toolchain)
 - Create: `packages/ui/src/components/LoadingSpinner.tsx`
 - Create: `packages/ui/src/components/EmptyState.tsx`
 
-- [x] **Step 1: Install shadcn/ui dependencies in packages/ui**
+- [x] **Step 1: Install the component toolchain in packages/ui**
+
+These four are what shadcn/ui is built on, which is why the step used to be
+called "install shadcn". Nothing installs shadcn itself — the components in
+`@masaar/ui` are written here.
 
 ```bash
 pnpm --filter @masaar/ui add clsx tailwind-merge class-variance-authority lucide-react
@@ -1432,7 +1339,7 @@ export function EmptyState({ title, description, action, className }: EmptyState
 
 ```bash
 git add packages/ui/
-git commit -m "feat(ui): add shadcn utils, LoadingSpinner, EmptyState with tests"
+git commit -m "feat(ui): add cn() helper, LoadingSpinner, EmptyState with tests"
 ```
 
 ---
@@ -2990,22 +2897,18 @@ git commit -m "feat(ui): add logo asset and Logo component, wire into TopBar and
 
 - [x] **Step 1: Create env files**
 
-`apps/staff/.env.local`:
+`VITE_API_URL` is the only variable any app reads, and admin does not read it
+at all — its base is the literal `/api/v1` in `src/main.tsx`. `VITE_APP_NAME`
+was planned here and never wired to anything.
+
+`apps/staff/.env.local` — optional; defaults to this value:
 ```
 VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=ERP
 ```
 
-`apps/admin/.env.local`:
+`apps/portal/.env.local` — optional; defaults to `/api/v1`, the same origin:
 ```
 VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=ERP Admin
-```
-
-`apps/portal/.env.local`:
-```
-VITE_API_URL=http://localhost:8000/api/v1
-VITE_APP_NAME=ERP Portal
 ```
 
 - [x] **Step 2: Add `.env.local` to `.gitignore`**
@@ -3055,7 +2958,7 @@ After all tasks are complete:
 
 | What was built | Where |
 |----------------|-------|
-| Turborepo monorepo | `c:\laragon\www\erp-frontend\` |
+| Turborepo monorepo | `c:\laragon\www\masaar-erp-frontend\` |
 | 3 Vite apps | `apps/staff`, `apps/admin`, `apps/portal` |
 | Shared TypeScript types | `packages/types/` |
 | Axios client + ZATCA hooks | `packages/api-client/` |
