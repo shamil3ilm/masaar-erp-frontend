@@ -76,34 +76,34 @@ export function CreateInvoicePage() {
           <Card>
             <CardHeader title="Invoice Details" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Customer" required error={errors.customer_id?.message} className="sm:col-span-2">
-                <Select {...register('customer_id')} error={!!errors.customer_id}>
+              <FormField label="Customer" htmlFor="customer_id" required error={errors.customer_id?.message} className="sm:col-span-2">
+                <Select id="customer_id" {...register('customer_id')} error={!!errors.customer_id}>
                   <option value="">Select customer…</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>{c.display_name}</option>
                   ))}
                 </Select>
               </FormField>
-              <FormField label="Invoice Type" required error={errors.invoice_type?.message}>
-                <Select {...register('invoice_type')}>
+              <FormField label="Invoice Type" htmlFor="invoice_type" required error={errors.invoice_type?.message}>
+                <Select id="invoice_type" {...register('invoice_type')}>
                   <option value="standard">Standard (B2B)</option>
                   <option value="simplified">Simplified (B2C)</option>
                   <option value="credit_note">Credit Note</option>
                   <option value="debit_note">Debit Note</option>
                 </Select>
               </FormField>
-              <FormField label="Currency" error={errors.currency_code?.message}>
-                <Select {...register('currency_code')}>
+              <FormField label="Currency" htmlFor="currency_code" error={errors.currency_code?.message}>
+                <Select id="currency_code" {...register('currency_code')}>
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>{c.code}</option>
                   ))}
                 </Select>
               </FormField>
-              <FormField label="Invoice Date" required error={errors.invoice_date?.message}>
-                <Input type="date" {...register('invoice_date')} error={!!errors.invoice_date} />
+              <FormField label="Invoice Date" htmlFor="invoice_date" required error={errors.invoice_date?.message}>
+                <Input id="invoice_date" type="date" {...register('invoice_date')} error={!!errors.invoice_date} />
               </FormField>
-              <FormField label="Due Date" error={errors.due_date?.message}>
-                <Input type="date" {...register('due_date')} error={!!errors.due_date} />
+              <FormField label="Due Date" htmlFor="due_date" error={errors.due_date?.message}>
+                <Input id="due_date" type="date" {...register('due_date')} error={!!errors.due_date} />
               </FormField>
             </div>
           </Card>
