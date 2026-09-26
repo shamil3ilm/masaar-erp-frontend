@@ -1,0 +1,19 @@
+{
+  "name": "@masaar/test-helpers",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@masaar/api-client": "workspace:*",
+    "@masaar/types": "workspace:*",
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -50,6 +50,9 @@ pnpm --filter @masaar/portal dev
 # Production build
 pnpm --filter @masaar/portal build
 
+# Unit tests (Vitest + Testing Library)
+pnpm --filter @masaar/portal test
+
 # Type check
 pnpm --filter @masaar/portal typecheck
 ```
