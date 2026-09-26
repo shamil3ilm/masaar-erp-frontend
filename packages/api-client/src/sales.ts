@@ -648,6 +648,9 @@ export function useAllocatePayment(id: number) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: salesKeys.payments.all })
       qc.invalidateQueries({ queryKey: salesKeys.invoices.all })
+      // An allocation moves what the customer owes, so their outstanding
+      // balance and their statement are stale until they are read again.
+      qc.invalidateQueries({ queryKey: salesKeys.contacts.all })
     },
   })
 }

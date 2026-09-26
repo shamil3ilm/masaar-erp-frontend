@@ -192,7 +192,7 @@ export type PaymentStatus = 'pending' | 'completed' | 'bounced' | 'voided'
 
 export interface PaymentAllocation {
   invoice_id: number
-  amount: number
+  amount: Decimal
 }
 
 export interface PaymentReceived {
