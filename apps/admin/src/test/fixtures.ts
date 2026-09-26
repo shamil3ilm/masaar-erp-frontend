@@ -29,3 +29,22 @@ export const LOGIN: AuthTokenResponse = {
   expires_in: 3600,
   user: ADMIN_USER,
 }
+
+/** Someone with a good password and no business in this console. */
+export const STAFF_USER: User = {
+  id: 2,
+  uuid: '018f3c2a-9b41-7c55-8d3e-000000000002',
+  name: 'Omar Haddad',
+  email: 'omar.haddad@masaar.test',
+  is_super_admin: false,
+  two_factor_enabled: false,
+  organization: null,
+  roles: [{ id: 2, name: 'Accountant', slug: 'accountant' }],
+}
+
+export const STAFF_LOGIN: AuthTokenResponse = {
+  token: 'staff-access-token',
+  token_type: 'bearer',
+  expires_in: 3600,
+  user: STAFF_USER,
+}
