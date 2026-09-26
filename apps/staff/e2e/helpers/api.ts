@@ -1,36 +1,12 @@
 import type { Page, Request } from '@playwright/test'
-import type { ApiError, ApiResponse, PaginatedResponse } from '@masaar/types'
+import { failure } from '@masaar/test-helpers'
 
-/** Every envelope the backend sends carries these; nothing in the app reads them. */
-function envelopeMeta() {
-  return { request_id: 'e2e', timestamp: '2026-02-10T09:00:00Z' }
-}
-
-/** The `ApiResponse` envelope a single-resource endpoint answers with. */
-export function ok<T>(data: T, message = 'OK'): ApiResponse<T> {
-  return { success: true, message, data, meta: envelopeMeta() }
-}
-
-/** The `PaginatedResponse` envelope a list endpoint answers with. */
-export function paginated<T>(rows: T[], page = 1, perPage = 20): PaginatedResponse<T> {
-  return {
-    success: true,
-    data: rows,
-    meta: {
-      current_page: page,
-      per_page: perPage,
-      total: rows.length,
-      last_page: Math.max(1, Math.ceil(rows.length / perPage)),
-      ...envelopeMeta(),
-    },
-    links: { first: null, last: null, prev: null, next: null },
-  }
-}
-
-/** The `ApiError` envelope a failed request answers with. */
-export function failure(code: string, message: string): ApiError {
-  return { success: false, message, error: { code, message }, meta: envelopeMeta() }
-}
+/*
+ * The envelopes live in @masaar/test-helpers, where the admin and portal
+ * suites build them too. They are re-exported here so a spec still reaches
+ * them through the helper it already imports `mockApi` from.
+ */
+export { failure, ok, paginated } from '@masaar/test-helpers'
 
 /**
  * The app's requests to its API, told apart from the pages it navigates to —

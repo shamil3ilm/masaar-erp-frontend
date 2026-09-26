@@ -36,6 +36,9 @@ pnpm --filter @masaar/admin dev
 # Production build
 pnpm --filter @masaar/admin build
 
+# Unit tests (Vitest + Testing Library)
+pnpm --filter @masaar/admin test
+
 # Type check
 pnpm --filter @masaar/admin typecheck
 ```
