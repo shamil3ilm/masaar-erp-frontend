@@ -5,6 +5,7 @@ import type {
   Invoice,
   InvoiceSummary,
   Organization,
+  Quotation,
   User,
   ZatcaDeviceOnboarding,
   ZatcaOnboardingStatus,
@@ -187,4 +188,32 @@ export const INVOICE_SUMMARY: InvoiceSummary = {
   },
   overdue_count: 0,
   overdue_amount: '0.0000',
+}
+
+/**
+ * A quotation as the list shows it after one is created. The discount fields
+ * hold what QuotationController stored: the type and value as sent, and the
+ * amount it worked out from them.
+ */
+export function quotation(overrides: Partial<Quotation> = {}): Quotation {
+  return {
+    id: 301,
+    quotation_number: 'QT-2026-0001',
+    customer_id: CUSTOMER.id,
+    customer: { id: CUSTOMER.id, name: CUSTOMER.display_name, email: CUSTOMER.email },
+    customer_name: CUSTOMER.display_name,
+    quotation_date: '2026-02-10',
+    valid_until: '2026-03-12',
+    currency_code: 'SAR',
+    exchange_rate: '1.000000',
+    subtotal: '1250.0000',
+    discount_type: 'percentage',
+    discount_value: '10.0000',
+    discount_amount: '125.0000',
+    tax_amount: '187.5000',
+    total: '1312.5000',
+    status: 'draft',
+    notes: null,
+    ...overrides,
+  }
 }
