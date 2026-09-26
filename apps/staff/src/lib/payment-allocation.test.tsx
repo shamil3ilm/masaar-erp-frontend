@@ -15,7 +15,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AxiosError, type AxiosAdapter, type AxiosResponse } from 'axios'
-import type { ApiError, ApiResponse, OpenItem, PaymentAllocation } from '@masaar/types'
+import type { OpenItem, PaymentAllocation } from '@masaar/types'
+import { failure, ok } from '@masaar/test-helpers'
 import {
   getApiClient,
   initApiClient,
@@ -27,16 +28,6 @@ import {
 
 const CUSTOMER_ID = 5
 const PAYMENT_ID = 9
-
-const META = { request_id: 'unit', timestamp: '2026-02-10T09:00:00Z' }
-
-function ok<T>(data: T): ApiResponse<T> {
-  return { success: true, message: 'OK', data, meta: META }
-}
-
-function failure(code: string, message: string): ApiError {
-  return { success: false, message, error: { code, message }, meta: META }
-}
 
 function openItem(overrides: Partial<OpenItem> = {}): OpenItem {
   return {

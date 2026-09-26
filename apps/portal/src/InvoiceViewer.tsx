@@ -1,20 +1,8 @@
 import type { InvoiceStatus, PortalInvoice, PortalInvoiceLine } from '@masaar/types'
+import { formatCurrency, formatDate, formatNumber } from './format'
 
 interface Props {
   invoice: PortalInvoice
-}
-
-// Amounts arrive as decimal strings; Intl picks the currency's own decimals.
-function formatCurrency(amount: string | number, currency: string): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(amount) || 0)
-}
-
-function formatDate(dateStr: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(dateStr))
 }
 
 // Invoice statuses mapped onto the badge styles index.css defines.
@@ -36,9 +24,9 @@ function LineItemRow({ item, currency }: { item: PortalInvoiceLine; currency: st
   return (
     <tr>
       <td className="col-desc">{item.description}</td>
-      <td className="col-num text-right">{Number(item.quantity)}</td>
+      <td className="col-num text-right">{formatNumber(item.quantity)}</td>
       <td className="col-num text-right">{formatCurrency(item.unit_price, currency)}</td>
-      <td className="col-num text-right">{Number(item.tax_rate)}%</td>
+      <td className="col-num text-right">{formatNumber(item.tax_rate)}%</td>
       <td className="col-num text-right">{formatCurrency(item.tax_amount, currency)}</td>
       <td className="col-num text-right">{formatCurrency(item.total, currency)}</td>
     </tr>
@@ -74,8 +62,10 @@ export function InvoiceViewer({ invoice }: Props) {
         <div className="invoice-doc">
           <div className="invoice-top">
             <div className="invoice-meta">
-              <div className="invoice-title">INVOICE</div>
-              <table className="meta-table">
+              <h1 className="invoice-title">INVOICE</h1>
+              {/* Named, because a screen reader announces a table by its name
+                  and this document holds three of them. */}
+              <table className="meta-table" aria-label="Invoice details">
                 <tbody>
                   <tr>
                     <th>Invoice #</th>
@@ -102,7 +92,7 @@ export function InvoiceViewer({ invoice }: Props) {
 
           {/* Bill to */}
           <div className="bill-to">
-            <h3>Bill To</h3>
+            <h2>Bill To</h2>
             <div className="buyer-name">{invoice.customer_name ?? '—'}</div>
             {invoice.customer_tax_number && (
               <div className="meta-text">VAT: {invoice.customer_tax_number}</div>
@@ -113,7 +103,7 @@ export function InvoiceViewer({ invoice }: Props) {
           </div>
 
           {/* Line items */}
-          <table className="line-items">
+          <table className="line-items" aria-label="Invoice line items">
             <thead>
               <tr>
                 <th className="col-desc">Description</th>
@@ -133,7 +123,7 @@ export function InvoiceViewer({ invoice }: Props) {
 
           {/* Totals */}
           <div className="totals-wrap">
-            <table className="totals-table">
+            <table className="totals-table" aria-label="Invoice totals">
               <tbody>
                 <tr>
                   <th>Subtotal</th>
