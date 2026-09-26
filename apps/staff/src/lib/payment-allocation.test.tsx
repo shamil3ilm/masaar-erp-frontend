@@ -140,8 +140,8 @@ describe('allocating a payment', () => {
   it('posts every allocation as one request and reports what is left unallocated', async () => {
     // A 2,500.00 receipt clears INV-0001 in full and pays 849.75 off INV-0002.
     const allocations: PaymentAllocation[] = [
-      { invoice_id: 101, amount: 1150 },
-      { invoice_id: 102, amount: 849.75 },
+      { invoice_id: 101, amount: '1150.0000' },
+      { invoice_id: 102, amount: '849.7500' },
     ]
     const t = setup(() => ({
       status: 200,
@@ -155,7 +155,7 @@ describe('allocating a payment', () => {
     expect(t.sent[0]).toMatchObject({ url: `/sales/payments-received/${PAYMENT_ID}/allocate`, method: 'post' })
     // The wire body, byte for byte: the amounts must survive as written.
     expect(t.sent[0].body).toBe(
-      '{"allocations":[{"invoice_id":101,"amount":1150},{"invoice_id":102,"amount":849.75}]}',
+      '{"allocations":[{"invoice_id":101,"amount":"1150.0000"},{"invoice_id":102,"amount":"849.7500"}]}',
     )
     expect(allocated.unallocated_amount).toBe(500.25)
   })
@@ -177,7 +177,7 @@ describe('allocating a payment', () => {
     await waitFor(() => expect(items.result.current.data).toHaveLength(2))
 
     const allocate = renderHook(() => useAllocatePayment(PAYMENT_ID), { wrapper: t.wrapper })
-    await act(() => allocate.result.current.mutateAsync([{ invoice_id: 102, amount: 849.75 }]))
+    await act(() => allocate.result.current.mutateAsync([{ invoice_id: 102, amount: '849.7500' }]))
 
     await waitFor(() => expect(items.result.current.data).toEqual([after]))
     expect(items.result.current.data?.[0].amount_due).toBe('1150.2500')
@@ -189,7 +189,7 @@ describe('allocating a payment', () => {
 
     const { result } = renderHook(() => useAllocatePayment(PAYMENT_ID), { wrapper: t.wrapper })
     const error = await act(() =>
-      result.current.mutateAsync([{ invoice_id: 101, amount: 1200 }]).catch((err: unknown) => err),
+      result.current.mutateAsync([{ invoice_id: 101, amount: '1200.0000' }]).catch((err: unknown) => err),
     )
 
     expect(parseApiError(error)).toMatchObject({
