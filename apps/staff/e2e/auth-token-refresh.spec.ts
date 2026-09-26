@@ -104,22 +104,15 @@ test.describe('An expired token', () => {
     // The stored session goes the moment the refresh is refused.
     await expect.poll(() => token(page)).toBeNull()
 
-    // React Query retries a failed query, so the app asks again once the
-    // session has gone — three endpoints, so more than three tries. None of
-    // those later 401s may start a second refresh.
-    await expect.poll(() => attempts.length).toBeGreaterThan(3)
-    expect(refreshes()).toBe(1)
-
-    /*
-     * GAP: logging out clears the session but navigates nowhere, so the user
-     * is left on a broken /app page until they go somewhere. The router's
-     * guard is what finally sends them to sign-in, which is why this asks for
-     * an app page rather than expecting a redirect to have happened already.
-     */
-    await page.goto('/app/dashboard')
-
+    // Sent to sign-in by the session ending, without going anywhere first.
     await expect(page).toHaveURL(/\/login$/)
     await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible()
+
+    // Every request the page had in flight was refused, and not one of those
+    // later 401s started a second refresh: a refresh that refreshed itself
+    // would run this count away rather than leave it at one.
+    expect(attempts.length).toBeGreaterThan(0)
+    await page.waitForTimeout(500)
     expect(refreshes()).toBe(1)
   })
 })
