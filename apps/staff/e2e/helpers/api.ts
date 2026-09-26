@@ -42,8 +42,28 @@ function isApiCall(url: URL): boolean {
 
 type JsonBody = unknown
 
-/** Builds the body for one request, so a mock can vary with what the app sent. */
-export type Responder = (request: Request) => JsonBody | Promise<JsonBody>
+const REPLY = Symbol('reply')
+
+/**
+ * A responder's answer when the status has to vary with the request — an
+ * expired token gets a 401 where a fresh one gets the body.
+ */
+export interface Reply {
+  readonly [REPLY]: true
+  readonly status: number
+  readonly body: JsonBody
+}
+
+export function reply(status: number, body: JsonBody): Reply {
+  return { [REPLY]: true, status, body }
+}
+
+function isReply(value: unknown): value is Reply {
+  return typeof value === 'object' && value !== null && REPLY in value
+}
+
+/** Builds the answer to one request, so a mock can vary with what the app sent. */
+export type Responder = (request: Request) => Reply | JsonBody | Promise<Reply | JsonBody>
 
 function isResponder(value: Responder | JsonBody): value is Responder {
   return typeof value === 'function'
@@ -63,11 +83,12 @@ export async function mockApi(
   await page.route(
     (url) => isApiCall(url) && url.pathname.endsWith(path),
     async (route) => {
-      const payload = isResponder(body) ? await body(route.request()) : body
+      const answer = isResponder(body) ? await body(route.request()) : body
+      const sent = isReply(answer) ? answer : { status, body: answer }
       await route.fulfill({
-        status,
+        status: sent.status,
         contentType: 'application/json',
-        body: JSON.stringify(payload),
+        body: JSON.stringify(sent.body),
       })
     },
   )
