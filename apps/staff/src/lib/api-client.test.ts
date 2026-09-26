@@ -8,7 +8,10 @@ import { initApiClient, parseApiError, REFRESH_URL } from '@masaar/api-client'
 
 type Reply = { status: number; data?: unknown }
 
-function setup(handler: (config: InternalAxiosRequestConfig) => Reply, initial: string | null = 'old') {
+function setup(
+  handler: (config: InternalAxiosRequestConfig) => Reply | Promise<Reply>,
+  initial: string | null = 'old',
+) {
   let token = initial
   const calls: string[] = []
   const setToken = vi.fn((t: string) => { token = t })
@@ -17,7 +20,7 @@ function setup(handler: (config: InternalAxiosRequestConfig) => Reply, initial: 
 
   const adapter: AxiosAdapter = async (config) => {
     calls.push(config.url ?? '')
-    const { status, data = {} } = handler(config)
+    const { status, data = {} } = await handler(config)
     const response: AxiosResponse = { data, status, statusText: String(status), headers: {}, config }
     if (status >= 400) throw new AxiosError(`HTTP ${status}`, undefined, config, null, response)
     return response
@@ -54,6 +57,39 @@ describe('token refresh', () => {
 
     expect([a.data, b.data]).toEqual(['/a', '/b'])
     expect(t.calls.filter((u) => u === REFRESH_URL)).toHaveLength(1)
+  })
+
+  it('retries a late 401 with the token another request already refreshed', async () => {
+    // `/slow` is still in flight when `/fast`'s refresh lands, so its 401 comes
+    // back holding a token that has since been replaced. It must retry with the
+    // token already in hand rather than ask for a refresh of its own.
+    const t = setup(async (config) => {
+      if (config.url === REFRESH_URL) return { status: 200, data: { data: { token: 'new' } } }
+      if (auth(config) === 'Bearer new') return { status: 200, data: config.url }
+      if (config.url === '/slow') await new Promise((resolve) => setTimeout(resolve, 20))
+      return { status: 401 }
+    })
+
+    const [fast, slow] = await Promise.all([t.client.get('/fast'), t.client.get('/slow')])
+
+    expect([fast.data, slow.data]).toEqual(['/fast', '/slow'])
+    // Five calls: the two originals, one refresh, then the two retries.
+    expect(t.calls).toHaveLength(5)
+    expect(t.calls.filter((u) => u === REFRESH_URL)).toHaveLength(1)
+    expect(t.setToken).toHaveBeenCalledTimes(1)
+  })
+
+  it('gives up after one retry when the refreshed token is refused as well', async () => {
+    // The refresh succeeded, so the session stands and nothing logs the user
+    // out; the request fails once instead of refreshing again and again.
+    const t = setup((config) =>
+      config.url === REFRESH_URL ? { status: 200, data: { data: { token: 'new' } } } : { status: 401 },
+    )
+
+    await expect(t.client.get('/a')).rejects.toBeInstanceOf(AxiosError)
+
+    expect(t.calls).toEqual(['/a', REFRESH_URL, '/a'])
+    expect(t.onLogout).not.toHaveBeenCalled()
   })
 
   it('rejects every waiting request and logs out when the refresh itself returns 401', async () => {
