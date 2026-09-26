@@ -1,10 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { AuthLayout, Logo, Input, PasswordInput, Button, FormField, Alert } from '@masaar/ui'
 import { isTwoFactorChallenge, parseApiError, useLogin, useVerify2fa } from '@masaar/api-client'
+import type { AuthTokenResponse } from '@masaar/api-client'
 
 interface AdminLoginProps {
   onLogin: (token: string) => void
 }
+
+/** Refused for want of the privilege, rather than by the server. */
+class NotAnAdministrator extends Error {}
 
 function AdminBrandPanel() {
   return (
@@ -35,12 +39,34 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   const login = useLogin()
   const verify2fa = useVerify2fa()
 
+  /**
+   * The console is for platform administrators, and the API refuses every
+   * admin call from anyone else. Signing an ordinary user in anyway gave them
+   * a console that answers 403 to everything, so the credential is checked
+   * for the privilege the console is built around before the session starts.
+   */
+  function admitSuperAdmin(result: AuthTokenResponse) {
+    if (result.user?.is_super_admin !== true) {
+      throw new NotAnAdministrator('This console is for platform administrators.')
+    }
+
+    onLogin(result.token)
+  }
+
   async function submit(request: () => Promise<void>, fallback: string) {
     setError(null)
     setLoading(true)
     try {
       await request()
     } catch (err) {
+      // Only this screen's own refusal carries a message fit to show. Anything
+      // else goes through parseApiError, so a transport failure cannot put a
+      // host name or a driver error in front of someone signing in.
+      if (err instanceof NotAnAdministrator) {
+        setError(err.message)
+        return
+      }
+
       const { status, message } = parseApiError(err)
       setError(status ? message : fallback)
     } finally {
@@ -56,7 +82,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
       if (isTwoFactorChallenge(result)) {
         setChallengeToken(result.challenge_token)
       } else {
-        onLogin(result.token)
+        admitSuperAdmin(result)
       }
     }, 'Login failed. Please check your credentials.')
   }
@@ -66,7 +92,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
     if (!challengeToken) return
     void submit(async () => {
       const result = await verify2fa.mutateAsync({ challenge_token: challengeToken, code })
-      onLogin(result.token)
+      admitSuperAdmin(result)
     }, 'Verification failed. Please try again.')
   }
 

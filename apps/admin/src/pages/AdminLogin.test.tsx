@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event'
 import { failure, ok, type SentRequest } from '@masaar/test-helpers'
 import { AdminLogin } from './AdminLogin'
 import { renderConsole, type ConsoleHarness } from '../test/harness'
-import { ADMIN_USER, CHALLENGE_TOKEN, LOGIN, PASSWORD, TOKEN } from '../test/fixtures'
+import { ADMIN_USER, CHALLENGE_TOKEN, LOGIN, PASSWORD, STAFF_LOGIN, TOKEN } from '../test/fixtures'
 
 let harness: ConsoleHarness
 
@@ -149,5 +149,35 @@ describe('two-step verification', () => {
 
     expect(screen.getByRole('heading', { name: 'Admin sign in' })).toBeVisible()
     expect(screen.queryByLabelText('Verification code')).not.toBeInTheDocument()
+  })
+
+  it('turns away a good credential that is not a platform administrator', async () => {
+    const user = userEvent.setup()
+    const onLogin = vi.fn()
+    harness = renderConsole(<AdminLogin onLogin={onLogin} />, () => ({ status: 200, body: ok(STAFF_LOGIN) }))
+
+    await signIn(user)
+
+    expect(await screen.findByText('This console is for platform administrators.')).toBeInTheDocument()
+    // The session never starts: the app is never handed a token to store.
+    expect(onLogin).not.toHaveBeenCalled()
+    expect(localStorage.getItem('admin_token')).toBeNull()
+  })
+
+  it('turns away a non-administrator who clears two-factor as well', async () => {
+    const user = userEvent.setup()
+    const onLogin = vi.fn()
+    harness = renderConsole(<AdminLogin onLogin={onLogin} />, (request) =>
+      request.url === '/auth/login'
+        ? { status: 200, body: ok({ requires_2fa: true, challenge_token: CHALLENGE_TOKEN }) }
+        : { status: 200, body: ok(STAFF_LOGIN) },
+    )
+
+    await signIn(user)
+    await user.type(await screen.findByLabelText('Verification code'), '123456')
+    await user.click(screen.getByRole('button', { name: 'Verify' }))
+
+    expect(await screen.findByText('This console is for platform administrators.')).toBeInTheDocument()
+    expect(onLogin).not.toHaveBeenCalled()
   })
 })
