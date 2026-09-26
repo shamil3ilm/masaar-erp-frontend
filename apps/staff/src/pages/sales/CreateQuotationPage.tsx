@@ -84,44 +84,45 @@ export function CreateQuotationPage() {
           <Card>
             <CardHeader title="Header" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Customer" required error={errors.customer_id?.message} className="sm:col-span-2">
-                <Select {...register('customer_id')} error={!!errors.customer_id}>
+              <FormField label="Customer" htmlFor="customer_id" required error={errors.customer_id?.message} className="sm:col-span-2">
+                <Select id="customer_id" {...register('customer_id')} error={!!errors.customer_id}>
                   <option value="">Select customer…</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>{c.display_name}</option>
                   ))}
                 </Select>
               </FormField>
-              <FormField label="Quotation Date" required error={errors.quotation_date?.message}>
-                <Input type="date" {...register('quotation_date')} error={!!errors.quotation_date} />
+              <FormField label="Quotation Date" htmlFor="quotation_date" required error={errors.quotation_date?.message}>
+                <Input id="quotation_date" type="date" {...register('quotation_date')} error={!!errors.quotation_date} />
               </FormField>
-              <FormField label="Valid Until" required error={errors.valid_until?.message}>
-                <Input type="date" {...register('valid_until')} error={!!errors.valid_until} />
+              <FormField label="Valid Until" htmlFor="valid_until" required error={errors.valid_until?.message}>
+                <Input id="valid_until" type="date" {...register('valid_until')} error={!!errors.valid_until} />
               </FormField>
-              <FormField label="Currency" error={errors.currency_code?.message}>
-                <Select {...register('currency_code')}>
+              <FormField label="Currency" htmlFor="currency_code" error={errors.currency_code?.message}>
+                <Select id="currency_code" {...register('currency_code')}>
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>{c.code}</option>
                   ))}
                 </Select>
               </FormField>
-              <FormField label="Discount Type" error={errors.discount_type?.message}>
-                <Select {...register('discount_type')}>
+              <FormField label="Discount Type" htmlFor="discount_type" error={errors.discount_type?.message}>
+                <Select id="discount_type" {...register('discount_type')}>
                   <option value="">None</option>
                   <option value="percentage">Percentage</option>
                   <option value="fixed">Fixed Amount</option>
                 </Select>
               </FormField>
-              <FormField label="Discount Value" error={errors.discount_value?.message}>
+              <FormField label="Discount Value" htmlFor="discount_value" error={errors.discount_value?.message}>
                 {/* A fixed discount is money; a percentage is any decimal. */}
                 <Input
+                  id="discount_value"
                   {...(discountType === 'fixed' ? moneyInputProps(currency) : quantityInputProps)}
                   {...register('discount_value', { valueAsNumber: true })}
                   error={!!errors.discount_value}
                 />
               </FormField>
-              <FormField label="Notes" className="sm:col-span-2" error={errors.notes?.message}>
-                <Textarea rows={3} {...register('notes')} />
+              <FormField label="Notes" htmlFor="notes" className="sm:col-span-2" error={errors.notes?.message}>
+                <Textarea id="notes" rows={3} {...register('notes')} />
               </FormField>
             </div>
           </Card>

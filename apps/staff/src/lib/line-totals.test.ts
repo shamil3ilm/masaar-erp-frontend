@@ -45,13 +45,33 @@ describe('computeTotals', () => {
     expect(computeTotals([line(1, 100, 12.345)], CREDIT_NOTE_TOTALS, 2).tax).toBe('12.34')
   })
 
+  /*
+   * OPEN QUESTION, not settled by the backend: should a document-level discount
+   * reduce the VAT it is taken off? Today it does not — Quotation::recalculateTotals
+   * taxes the full subtotal and subtracts the discount afterwards, and these
+   * numbers describe that. If the decision goes the other way, the expectations
+   * below are the ones to change: a 10% discount would tax 90.00 instead of
+   * 100.00, giving tax '13.50' and total '103.50'; the 5.00 fixed discount would
+   * tax 95.00, giving tax '14.25' and total '109.25'. Only the discounted cases
+   * move; 'discount' and 'subtotal' stay as they are.
+   */
   it('takes a quotation discount off the subtotal after tax', () => {
     const lines = [line(1, 100, 15)]
 
     expect(computeTotals(lines, QUOTATION_TOTALS, 2, { type: 'percentage', value: 10 }))
       .toMatchObject({ subtotal: '100.00', tax: '15.00', discount: '10.00', total: '105.00' })
-    expect(computeTotals(lines, QUOTATION_TOTALS, 2, { type: 'fixed', value: 5 }).total).toBe('110.00')
-    expect(computeTotals(lines, QUOTATION_TOTALS, 2, { type: '', value: 5 }).total).toBe('115.00')
+    expect(computeTotals(lines, QUOTATION_TOTALS, 2, { type: 'fixed', value: 5 }))
+      .toMatchObject({ subtotal: '100.00', tax: '15.00', discount: '5.00', total: '110.00' })
+    expect(computeTotals(lines, QUOTATION_TOTALS, 2, { type: '', value: 5 }))
+      .toMatchObject({ discount: '0.00', total: '115.00' })
+  })
+
+  it('ignores a discount value of zero or less, whichever type is chosen', () => {
+    const lines = [line(1, 100, 15)]
+
+    expect(computeTotals(lines, QUOTATION_TOTALS, 2, { type: 'percentage', value: 0 }).total).toBe('115.00')
+    expect(computeTotals(lines, QUOTATION_TOTALS, 2, { type: 'fixed', value: -20 }))
+      .toMatchObject({ discount: '0.00', total: '115.00' })
   })
 
   it('treats empty and invalid inputs as zero', () => {
