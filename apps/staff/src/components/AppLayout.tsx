@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from '@tanstack/react-router'
 import {
   AppShell, Sidebar, TopBar, Logo, ThemeToggle, DirectionToggle,
@@ -44,7 +45,16 @@ export function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, organization, organizations, permissions, switchOrg, logout } = useAuthStore()
+  const token = useAuthStore((state) => state.token)
   usePermissionSync()
+
+  // The session can end without anyone pressing anything: a refresh the server
+  // refuses clears it from inside the API client. The route guard only runs on
+  // a navigation, so without this the visitor stays on a page that has no
+  // session behind it and every request it makes is refused.
+  useEffect(() => {
+    if (!token) void navigate({ to: '/login' })
+  }, [token, navigate])
 
   function handleSwitchOrg(orgId: string) {
     const org = organizations.find((o) => String(o.id) === orgId)
