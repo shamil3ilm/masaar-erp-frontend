@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { add, dec, mul, percent, rescale, sub, toFixed } from './decimal'
+import { add, cmp, dec, div, mul, mulExact, overHundred, rescale, sub, toFixed } from './decimal'
 
 describe('decimal', () => {
   it('parses numbers and decimal strings exactly', () => {
@@ -18,7 +18,29 @@ describe('decimal', () => {
     expect(toFixed(rescale(dec('1.23459'), 4, 'trunc'))).toBe('1.2345')
     expect(toFixed(rescale(dec('-1.23459'), 4, 'trunc'))).toBe('-1.2345')
     expect(toFixed(mul(dec('10.999'), dec('1'), 2))).toBe('10.99')
-    expect(toFixed(percent(dec('12.345'), 4))).toBe('0.1234')
+    expect(toFixed(div(dec('10'), dec('3'), 4))).toBe('3.3333')
+    expect(toFixed(div(dec('-10'), dec('3'), 4))).toBe('-3.3333')
+  })
+
+  it('divides by a hundred without losing a digit', () => {
+    // The rate used to be truncated at six decimals before it was charged, so
+    // a four-decimal rate lost its tail. Moving the point keeps all of it.
+    expect(toFixed(overHundred(dec('12.345')))).toBe('0.12345')
+    expect(toFixed(mulExact(dec('1.5'), dec('2.25')))).toBe('3.375')
+  })
+
+  it('divides exactly rather than at the narrower scale', () => {
+    // 0.0001 / 3 at four decimals is zero if the numerator is truncated to the
+    // scale first, and 0.0000 only after the division if it is not - the
+    // apportionment asks for twelve decimals of a figure held at four.
+    expect(toFixed(div(dec('0.0001'), dec('3'), 12))).toBe('0.000033333333')
+    expect(toFixed(div(dec('1'), dec('0'), 4))).toBe('0.0000')
+  })
+
+  it('compares like bccomp', () => {
+    expect(cmp(dec('1.50'), dec('1.5'))).toBe(0)
+    expect(cmp(dec('1.4999'), dec('1.5'))).toBe(-1)
+    expect(cmp(dec('-1'), dec('-2'))).toBe(1)
   })
 
   it('rounds half away from zero like the decimal cast', () => {

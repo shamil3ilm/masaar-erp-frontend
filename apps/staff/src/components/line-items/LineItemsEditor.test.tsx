@@ -64,13 +64,17 @@ describe('LineItemsEditor', () => {
 
     expect(screen.getByLabelText('Line 1 unit price')).toHaveAttribute('step', '0.001')
     expect(row('Subtotal')).toHaveTextContent('10.990')
-    expect(row('Total')).toHaveTextContent('12.630')
+    expect(row('Total')).toHaveTextContent('12.640')
   })
 
-  it('lists a quotation discount before the total', () => {
+  it('taxes what is left after the discount', () => {
     renderEditor([{ description: 'Service', quantity: 1, unit_price: 100, tax_rate: 15 }], { discount: { type: 'fixed', value: 5 } })
 
     expect(row('Discount')).toHaveTextContent('5.00')
-    expect(row('Total')).toHaveTextContent('110.00')
+    // The line carries 15.00 of VAT; the document carries 14.25, because the
+    // allowance comes off the taxable amount before it is taxed.
+    expect(screen.getByLabelText('Line 1 VAT')).toHaveTextContent('15.00')
+    expect(row('VAT')).toHaveTextContent('14.25')
+    expect(row('Total')).toHaveTextContent('109.25')
   })
 })

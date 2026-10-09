@@ -44,9 +44,34 @@ export function mul(a: Dec, b: Dec, scale: number): Dec {
   return rescale({ units: a.units * b.units, scale: a.scale + b.scale }, scale, 'trunc')
 }
 
-/** `bcdiv(a, '100', scale)` — the only division the backend's line math uses. */
-export function percent(a: Dec, scale: number): Dec {
-  return rescale({ units: a.units, scale: a.scale + 2 }, scale, 'trunc')
+/**
+ * a/100 with nothing lost: dividing a decimal by one hundred only moves the
+ * point, so this is exact and a caller decides where to round.
+ */
+export function overHundred(a: Dec): Dec {
+  return { units: a.units, scale: a.scale + 2 }
+}
+
+/** The exact product, at the sum of the two scales. */
+export function mulExact(a: Dec, b: Dec): Dec {
+  return { units: a.units * b.units, scale: a.scale + b.scale }
+}
+
+/**
+ * `bcdiv(a, b, scale)`: truncated toward zero, like bcmath and like BigInt
+ * division. Both sides are scaled up before the one division, so no digit is
+ * lost ahead of it. Zero for a zero divisor, which is what bcdiv returns.
+ */
+export function div(a: Dec, b: Dec, scale: number): Dec {
+  if (b.units === 0n) return { units: 0n, scale }
+
+  return { units: (a.units * pow10(b.scale + scale)) / (b.units * pow10(a.scale)), scale }
+}
+
+/** -1, 0 or 1, like `bccomp`. */
+export function cmp(a: Dec, b: Dec): number {
+  const d = sub(a, b).units
+  return d === 0n ? 0 : d < 0n ? -1 : 1
 }
 
 export function add(a: Dec, b: Dec): Dec {
