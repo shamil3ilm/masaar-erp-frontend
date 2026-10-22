@@ -1,6 +1,6 @@
 # Masaar ERP Frontend
 
-Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing three React applications and a shared component system.
+Multi-tenant ERP frontend for the GCC, with INR and India GST rate support — a Turborepo monorepo containing three React applications and a shared component system.
 
 ## Monorepo Structure
 
@@ -19,6 +19,7 @@ Multi-tenant ERP frontend for GCC & India — a Turborepo monorepo containing th
 | `@masaar/types` | TypeScript interfaces (Organization, User, ZatcaInvoice, VendorInvoice, etc.) |
 | `@masaar/api-client` | Axios instance, TanStack Query hooks, auth helpers |
 | `@masaar/ui` | Masaar design system — tokens, components, auth layout, app shell |
+| `@masaar/test-helpers` | Test-only helpers: typed API response envelopes and an HTTP stub, so a contract change fails the typecheck of every suite that uses them |
 
 ## Design System
 
@@ -59,7 +60,7 @@ Variables below.
 | `pnpm build` | Build all apps |
 | `pnpm build --force` | Build bypassing Turborepo cache |
 | `pnpm typecheck` | TypeScript check across all packages |
-| `pnpm test` | Run unit tests (`@masaar/staff`, `@masaar/ui`) |
+| `pnpm test` | Run unit tests (`@masaar/staff`, `@masaar/admin`, `@masaar/portal`, `@masaar/ui`) |
 | `pnpm e2e` | Run Playwright end-to-end tests (`@masaar/staff`) |
 | `pnpm lint` | ESLint across every app and package |
 
@@ -84,6 +85,8 @@ pnpm --filter @masaar/staff test       # Unit tests, once
 pnpm --filter @masaar/staff test:watch # Unit tests, watching
 pnpm --filter @masaar/staff e2e        # Playwright; starts its own dev server
 pnpm --filter @masaar/staff preview    # Serve the built staff bundle
+pnpm --filter @masaar/admin test       # Admin console unit tests
+pnpm --filter @masaar/portal test      # Portal unit tests
 pnpm --filter @masaar/ui test          # Design-system component tests
 ```
 
